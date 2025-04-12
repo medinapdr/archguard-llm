@@ -18,8 +18,11 @@ Este projeto tem como finalidade explorar o uso de modelos de linguagem para aut
 
 O objetivo deste trabalho é desenvolver uma abordagem que utilize modelos de linguagem (LLMs) para:
 - **Detectar inconsistências**: Identificar divergências em padrões arquiteturais e de implementação que não são facilmente captadas por ferramentas tradicionais.
+  - Exemplo: Se todos os comandos de consulta ao banco seguirem o padrão de prefixo "get" (ex: getUser, getProductList), a LLM poderia identificar qualquer discrepância, como uma consulta chamada "fetchData", e alertar a equipe para ajustar a nomenclatura, garantindo consistência no código.
 - **Apoiar o processo de code review**: Automatizar a verificação de conformidade da base de código com os padrões definidos, fornecendo feedback imediato durante a criação e atualização de Pull Requests.
+  - Exemplo: Se for prática comum validar no controller, como checar autenticação ou validar dados de entrada antes de qualquer operação de negócio, a LLM poderia identificar quando esse padrão não é seguido.
 - **Melhorar a qualidade do software**: Contribuir para uma maior consistência e manutenção dos padrões de desenvolvimento, reduzindo falhas e facilitando a evolução do projeto.
+  - Exemplo: A LLM poderia identificar onde o código poderia ser mais modular ou onde princípios como "SOLID" não estão sendo seguidos. Ela poderia sugerir refatorações para melhorar o design, tornando o código mais fácil de manter e expandir, além de prevenir falhas futuras.
 
 ---
 
@@ -27,8 +30,11 @@ O objetivo deste trabalho é desenvolver uma abordagem que utilize modelos de li
 
 ### 3.1 Modelo de Linguagem
 
-- **Modelo Proposto**: Utilização de um modelo de linguagem de última geração (por exemplo, GPT-4, Claude 3.7 ou outro) como base para a análise.
-- **Customização**: Avaliar a necessidade de fine-tuning ou ajustes para adaptar o modelo ao contexto específico da codebase utilizada, levando em consideração a linguagem de programação e os padrões arquiteturais definidos no projeto.
+- **Modelo Proposto**: GPT-4o da OpenAI.
+  - Motivação: Esse modelo foi escolhido pela fácil integração via API e precisão no seguimento de instruções via prompt.
+- **Customização**:
+  - Contexto: Informações adicionais, como explicações sobre padrões de código específicos do projeto, poderão ser incluídas no prompt conforme necessário.
+  - Temperatura: A temperatura será ajustada para um valor baixo, visando reduzir a aleatoriedade nas respostas e minimizar o risco de alucinações durante a análise de código.
 
 ### 3.2 Datasets
 
@@ -41,10 +47,13 @@ O objetivo deste trabalho é desenvolver uma abordagem que utilize modelos de li
 
 ### 3.3 Exemplos Preliminares de Prompts
 
-- **Abordagem Zero-shot**:
+- **Abordagem "Zero-shot Prompting"**:
   - Prompt: "Analise o seguinte trecho de código e verifique se ele segue os padrões arquiteturais definidos para este projeto."
-- **Abordagem One-shot**:
+- **Abordagem "One-shot Prompting"**:
   - Prompt: "Exemplo de referência: No trecho abaixo, é aplicada uma abordagem consistente com os padrões do projeto. Compare com o seguinte código e indique possíveis inconsistências."
+- **Abordagem "Prompt Chaining"**:
+  - Prompt 1 (Extração de Padrões Arquiteturais): "Analise os trechos de código abaixo e identifique os padrões arquiteturais empregados, como organização de camadas, padrões de design, separação de responsabilidades e convenções de nomenclatura."
+  - Prompt 2 (Análise de Consistência do Código): "Com base nos padrões arquiteturais extraídos, examine o seguinte trecho de código e identifique quaisquer inconsistências em relação às diretrizes estabelecidas. Aponte onde o código não segue os padrões e forneça sugestões de melhorias."
 
 *Observação: Os prompts serão refinados à medida que os experimentos forem evoluindo.*
 
@@ -68,40 +77,6 @@ O objetivo deste trabalho é desenvolver uma abordagem que utilize modelos de li
 
 ---
 
-## 4. Acesso a Modelos de Linguagem (LLMs)
-
-### 4.1 Modelos Open Source Recomendados
-
-Para garantir a viabilidade e reprodutibilidade do projeto, optaremos por utilizar modelos de linguagem de código aberto que não requerem acesso a APIs comerciais. As opções consideradas são:
-
-- **LLaMA 2 (Meta)**: Disponível em versões de 7B a 70B parâmetros, o LLaMA 2 é adequado para tarefas de análise de código e pode ser executado localmente com recursos computacionais apropriados.
-
-- **BLOOM (BigScience)**: Modelo multilíngue com 176B parâmetros, treinado em 46 idiomas naturais e 13 linguagens de programação, ideal para análise de código em diversos contextos.
-
-- **GPT4All**: Um ecossistema de modelos compactos de código aberto, projetado para ser executado localmente, facilitando experimentações sem dependência de APIs externas.
-
-### 4.2 Infraestrutura Necessária
-
-A execução local desses modelos requer infraestrutura computacional adequada:
-
-- **Memória RAM**: Mínimo de 16 GB, recomendado 32 GB ou mais.
-
-- **GPU**: Placa gráfica com suporte a CUDA, com pelo menos 12 GB de VRAM para modelos maiores.
-
-Caso o grupo não disponha dessa infraestrutura, será considerada a utilização de plataformas de computação em nuvem que ofereçam recursos gratuitos ou de baixo custo para pesquisa acadêmica.
-
-### 4.3 Alternativas Comerciais
-
-Se necessário, poderemos recorrer a APIs comerciais com planos gratuitos ou acadêmicos, como:
-
-- **OpenAI (ChatGPT/GPT-4)**: Oferece planos gratuitos com limitações de uso, adequados para testes iniciais.
-
-- **Google Cloud (PaLM 2)**: Disponibiliza créditos para pesquisadores e estudantes, permitindo acesso a modelos avançados.
-
-A escolha entre modelos open source e comerciais será baseada na disponibilidade de recursos e nas necessidades específicas do projeto.
-
----
-
-## 5. Considerações Finais
+## 4. Considerações Finais
 
 Este projeto busca integrar inteligência artificial ao processo de revisão de código, promovendo uma abordagem inovadora para manter a consistência e qualidade da base de código. A metodologia proposta será revista e refinada à medida que os experimentos avançarem, com o intuito de aperfeiçoar tanto a precisão das análises quanto a aplicabilidade prática da ferramenta no ambiente de desenvolvimento.
