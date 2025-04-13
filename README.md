@@ -1,8 +1,8 @@
 # ArchGuard LLM
 
-# Revisão de Código Automatizada com LLMs
+# Avaliação do uso de LLMs para revisão de código com foco na padronização arquitetural
 
-Este projeto tem como finalidade explorar o uso de modelos de linguagem para automatizar a revisão de código, com foco na identificação de inconsistências e na padronização arquitetural. O objetivo é complementar as ferramentas tradicionais (como linters) com uma análise mais profunda e contextualizada, possibilitando uma melhoria contínua na qualidade da codebase.
+Este projeto tem como finalidade explorar o uso de modelos de linguagem para automatizar a revisão de código, com foco na garantia de padronização arquitetural. O objetivo é complementar as ferramentas tradicionais (como linters) com uma análise mais profunda e contextualizada, possibilitando uma melhoria contínua na qualidade da codebase.
 
 ---
 
@@ -16,13 +16,13 @@ Este projeto tem como finalidade explorar o uso de modelos de linguagem para aut
 
 ## 2. Objetivo do Trabalho
 
-O objetivo deste trabalho é desenvolver uma abordagem que utilize modelos de linguagem (LLMs) para:
-- **Detectar inconsistências**: Identificar divergências em padrões arquiteturais e de implementação que não são facilmente captadas por ferramentas tradicionais.
-  - Exemplo: Se todos os comandos de consulta ao banco seguirem o padrão de prefixo "get" (ex: getUser, getProductList), a LLM poderia identificar qualquer discrepância, como uma consulta chamada "fetchData", e alertar a equipe para ajustar a nomenclatura, garantindo consistência no código.
-- **Apoiar o processo de code review**: Automatizar a verificação de conformidade da base de código com os padrões definidos, fornecendo feedback imediato durante a criação e atualização de Pull Requests.
+Este trabalho tem como objetivo desenvolver uma abordagem baseada em modelos de linguagem (LLMs) para garantir a padronização arquitetural do código. A proposta se apoia em três pilares principais:
+- **Detecção de inconsistências arquiteturais e de implementação**: Utilizar LLMs para identificar desvios em padrões previamente estabelecidos, que muitas vezes passam despercebidos por ferramentas tradicionais.
+  - Exemplo: Se o padrão adotado para consultas ao banco de dados utiliza o prefixo "get" (ex: getUser, getProductList), a LLM pode sinalizar discrepâncias como uma função nomeada fetchData, sugerindo sua padronização.
+- **Apoio ao processo de code review automatizado**: Integrar LLMs ao fluxo de revisão de código para verificar automaticamente a aderência aos padrões arquiteturais definidos, oferecendo feedback imediato durante a criação ou atualização de Pull Requests.
   - Exemplo: Se for prática comum validar no controller, como checar autenticação ou validar dados de entrada antes de qualquer operação de negócio, a LLM poderia identificar quando esse padrão não é seguido.
-- **Melhorar a qualidade do software**: Contribuir para uma maior consistência e manutenção dos padrões de desenvolvimento, reduzindo falhas e facilitando a evolução do projeto.
-  - Exemplo: A LLM poderia identificar onde o código poderia ser mais modular ou onde princípios como "SOLID" não estão sendo seguidos. Ela poderia sugerir refatorações para melhorar o design, tornando o código mais fácil de manter e expandir, além de prevenir falhas futuras.
+- **Melhorar a qualidade do software**: Auxiliar na identificação de oportunidades de refatoração e no reforço de boas práticas de design de software, como os princípios SOLID, favorecendo um código mais modular, coeso e sustentável.
+  - Exemplo: A LLM pode apontar trechos onde há violação de princípios arquiteturais e sugerir reorganizações que tornem o código mais compreensível, reutilizável e resiliente a mudanças.
 
 ---
 
@@ -79,4 +79,4 @@ O objetivo deste trabalho é desenvolver uma abordagem que utilize modelos de li
 
 ## 4. Considerações Finais
 
-Este projeto busca integrar inteligência artificial ao processo de revisão de código, promovendo uma abordagem inovadora para manter a consistência e qualidade da base de código. A metodologia proposta será revista e refinada à medida que os experimentos avançarem, com o intuito de aperfeiçoar tanto a precisão das análises quanto a aplicabilidade prática da ferramenta no ambiente de desenvolvimento.
+Este projeto propõe a aplicação de modelos de linguagem no processo de revisão de código, com o objetivo de garantir a padronização arquitetural e fortalecer a qualidade da base de software. A metodologia proposta será revista e refinada à medida que os experimentos avançarem, com o intuito de aperfeiçoar tanto a precisão das análises quanto a aplicabilidade prática da ferramenta no ambiente de desenvolvimento.
