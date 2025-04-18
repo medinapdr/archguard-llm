@@ -1,0 +1,29 @@
+name: Architecture Consistency Check
+
+on:
+  pull_request:
+
+jobs:
+  openai_review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install openai
+
+      - name: Run AI
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          changed_files=$(git diff --name-only origin/main...HEAD -- '*.py')
+          for file in $changed_files; do
+            python3 scripts/run_architecture_consistency_check.py "$file" prompts/architecture_consistency_check.txt
+          done
