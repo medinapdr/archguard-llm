@@ -25,7 +25,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          changed_files=$(git diff --name-only origin/main...HEAD -- '*.js')
-          for file in $changed_files; do
+          all_files=$(find examples -type f -name '*.js')
+          for file in $all_files; do
             python3 ai-agents/architecture-checker/run-ai-agent.py "$file"
           done
