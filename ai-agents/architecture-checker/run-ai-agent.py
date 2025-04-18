@@ -21,7 +21,7 @@ def run_architecture_check(file_path: str, prompt_path: str) -> None:
     user_prompt = build_user_prompt(file_content)
 
     response = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
