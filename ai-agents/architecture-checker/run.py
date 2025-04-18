@@ -3,7 +3,7 @@ import sys
 from typing import List
 from openai import OpenAI
 
-BATCH_FILE_ANALYSIS_SIZE = 5
+BATCH_FILE_ANALYSIS_SIZE = 50
 
 def load_file_content(path: str) -> str:
     with open(path, "r", encoding="utf-8") as f:
