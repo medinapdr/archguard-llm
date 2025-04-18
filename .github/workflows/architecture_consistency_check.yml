@@ -27,5 +27,5 @@ jobs:
         run: |
           changed_files=$(git diff --name-only origin/main...HEAD -- '*.py')
           for file in $changed_files; do
-            python3 scripts/run_architecture_consistency_check.py "$file" prompts/architecture_consistency_check.txt
+            python3 scripts/run_architecture_consistency_check.py "$file" prompts/architecture_consistency_check.md
           done
