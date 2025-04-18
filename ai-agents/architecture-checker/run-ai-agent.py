@@ -2,19 +2,23 @@ import os
 import sys
 from openai import OpenAI
 
-def main():
-    client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+def load_file_content(path: str) -> str:
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
 
-    file_path = sys.argv[1]
-    system_prompt_path = "ai-agents/architecture-checker/system-prompt.md"
+def build_user_prompt(code: str) -> str:
+    return f"{code}"
 
-    with open(file_path, "r", encoding="utf-8") as f:
-        file_content = f.read()
+def get_openai_client() -> OpenAI:
+    api_key = os.getenv("OPENAI_API_KEY")
+    return OpenAI(api_key=api_key)
 
-    with open(system_prompt_path, "r", encoding="utf-8") as f:
-        system_prompt = f.read()
+def run_architecture_check(file_path: str, prompt_path: str) -> None:
+    client = get_openai_client()
 
-    user_prompt = f"Analise o seguinte código e sugira melhorias:\n\n{file_content}"
+    file_content = load_file_content(file_path)
+    system_prompt = load_file_content(prompt_path)
+    user_prompt = build_user_prompt(file_content)
 
     response = client.chat.completions.create(
         model="gpt-4",
@@ -26,6 +30,11 @@ def main():
 
     print(f"--- Sugestão para: {file_path} ---")
     print(response.choices[0].message.content)
+
+def main():
+    file_path = sys.argv[1]
+    prompt_path = "ai-agents/architecture-checker/system-prompt.md"
+    run_architecture_check(file_path, prompt_path)
 
 if __name__ == "__main__":
     main()
