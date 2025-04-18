@@ -1,10 +1,9 @@
-# scripts/run_openai_review.py
-import openai
 import os
 import sys
+from openai import OpenAI
 
 def main():
-    openai.api_key = os.environ["OPENAI_API_KEY"]
+    client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
     file_path = sys.argv[1]
     system_prompt_path = sys.argv[2]
@@ -15,9 +14,9 @@ def main():
     with open(system_prompt_path, "r", encoding="utf-8") as f:
         system_prompt = f.read()
 
-    user_prompt = f"{file_content}"
+    user_prompt = f"Analise o seguinte código e sugira melhorias:\n\n{file_content}"
 
-    response = openai.ChatCompletion.create(
+    response = client.chat.completions.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": system_prompt},
