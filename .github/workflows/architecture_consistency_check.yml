@@ -26,6 +26,4 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           all_files=$(find examples -type f -name '*.js')
-          for file in $all_files; do
-            python3 ai-agents/architecture-checker/run-ai-agent.py "$file"
-          done
+          python3 ai-agents/architecture-checker/run.py $all_files
