@@ -6,7 +6,7 @@ def main():
     client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
     file_path = sys.argv[1]
-    system_prompt_path = sys.argv[2]
+    system_prompt_path = "ai-agents/architecture-checker/system-prompt.md"
 
     with open(file_path, "r", encoding="utf-8") as f:
         file_content = f.read()

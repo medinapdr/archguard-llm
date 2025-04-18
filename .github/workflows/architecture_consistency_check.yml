@@ -4,7 +4,7 @@ on:
   pull_request:
 
 jobs:
-  openai_review:
+  run_architecture_checker_ai_agent:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,7 +25,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          changed_files=$(git diff --name-only origin/main...HEAD -- '*.py')
+          changed_files=$(git diff --name-only origin/main...HEAD -- '*.js')
           for file in $changed_files; do
-            python3 scripts/run_architecture_consistency_check.py "$file" prompts/architecture_consistency_check.md
+            python3 ai-agents/architecture-checker/run-ai-agent.py "$file"
           done
