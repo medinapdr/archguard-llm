@@ -1,7 +1,9 @@
 name: Architecture Consistency Check
 
 on:
-  pull_request:
+  push:
+    branches: 
+      - main
 
 jobs:
   run_architecture_checker_ai_agent:
