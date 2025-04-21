@@ -1,3 +1,6 @@
+permissions:
+  contents: write
+
 name: Architecture Consistency Check
 
 on:
@@ -37,4 +40,4 @@ jobs:
           
           git add ai-agents/architecture-checker/js-example-output.md
           git commit -m "chore: update architecture pattern result" || echo "No changes to commit"
-          git push
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:main
