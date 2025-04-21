@@ -5,8 +5,10 @@ name: Architecture Consistency Check
 
 on:
   push:
-    branches: 
+    branches:
       - main
+    paths:
+      - 'examples/**'
 
 jobs:
   run_architecture_checker_ai_agent:
