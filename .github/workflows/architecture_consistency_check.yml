@@ -28,4 +28,13 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           all_files=$(find examples -type f -name '*.js')
-          python3 ai-agents/architecture-checker/run.py $all_files
+          python3 ai-agents/architecture-checker/run.py $all_files > ai-agents/architecture-checker/js-example-output.md
+
+      - name: Save AI Output
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add ai-agents/architecture-checker/js-example-output.md
+          git commit -m "chore: update architecture pattern result" || echo "No changes to commit"
+          git push
