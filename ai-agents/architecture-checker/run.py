@@ -22,12 +22,12 @@ def get_openai_client() -> OpenAI:
     api_key = os.getenv("OPENAI_API_KEY")
     return OpenAI(api_key=api_key)
 
-def run_architecture_checker_batch(file_paths: List[str], prompt_path: str) -> None:
-    client = get_openai_client()
-    system_prompt = load_file_content(prompt_path)
+def extract_architecture_patterns_from_files(file_paths: List[str]) -> str:
+    openai_client = get_openai_client()
+    system_prompt = load_file_content("ai-agents/architecture-checker/system-prompt.md")
     user_prompt = build_user_prompt(file_paths)
 
-    response = client.chat.completions.create(
+    response = openai_client.chat.completions.create(
         model="gpt-4o",
         messages=[
             {"role": "system", "content": system_prompt},
@@ -35,16 +35,19 @@ def run_architecture_checker_batch(file_paths: List[str], prompt_path: str) -> N
         ]
     )
 
-    print(response.choices[0].message.content)
-    print("\n\n")
+    return response.choices[0].message.content
 
 def main():
     *file_paths, = sys.argv[1:]
-    prompt_path = "ai-agents/architecture-checker/system-prompt.md"
 
-    for i in range(0, len(file_paths), BATCH_FILE_ANALYSIS_SIZE):
-        batch = file_paths[i:i + BATCH_FILE_ANALYSIS_SIZE]
-        run_architecture_checker_batch(batch, prompt_path)
+    all_extracted_architecture_patterns = []
+
+    for batch_start_index in range(0, len(file_paths), BATCH_FILE_ANALYSIS_SIZE):
+        batch_file_path = file_paths[batch_start_index:batch_start_index + BATCH_FILE_ANALYSIS_SIZE]
+        extracted_architecture_pattern = extract_architecture_patterns_from_files(batch_file_path)
+        all_extracted_architecture_patterns.append(extracted_architecture_pattern)
+
+    print("\n\n---\n\n".join(all_extracted_architecture_patterns))
 
 if __name__ == "__main__":
     main()
