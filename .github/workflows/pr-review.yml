@@ -1,0 +1,41 @@
+permissions:
+  contents: write
+  pull-requests: write
+
+name: Pull Request Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+jobs:
+  run_code_reveiewer:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install openai
+
+      - name: Generatee diff file from PR
+        run: |
+          git fetch origin main
+          git diff origin/main...HEAD > pr-review.diff
+          cat pr-review.diff
+
+      - name: AI Run Code Reviewer
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python3 ai-agents/code-reviewer/run.py pr-review.diff > ai-agents/code-reviewer/pr-review-output.md
