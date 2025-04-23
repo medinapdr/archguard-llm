@@ -2,7 +2,7 @@ permissions:
   contents: write
   pull-requests: write
 
-name: Pull Request Review
+name: Pull Request Review AI
 
 on:
   pull_request:
