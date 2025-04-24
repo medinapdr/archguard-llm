@@ -14,5 +14,3 @@ class UserValidation {
 }
 
 module.exports = new UserValidation();
-
-console.log("UserValidation loaded");
