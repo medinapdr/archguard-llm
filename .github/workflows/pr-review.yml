@@ -47,4 +47,4 @@ jobs:
 
           git add ai-agents/code-reviewer/pr-review-output.md
           git commit -m "chore: update pr-review" || echo "No changes to commit"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} HEAD:${{ github.head_ref }}
