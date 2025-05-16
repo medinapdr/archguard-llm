@@ -66,9 +66,6 @@ def main():
     provider = args.provider
     file_paths = args.file_paths
 
-    print(f"Usando provedor: {provider}")
-    print(f"Analisando arquivos: {file_paths}")
-
     all_extracted_architecture_patterns = []
 
     for batch_start_index in range(0, len(file_paths), BATCH_FILE_ANALYSIS_SIZE):
