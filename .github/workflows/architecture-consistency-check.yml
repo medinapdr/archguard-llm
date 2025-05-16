@@ -4,7 +4,9 @@ permissions:
 name: Architecture Consistency Check
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   run_architecture_checker_ai_agent:
