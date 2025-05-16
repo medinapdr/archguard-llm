@@ -38,7 +38,7 @@ def generate_text(system_prompt: str, user_prompt: str, provider: str) -> str:
 
     elif provider == "gemini":
         configure(api_key=os.getenv("GEMINI_API_KEY"))
-        model = GenerativeModel("gemini-2.5-flash")
+        model = GenerativeModel("gemini-2.5-flash-preview-04-17")
 
         response = model.generate_content([
             {"role": "system", "parts": [system_prompt]},
