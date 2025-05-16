@@ -1,85 +1,65 @@
-## Convenção de Nomes de Funções para Operações de Banco de Dados
+## Convecção de Nomenclatura de Funções
 
 ### Descrição
 
-No código fornecido, há uma clara convenção de nomes para funções que manipulam dados de usuários. Funções que realizam operações de banco de dados seguem um padrão de nomenclatura coerente de acordo com a operação realizada. As funções que buscam dados utilizam o prefixo `get`, enquanto aquelas que criam novos registros utilizam `create`. Isso fica evidente nas funções `getAll` e `create` do arquivo `UserRepository.js`.
+Na codebase, as funções seguem um padrão de nomenclatura baseado em ações, como `getAll`, `create`, `validateCreateUserParams`, o que sugere a utilização de prefixos descritivos que refletem a operação executada pela função. Este padrão oferece clara leitura sobre a finalidade de cada função.
 
 ### Exemplos
 
-- Consistente com o padrão:
-  - `getAll()` em `UserRepository.js` — para buscar todos os usuários.
-  - `create(user)` em `UserRepository.js` — para criar um novo usuário.
-  
-- Inconsistente com o padrão:
-  - `fetchAllUsers()` (hipotético) em vez de `getAll()`.
-  - `insertUser(user)` (hipotético) em vez de `create(user)`.
-
----
-
-## Padrão de Design de Controller e Serviço
-
-### Descrição
-
-O código apresenta um padrão claro de separação entre "Controller" e "Serviço". O Controller (`UserController.js`) lida com a comunicação HTTP e responde a solicitações, enquanto o Serviço (`UserService.js`) encapsula a lógica de negócios. Esta é uma implementação típica de um padrão de design em camadas, onde cada componente do sistema tem uma responsabilidade clara.
-
-### Exemplos
-
-- Consistente com o padrão:
-  - `UserController.js` lida com solicitações HTTP e usa métodos de serviço como `UserService.getAll()` para executar lógica.
-  - `UserService.js` fornece a funcionalidade de negócio abstrata, como `getAll` e `create`.
-  
-- Inconsistente com o padrão:
-  - Lógica de negócio escrita diretamente dentro de `UserController.js`, sem utilizar `UserService.js`.
-
----
+- Conforme o padrão: `getAll`, `createUser`, `validateCreateUserParams`.
+- Não conforme o padrão: `allUsers`, `addUser`, `checkUserParams` (não utiliza o mesmo estilo de prefixos).
 
 ## Arquitetura em Camadas
 
 ### Descrição
 
-A estrutura do código segue uma arquitetura em camadas, separando lógica de validação, controle, serviço, repositório e utilitários. Cada módulo tem sua responsabilidade específica, o que melhora a organização e a manutenibilidade do código.
+A codebase demonstra uma arquitetura em camadas, onde responsabilidades distintas são divididas entre camadas separadas como Controllers, Services, Repositories, Validations, e Routes. Isso promove a separação de preocupações (SoC), facilitando a manutenção e evolução do código.
 
 ### Exemplos
 
-- Consistente com o padrão:
-  - `UserRoute.js` define rotas HTTP que encaminham para o `UserController.js`.
-  - `UserController.js` utiliza `UserService.js` para operações de usuário.
-  - `UserService.js` interage com o `UserRepository.js` para acessar dados.
-  
-- Inconsistente com o padrão:
-  - Lógica de validação implementada diretamente em `UserController.js` sem usar `UserValidation.js`.
+- Conforme o padrão: A camada de Controladores (`UserController`) lida com a lógica de requisições HTTP, enquanto a camada de Serviços (`UserService`) trata das regras de negócio. A camada de Repositórios (`UserRepository`) é responsável por interagir com os dados.
+- Não conforme o padrão: Misturar chamada de banco de dados diretamente no controlador sem utilizar os serviços e repositórios definidos.
 
----
-
-## Utilização do Padrão Singleton
+## Singleton Pattern
 
 ### Descrição
 
-O código apresenta a utilização do padrão Singleton para algumas classes como `ValidatorUtil.js`, `UserValidation.js`, `UserService.js`, e `UserController.js`. Este padrão é indicado pelo uso do operador `new` seguido de `module.exports`, garantindo assim que apenas uma instância dessas classes é criada e utilizada no sistema.
+O padrão Singleton é utilizado na implementação de módulos como `ValidatorUtil`, `UserService`, `UserValidation`, e `UserController`, uma vez que cada um é exportado como uma instância única através do uso de `module.exports = new ClassName()`.
 
 ### Exemplos
 
-- Consistente com o padrão:
-  - `module.exports = new UserValidation()` em `UserValidation.js`.
-  - `module.exports = new ValidatorUtil()` em `ValidatorUtil.js`.
-  
-- Inconsistente com o padrão:
-  - Criar instâncias diretamente ao invés de exportar uma única instância, por exemplo, `new UserValidation()` cada vez que a validação fosse necessária.
+- Conforme o padrão: `module.exports = new UserValidation();`
+- Não conforme o padrão: `module.exports = UserValidation;` (isso não garantiria uma única instância da classe).
 
----
-
-## Padronização de Mensagens de Erro
+## Convenções de Modulação e Organização de Código
 
 ### Descrição
 
-O código segue um padrão para tratar erros e retornar respostas HTTP. Em `UserController.js`, os erros são tratados com um bloco try-catch e retornam mensagens padronizadas ao cliente, como "Server Error" para erros de servidor.
+O código está organizado de forma modular, cada módulo contendo lógicas específicas. Observa-se isso em pastas como `Routes`, `Controllers`, `Services`, entre outras, que separam funcionalidades e mantêm o código bem organizado e escalável.
 
 ### Exemplos
 
-- Consistente com o padrão:
-  - Uso de `return res.status(500).json({ error: "Server Error" })` para capturar e responder a erros genéricos do servidor.
-  
-- Inconsistente com o padrão:
-  - Mensagens diferente para erros semelhantes, por exemplo, `return res.status(500).json({ error: "Unexpected Error" })`. 
+- Conforme o padrão: Arquivos como `UserRoute.js`, `UserController.js`, `UserService.js` demonstram uma clara modularização.
+- Não conforme o padrão: Colocar todas as funções e implementações dentro de um único arquivo, desrespeitando a separação lógica por módulos.
 
----
+## Gerenciamento Consistente de Erros
+
+### Descrição
+
+Os controladores, exemplificados pelo `UserController`, seguem um padrão consistente para lidar com erros, utilizando blocos `try-catch` e retornando respostas com status apropriados ao cliente (`500` para errors de servidor).
+
+### Exemplos
+
+- Conforme o padrão: Uso de blocos `try-catch` em `createUser` e `getAllUsers`.
+- Não conforme o padrão: Não capturar exceções que podem lançar erros de runtime sem tratamento adequado.
+
+## Convenção de Acesso a Bancos de Dados
+
+### Descrição
+
+O acesso aos dados segue a convenção de utilização de Repositórios, onde o `UserRepository` gerencia a interação com os dados dos usuários, encapsulando a lógica de acesso aos dados em métodos como `getAll` e `create`.
+
+### Exemplos
+
+- Conforme o padrão: `UserRepository.getAll()` e `UserRepository.create(user)`.
+- Não conforme o padrão: Implementar diretamente a manipulação dos arrays de usuários nos controladores ou serviços.
