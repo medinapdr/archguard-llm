@@ -46,7 +46,6 @@ def generate_text(system_prompt: str, user_prompt: str, provider: str) -> str:
         raise ValueError(f"Unsupported provider: {provider}")
 
 def extract_architecture_patterns_from_files(file_paths: List[str], provider: str) -> str:
-    openai_client = get_openai_client()
     system_prompt = load_file_content("ai-agents/architecture-checker/system-prompt.md")
     user_prompt = build_user_prompt(file_paths)
 
