@@ -1,7 +1,7 @@
 permissions:
   contents: write
 
-name: Architecture Consistency Check 2
+name: Architecture Consistency Check
 
 on:
   push:
@@ -13,6 +13,18 @@ on:
 jobs:
   run_architecture_checker_ai_agent:
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        target:
+          - project_name: "kindlefy"
+            folder_path: "examples/kindlefy"
+            llm_provider: "gemini"
+            target_files: "*.ts"
+          - project_name: "js"
+            folder_path: "examples/js"
+            llm_provider: "openai"
+            target_files: "*.js"
 
     steps:
       - name: Checkout code
@@ -26,11 +38,14 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install openai
+        run: |
+          pip install openai
+          pip install google-generativeai
 
       - name: Run AI
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          all_files=$(find examples/kindlefy -type f -name '*.ts')
-          python3 ai-agents/architecture-checker/run.py $all_files
+          all_files=$(find ${{ matrix.target.folder_path }} -type f -name '${{ matrix.target.target_files }}')
+          python3 ai-agents/architecture-checker/run.py --provider ${{ matrix.target.llm_provider }} $all_files
