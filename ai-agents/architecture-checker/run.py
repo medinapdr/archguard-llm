@@ -6,7 +6,7 @@ from openai import OpenAI
 import google.generativeai as genai
 from google.generativeai import configure, GenerativeModel
 
-BATCH_FILE_ANALYSIS_SIZE = 50
+BATCH_FILE_ANALYSIS_SIZE = 100
 
 def load_file_content(path: str) -> str:
     with open(path, "r", encoding="utf-8") as f:
@@ -21,7 +21,7 @@ def build_user_prompt(files: List[str]) -> str:
 
     return "\n\n".join(parts)
 
-def generate_text(system_prompt: str, user_prompt: str, provider: str) -> str:
+def generate_response_from_llm_model(system_prompt: str, user_prompt: str, provider: str) -> str:
     if provider == "openai":
         api_key = os.getenv("OPENAI_API_KEY")
         openai_client = OpenAI(api_key=api_key)
@@ -54,7 +54,7 @@ def extract_architecture_patterns_from_files(file_paths: List[str], provider: st
     system_prompt = load_file_content("ai-agents/architecture-checker/system-prompt.md")
     user_prompt = build_user_prompt(file_paths)
 
-    return generate_text(system_prompt, user_prompt, provider)
+    return generate_response_from_llm_model(system_prompt, user_prompt, provider)
 
 def main():
     parser = argparse.ArgumentParser(description="Run architecture checker")
