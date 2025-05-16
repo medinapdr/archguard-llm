@@ -1,0 +1,72 @@
+{
+  "name": "kindlefy",
+  "version": "1.5.4",
+  "description": "Send diverse contents to your Kindle",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node -r module-alias/register dist/index.js",
+    "dev": "nodemon src/index.ts",
+    "build": "rm -rf dist && tsc",
+    "deploy": "git checkout master && git pull && npx vpdate && git push",
+    "exec": "node -r tsconfig-paths/register -r sucrase/register src/index.ts",
+    "test": "jest --passWithNoTests --runInBand",
+    "test:unit": "npm test -- --watch -c jest-unit-config.js",
+    "test:integration": "npm test -- --watch -c jest-integration-config.js",
+    "test:staged": "npm test -- --findRelatedTests",
+    "test:ci": "npm test -- --coverage"
+  },
+  "devDependencies": {
+    "@types/archiver": "^5.3.1",
+    "@types/configstore": "^5.0.1",
+    "@types/jest": "^25.2.3",
+    "@types/level": "^6.0.0",
+    "@types/mime-types": "^2.1.1",
+    "@types/node": "^14.0.1",
+    "@types/nodemailer": "^6.4.4",
+    "@types/sharp": "^0.30.2",
+    "@types/write-file-atomic": "^4.0.0",
+    "@typescript-eslint/eslint-plugin": "^2.34.0",
+    "eslint": "^7.2.0",
+    "eslint-config-standard-with-typescript": "^17.0.0",
+    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "git-commit-msg-linter": "^2.4.3",
+    "husky": "^4.2.5",
+    "jest": "^26.0.1",
+    "lint-staged": "^10.2.10",
+    "nodemon": "^2.0.4",
+    "sucrase": "^3.15.0",
+    "ts-jest": "^26.0.0",
+    "tsconfig-paths": "^3.9.0",
+    "typescript": "^4.1.0"
+  },
+  "dependencies": {
+    "@actions/core": "^1.6.0",
+    "@actions/github": "^5.0.0",
+    "ansi-styles": "^5.1.0",
+    "archiver": "^5.3.0",
+    "axios": "^0.24.0",
+    "cheerio": "^1.0.0-rc.10",
+    "dotenv": "^8.2.0",
+    "epub-gen": "^0.1.0",
+    "form-data": "^4.0.0",
+    "mime-types": "^2.1.34",
+    "module-alias": "^2.2.2",
+    "nodemailer": "^6.7.2",
+    "npm": "^8.1.4",
+    "p-queue": "^6.6.2",
+    "p-retry": "4.6.1",
+    "puppeteer": "^14.1.0",
+    "rss-parser": "^3.12.0",
+    "slugify": "^1.6.5",
+    "tasuku": "^1.0.2"
+  },
+  "_moduleAliases": {
+    "@": "./dist"
+  },
+  "engines": {
+    "node": ">=0.10.3 <15"
+  }
+}

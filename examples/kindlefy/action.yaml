@@ -1,0 +1,28 @@
+name: 'Kindlefy'
+description: 'Send diverse contents to your Kindle'
+author: 'Guilherme Mota'
+
+inputs:
+  kindle_email:
+    description: "The email you use to receive the kindle contents (per example yourname@kindle.com)."
+    required: true
+  sender:
+    description: "The senders to send contents to Kindle."
+    required: true
+  sources:
+    description: "The sources to retrieve the content to Kindle."
+    required: true
+  storage:
+    description: "The storage used to persist info about synced data."
+    required: false
+  no_duplicated_sync:
+    description: "Uses an existing storage in order to keep track of synced data in order to avoid duplicated sync."
+    required: false
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+
+branding:
+  color: 'blue'
+  icon: 'book'
