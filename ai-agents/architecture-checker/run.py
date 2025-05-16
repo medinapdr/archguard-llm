@@ -69,8 +69,8 @@ def main():
 
     for batch_start_index in range(0, len(file_paths), BATCH_FILE_ANALYSIS_SIZE):
         batch_file_path = file_paths[batch_start_index:batch_start_index + BATCH_FILE_ANALYSIS_SIZE]
-        extracted_architecture_pattern = extract_architecture_patterns_from_files(batch_file_path)
-        all_extracted_architecture_patterns.append(extracted_architecture_pattern, provider)
+        extracted_architecture_pattern = extract_architecture_patterns_from_files(batch_file_path, provider)
+        all_extracted_architecture_patterns.append(extracted_architecture_pattern)
 
     print("\n\n---\n\n".join(all_extracted_architecture_patterns))
 
