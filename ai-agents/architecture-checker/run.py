@@ -3,6 +3,8 @@ import sys
 import argparse
 from typing import List
 from openai import OpenAI
+import google.generativeai as genai
+from google.generativeai import configure, GenerativeModel
 
 BATCH_FILE_ANALYSIS_SIZE = 50
 
@@ -36,10 +38,13 @@ def generate_text(system_prompt: str, user_prompt: str, provider: str) -> str:
 
     elif provider == "gemini":
         configure(api_key=os.getenv("GEMINI_API_KEY"))
-        model = GenerativeModel("gemini-pro")
+        model = GenerativeModel("gemini-2.5-flash")
 
-        prompt = f"{system_prompt}\n\n{user_prompt}"
-        response = model.generate_content(prompt)
+        response = model.generate_content([
+            {"role": "system", "parts": [system_prompt]},
+            {"role": "user", "parts": [user_prompt]},
+        ])
+
         return response.text
 
     else:
