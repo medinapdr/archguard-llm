@@ -5,6 +5,12 @@ permissions:
 name: Pull Request Review AI
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+    paths:
+      - 'examples/**'
 
 jobs:
   run_code_reveiewer:
