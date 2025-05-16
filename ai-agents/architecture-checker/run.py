@@ -41,7 +41,7 @@ def generate_text(system_prompt: str, user_prompt: str, provider: str) -> str:
         model = GenerativeModel("gemini-2.5-flash-preview-04-17")
 
         response = model.generate_content([
-            {"role": "system", "parts": [system_prompt]},
+            {"role": "model", "parts": [system_prompt]},
             {"role": "user", "parts": [user_prompt]},
         ])
 
