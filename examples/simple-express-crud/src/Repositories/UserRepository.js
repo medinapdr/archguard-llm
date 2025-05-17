@@ -6,7 +6,7 @@ class UserRepository {
 	}
 
 	getById (id) {
-		return UserRepository.#users[id]
+		return UserRepository.#users.find(user => user.id === id);
 	}
 
 	create (user) {
