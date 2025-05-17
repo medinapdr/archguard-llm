@@ -1,6 +1,3 @@
-permissions:
-  contents: write
-
 name: Architecture Consistency Check
 
 on:
@@ -11,6 +8,9 @@ on:
 jobs:
   run_architecture_checker_ai_agent:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
 
     strategy:
       matrix:
@@ -25,22 +25,22 @@ jobs:
             target_files: "*.js"
 
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
-      - name: Set up Python
+      - name: Set Up Python Environment
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
+      - name: Install LLM Agent Dependencies
         run: |
           pip install openai
           pip install google-generativeai
 
-      - name: Run AI
+      - name: Generate Architecture Description with LLM
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -48,7 +48,7 @@ jobs:
           all_files=$(find ${{ matrix.target.folder_path }} -type f -name '${{ matrix.target.target_files }}')
           python3 ai-agents/architecture-checker/run.py --provider ${{ matrix.target.llm_provider }} $all_files > ai-agents/architecture-checker/${{ matrix.target.project_name }}-example-output.md
 
-      - name: Save AI Output
+      - name: Commit and Push Architecture Description
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"

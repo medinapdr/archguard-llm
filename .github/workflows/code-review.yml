@@ -1,0 +1,52 @@
+name: Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+    paths:
+      - 'examples/**'
+
+jobs:
+  run_code_reveiewer_ai_agent:
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set Up Python Environment
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install LLM Agent Dependencies
+        run: pip install openai
+
+      - name: Generate Diff from Pull Request
+        run: |
+          git fetch origin main
+          git diff origin/main...HEAD > pr-review.diff
+          cat pr-review.diff
+
+      - name: Generate Code Review Comment with LLM
+        id: generate_code_review_comment
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          COMMENT=$(python3 ai-agents/code-reviewer/run.py pr-review.diff)
+          COMMENT_ESCAPED="${COMMENT//'%'/'%25'}"
+          COMMENT_ESCAPED="${COMMENT_ESCAPED//$'\n'/'%0A'}"
+          COMMENT_ESCAPED="${COMMENT_ESCAPED//$'\r'/'%0D'}"
+          echo "body=$COMMENT_ESCAPED" >> $GITHUB_OUTPUT
+
+      - name: Post Review Comment to Pull Request
+        uses: mshick/add-pr-comment@v2
+        with:
+          message: ${{ steps.generate_code_review_comment.outputs.body }}
