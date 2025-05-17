@@ -1,393 +1,679 @@
-Aqui estão os padrões arquiteturais identificados no código fornecido:
+Ok, compreendi as regras e o formato exigido. Analisarei o código fornecido para identificar os padrões arquiteturais e documentá-los em Português.
 
-## Convenção de Nomenclatura por Sufixo
+---
 
-### Descrição
-
-Classes e arquivos são nomeados com sufixos que indicam seu propósito ou tipo dentro da arquitetura da aplicação. Esta convenção ajuda a organizar o código e a entender rapidamente a responsabilidade de cada componente. Sufixos comuns incluem `Module`, `Service`, `Tool`, `Validation`, e `Util`.
-
--   `Module`: Geralmente orquestra o fluxo principal ou coordena outros componentes.
--   `Service`: Fornece funcionalidades que podem ser consumidas por vários módulos ou ferramentas. Muitas vezes representam integrações com serviços externos ou funcionalidades de infraestrutura.
--   `Tool`: Implementa lógica específica de domínio ou integrações com bibliotecas/sistemas externos. Frequentemente implementam contratos (interfaces).
--   `Validation`: Contém lógica de validação de dados ou estado.
--   `Util`: Oferece funções utilitárias genéricas que não se encaixam em categorias mais específicas.
-
-### Exemplos
-
-**Seguindo o padrão:**
-
-```typescript
-// Arquivo: examples/kindlefy/src/Modules/SyncModule.ts
-class SyncModule { /* ... */ }
-export default SyncModule
-
-// Arquivo: examples/kindlefy/src/Services/HttpService.ts
-class HttpService { /* ... */ }
-export default HttpService
-
-// Arquivo: examples/kindlefy/src/Tools/Converters/RSSConverterTool.ts
-class RSSConverterTool implements ConverterContract<Buffer> { /* ... */ }
-export default RSSConverterTool
-
-// Arquivo: examples/kindlefy/src/Validations/EnvironmentValidation.ts
-class EnvironmentValidation { /* ... */ }
-export default new EnvironmentValidation()
-
-// Arquivo: examples/kindlefy/src/Utils/FileUtil.ts
-class FileUtil { /* ... */ }
-export default new FileUtil()
-```
-
-**Não seguindo o padrão (Exemplo Hipotético - não encontrado no código, mas ilustrativo):**
-
-Se houvesse um arquivo chamado `download.ts` que implementasse a lógica de download de HTTP sem usar o sufixo `Service` ou `Tool`. No entanto, no código fornecido, a convenção de sufixo parece ser aplicada de forma bastante consistente para os tipos principais de arquivos. `App.ts` é uma exceção, mas é a classe de inicialização principal.
-
-## Padrão Singleton para Serviços e Utilitários
+## Organização por Camadas e Domínios
 
 ### Descrição
 
-Muitas classes localizadas nas pastas `Services` e `Utils` são implementadas seguindo o padrão Singleton. Isso significa que apenas uma instância da classe é criada e reutilizada por toda a aplicação. Isso é alcançado instanciando a classe diretamente na exportação padrão do módulo (`export default new Class()`). Este padrão é adequado para serviços ou utilitários que não mantêm estado por requisição e podem ser compartilhados globalmente para evitar a criação desnecessária de objetos e gerenciar recursos (como conexões de navegador em `BrowserService` ou filas em `QueueService`).
+O código segue uma estrutura modular bem definida, separando as responsabilidades em diretórios que representam camadas ou domínios específicos. Essa organização facilita a compreensão, a manutenção e a escalabilidade do projeto, aderindo ao princípio da Separação de Interesses (Separation of Concerns - SoC).
+
+As principais camadas/domínios identificados são:
+
+*   `Modules`: Contêm a lógica de orquestração de alto nível e combinam funcionalidades de `Services` e `Tools` para executar casos de uso específicos (Importação, Conversão, Sincronização, Armazenamento, Configuração).
+*   `Services`: Fornecem funcionalidades de baixo nível ou infraestrutura, muitas vezes encapsulando interações com sistemas externos ou utilitários complexos (HTTP, Navegador, Notificações, Manipulação de Arquivos Temporários, Crawling, Compressão, Execução de Comandos, Tratamento de Erros).
+*   `Tools`: Implementam a lógica específica de um domínio, atuando como "ferramentas" que os `Modules` utilizam para realizar tarefas (Importadores de Fontes específicas, Conversores de Formato, Enviadores para Kindle, Ferramenta de Armazenamento).
+*   `Validations`: Contêm lógica de validação, separada das operações que a utilizam.
+*   `Utils`: Classes com funções auxiliares genéricas e reutilizáveis que não se encaixam em um domínio específico.
+*   `Protocols`: Contêm definições de tipos e interfaces (contratos) usados em todo o projeto.
+*   `Models`: Definição de estruturas de dados principais (ex: `DocumentModel`).
+*   `Exceptions`: Classes para definir erros customizados, centralizando o tratamento de exceções.
 
 ### Exemplos
 
-**Seguindo o padrão:**
+**Seguindo o padrão (Separação por Camadas/Domínios):**
 
-```typescript
-// Arquivo: examples/kindlefy/src/Validations/EnvironmentValidation.ts
-class EnvironmentValidation { /* ... */ }
-export default new EnvironmentValidation() // Instância única exportada
-
-// Arquivo: examples/kindlefy/src/Services/BrowserService.ts
-class BrowserService { /* ... */ }
-export default new BrowserService() // Instância única exportada
-
-// Arquivo: examples/kindlefy/src/Utils/FileUtil.ts
-class FileUtil { /* ... */ }
-export default new FileUtil() // Instância única exportada
-```
-
-**Não seguindo o padrão:**
-
-```typescript
-// Arquivo: examples/kindlefy/src/Tools/Converters/RSSConverterTool.ts
-class RSSConverterTool implements ConverterContract<Buffer> { /* ... */ }
-// Não é um Singleton, exporta a classe para ser instanciada onde necessário
-export default RSSConverterTool
-```
-
-```typescript
-// Arquivo: examples/kindlefy/src/Modules/SyncModule.ts
-class SyncModule {
-	constructor (senderConfig: SenderConfig[], kindleConfig: KindleConfig) { /* ... */ }
-}
-// Não é um Singleton, é instanciado na classe App (em App.ts)
-export default SyncModule
-```
-
-## Padrão Strategy/Factory para Seleção de Implementação
-
-### Descrição
-
-Módulos de coordenação (`ImportationModule`, `ConversionModule`, `SyncModule`, `StoreModule`) utilizam uma combinação dos padrões Factory e Strategy. Eles dependem de "contratos" (interfaces definidas em `Protocols`) e selecionam a implementação concreta apropriada (uma `Tool` ou `Service`) em tempo de execução com base em parâmetros de configuração (como `sourceConfig.type`, `senderConfig.type`, `storageConfig.type`). Um objeto de mapa (`importerMap`, `converterMap`, etc.) funciona como uma fábrica para obter a instância ou classe correta, e o código então chama um método comum definido no contrato (Strategy).
-
-### Exemplos
-
-**Seguindo o padrão:**
-
-```typescript
-// Arquivo: examples/kindlefy/src/Modules/ImportationModule.ts
-class ImportationModule {
-	async import (sourceConfig: SourceConfig): Promise<Content<unknown>> {
-		const importer = this.getImporterBySourceConfig(sourceConfig) // Factory/Strategy: Seleciona o Importer
-		return await importer.import(sourceConfig) // Strategy: Chama o método comum 'import'
-	}
-
-	private getImporterBySourceConfig (sourceConfig: SourceConfig): ImporterContract<unknown> {
-		const importerMap: Record<SourceConfig["type"], ImporterContract<unknown>> = {
-			rss: RSSImporterTool, // Mapeia tipo para Implementação (Factory)
-			manga: MangaImporterTool
-		}
-		return importerMap[sourceConfig.type]
-	}
-}
-```
-
-```typescript
-// Arquivo: examples/kindlefy/src/Modules/SyncModule.ts
-class SyncModule {
-	async sync (document: DocumentModel): Promise<void> {
-		await this.sender.sendToKindle(document, this.kindleConfig) // Strategy: Chama o método comum 'sendToKindle'
-	}
-
-	private get sender (): SenderContract {
-		const [config] = this.senderConfig
-		const senderMap: Record<SenderConfig["type"], SenderContract> = { // Mapeia tipo para Implementação (Factory)
-			smtp: new SMTPSenderTool(config as SMTPConfig),
-			gmail: new GmailSenderTool(config.email, config.password),
-			outlook: new OutlookSenderTool(config.email, config.password)
-		}
-		return senderMap[config.type]
-	}
-}
-```
-
-**Não seguindo o padrão (Exemplo Hipotético - não encontrado no código, mas ilustrativo):**
-
-Se a lógica de importação para cada tipo de fonte fosse implementada diretamente dentro do `ImportationModule` com grandes blocos `if/else` ou `switch`, em vez de delegar a implementações separadas que seguem um contrato.
-
-## Arquitetura Modular/Organizada por Domínio
-
-### Descrição
-
-O código é claramente organizado em diretórios que representam módulos lógicos ou domínios de responsabilidade (`Modules`, `Services`, `Tools`, `Validations`, `Utils`, `Protocols`, `Exceptions`, `Models`). Essa estrutura promove a separação de preocupações (SoC) e melhora a manutenibilidade, agrupando códigos relacionados. Os `Modules` atuam como a camada de orquestração, os `Services` fornecem funcionalidades compartilhadas ou de infraestrutura, e os `Tools` são implementações mais específicas de funcionalidades (frequentemente seguindo contratos).
-
-### Exemplos
-
-**Seguindo o padrão:**
-
--   Arquivo `App.ts` orquestrando os módulos:
+*   O arquivo `App.ts` (camada de Aplicação/Orquestração) interage com `Modules` (`SetupInputModule`, `ImportationModule`, `ConversionModule`, `SyncModule`, `StoreModule`) e alguns `Services` globais (`NotificationService`, `TempFolderService`, `BrowserService`), mas não interage diretamente com `Tools` ou `Utils`.
     ```typescript
-    // Arquivo: examples/kindlefy/src/App.ts
+    // File: examples/kindlefy/src/App.ts
     import SyncModule from "@/Modules/SyncModule"
     import StoreModule from "@/Modules/StoreModule"
     // ... outros imports de Modules e Services
 
     class App {
-        // ... instanciação de Modules
+        // ... inicialização de Modules
+
         async run (): Promise<void> {
-            // ... fluxo da aplicação orquestrando módulos e serviços
+            // ... interações com Modules e Services
+            const config = await NotificationService.task("Fetch setup input", async (task) => {
+                const result = await this.setupInputModule.fetch()
+                // ...
+                return result
+            })
+            // ...
+            const syncModule = new SyncModule(config.senders, config.kindle)
+            const storeModule = new StoreModule(config.storages, config.sync)
+            // ...
         }
     }
     ```
--   Divisão de responsabilidades em pastas:
+*   O arquivo `MeusMangasImporterService.ts` (camada de Service/Infraestrutura) utiliza `HttpService`, `CrawlerService`, `CompressionService`, `TempFolderService` (outros Services/Infraestrutura) e `FileUtil`, `SanitizationUtil` (Utils), mas *não* contém lógica de negócio de alto nível de `Modules` nem implementa um `SenderContract` ou `ConverterContract` de `Tools`.
+    ```typescript
+    // File: examples/kindlefy/src/Services/MeusMangasImporterService.ts
+    import HttpService from "@/Services/HttpService"
+    import CrawlerService from "@/Services/CrawlerService"
+    import CompressionService from "@/Services/CompressionService"
+    import TempFolderService from "@/Services/TempFolderService"
+
+    import FileUtil from "@/Utils/FileUtil"
+    import SanitizationUtil from "@/Utils/SanitizationUtil"
+
+    class MeusMangasImporterService implements MangaImporterContract {
+        // ... usa os services e utils importados para implementar o contrato
+    }
     ```
-    src/
-    ├── Exceptions/          // Erros customizados
-    ├── Models/              // Modelos de dados
-    ├── Modules/             // Camada de orquestração
-    ├── Protocols/           // Interfaces e tipos
-    ├── Services/            // Funcionalidades de infraestrutura/compartilhadas
-    ├── Tools/               // Implementações específicas (Converters, Importers, Senders, Storages)
-    ├── Utils/               // Funções utilitárias genéricas
-    ├── Validations/         // Lógica de validação
-    ├── App.ts               // Ponto de entrada principal da lógica
-    └── index.ts             // Ponto de entrada da aplicação (bootstrap)
+
+**Não seguindo o padrão (Exemplo Hipotético de Violação):**
+
+*   Se o arquivo `App.ts` (camada de Orquestração) contivesse diretamente a lógica de parsing JSON que deveria estar em `ParseUtil` (camada de Utility).
+    ```typescript
+    // Exemplo hipotético (VIOLAÇÃO DO PADRÃO)
+    // File: examples/kindlefy/src/App.ts
+    // ...
+    class App {
+        // ...
+        private fetchEnvConfig (): Config {
+            // Lógica de parsing diretamente aqui, sem usar ParseUtil
+            const sourcesString = process.env.SOURCES;
+            let sourcesArray = [];
+            try {
+                sourcesArray = JSON.parse(sourcesString);
+            } catch (error) {
+                console.error("Parsing failed!"); // Tratamento de erro duplicado ou inconsistente
+            }
+            // ...
+        }
+    }
     ```
-
-**Não seguindo o padrão (Exemplo Hipotético - não encontrado no código, mas ilustrativo):**
-
-Se todo o código estivesse em uma única pasta `src/` sem subdivisões lógicas, ou se as funções de validação estivessem espalhadas por arquivos de `Service` ou `Module` em vez de agrupadas em `Validations`.
-
-## Serviços de Infraestrutura Centralizados
-
-### Descrição
-
-Funcionalidades comuns e de infraestrutura, como requisições HTTP (`HttpService`, `HttpProxyService`), gerenciamento de filas (`QueueService`), notificações (`NotificationService`), manipulação de arquivos temporários (`TempFolderService`), interação com o navegador (`BrowserService`), tratamento de erros (`ErrorHandlerService`), execução de comandos de processo (`ProcessCommandService`) e crawling web (`CrawlerService`), são implementadas como `Services` e centralizadas na pasta `src/Services`. Outros componentes da aplicação dependem desses serviços para executar suas tarefas, promovendo reuso e consistência.
-
-### Exemplos
-
-**Seguindo o padrão:**
-
-```typescript
-// Arquivo: examples/kindlefy/src/Tools/Importers/RSSImporterTool.ts
-import HttpService from "@/Services/HttpService" // Utiliza o serviço centralizado
-
-class RSSImporterTool implements ImporterContract<Buffer> {
-	private readonly httpService = new HttpService({}) // Instancia e utiliza
-
-	async import (sourceConfig: SourceConfig): Promise<Content<Buffer>> {
-		const buffer = await this.httpService.toBuffer(sourceConfig.url)
-		// ...
-	}
-}
-```
-
-```typescript
-// Arquivo: examples/kindlefy/src/Services/NotificationService.ts
-import ErrorHandlerService from "@/Services/ErrorHandlerService" // Utiliza outro serviço centralizado
-
-class NotificationService {
-	private async CLITask<Result extends unknown>(title: string, callbackFn: TaskCallback<Result>): Promise<Result> {
-		try { /* ... */ } catch (error) {
-			ErrorHandlerService.handle(error) // Delega o tratamento de erro
-			// ...
-		}
-	}
-	// ...
-}
-```
-
-**Não seguindo o padrão (Exemplo Hipotético - não encontrado no código, mas ilustrativo):**
-
-Se cada "Tool" que precisasse fazer uma requisição HTTP criasse sua própria instância `axios` e gerenciasse a lógica de headers, proxies, etc., em vez de usar o `HttpService` centralizado.
-
-## Camada de Acesso a Dados (JSON Database)
-
-### Descrição
-
-O `JSONDatabaseService` atua como uma camada de acesso a dados para persistir informações em arquivos JSON. Ele encapsula a lógica de leitura, escrita e serialização/desserialização dos dados. Crucialmente, ele utiliza um `QueueService` interno (`actionFIFOQueue`) configurado com `concurrency: 1` para garantir que as operações de leitura e escrita no arquivo sejam sequenciais, prevenindo problemas de concorrência ao acessar o mesmo arquivo de diferentes partes da aplicação. A `StoreModule` utiliza este serviço para implementar a funcionalidade de verificação de duplicidade.
-
-### Exemplos
-
-**Seguindo o padrão:**
-
-```typescript
-// Arquivo: examples/kindlefy/src/Services/JSONDatabaseService.ts
-class JSONDatabaseService<Model extends unknown> {
-	private static readonly actionFIFOQueue = new QueueService({ concurrency: 1 }) // Gerencia concorrência de acesso ao arquivo
-	// ...
-	async set (key: string, value: Model): Promise<void> {
-		return await JSONDatabaseService.actionFIFOQueue.enqueue(async () => { // Enfileira a operação
-			await this.syncInMemoryDatabaseByFileDatabaseIfNotAlreadySync()
-			JSONDatabaseService.databases[this.path][key] = value
-			await this.refreshFileDatabaseFromInMemoryDatabase()
-		})
-	}
-	// ...
-}
-```
-
-```typescript
-// Arquivo: examples/kindlefy/src/Modules/StoreModule.ts
-import JSONDatabaseService from "@/Services/JSONDatabaseService" // Depende do serviço de acesso a dados
-
-class StoreModule {
-	private readonly JSONDatabaseService: JSONDatabaseService<DocumentModelSavedAttributes>
-	// ...
-	async isDocumentAlreadySync (document: DocumentModel): Promise<boolean> {
-		if (this.isAbleToUseStorage) {
-			const existingDocument = await this.storage.retrieveOneDocumentByTitle(document.title) // Utiliza o storage, que usa o JSONDatabaseService
-			return Boolean(existingDocument)
-		} else {
-			return false
-		}
-	}
-	// ...
-}
-```
-
-**Não seguindo o padrão (Exemplo Hipotético - não encontrado no código, mas ilustrativo):**
-
-Se a `StoreModule` ou outras partes do código manipulassem arquivos JSON diretamente usando `fs.promises.readFile` e `fs.promises.writeFile` sem a abstração fornecida pelo `JSONDatabaseService` e seu controle de concorrência.
-
-## Convenção de Nomenclatura para Métodos de Acesso/Modificação
-
-### Descrição
-
-Há um uso consistente de prefixos em nomes de métodos para indicar a natureza da operação:
--   `get*`: Usado para recuperar um valor, propriedade ou instância sem alterar o estado visível externamente.
--   `set*`: Usado para definir ou modificar o valor de uma propriedade ou estado.
--   `is*`: Usado para métodos que retornam um valor booleano (verificação de estado ou condição).
--   `fetch*`: Usado especificamente para obter dados de configuração externa.
--   `convert*`: Usado para métodos que transformam dados de um formato para outro.
-
-### Exemplos
-
-**Seguindo o padrão:**
-
-```typescript
-// Arquivo: examples/kindlefy/src/Services/FileUtil.ts
-class FileUtil {
-	getMimetypeByFileName (filename: string): string | null { /* ... */ } // Recupera valor
-	parseFilePath (filePath: string): ParsedFilePath { /* ... */ } // Transforma/Recupera estrutura
-}
-```
-
-```typescript
-// Arquivo: examples/kindlefy/src/Validations/EnvironmentValidation.ts
-class EnvironmentValidation {
-	get isGithubActionEnvironment (): boolean { /* ... */ } // Verifica condição (boolean)
-	get isDevEnvironment (): boolean { /* ... */ } // Verifica condição (boolean)
-}
-```
-
-```typescript
-// Arquivo: examples/kindlefy/src/Modules/SetupInputModule.ts
-class SetupInputModule {
-	async fetch (): Promise<Config> { /* ... */ } // Busca dados externos (config)
-	private fetchGithubActionsConfig (): Config { /* ... */ } // Busca dados externos (config)
-	private fetchEnvConfig (): Config { /* ... */ } // Busca dados externos (config)
-}
-```
-
-```typescript
-// Arquivo: examples/kindlefy/src/Modules/ConversionModule.ts
-class ConversionModule {
-	async convert (content: Content<unknown>): Promise<DocumentModel[]> { /* ... */ } // Transforma dados
-	private getConverterBySourceConfig (sourceConfig: SourceConfig): ConverterContract<unknown> { /* ... */ } // Recupera instância
-}
-```
-
-```typescript
-// Arquivo: examples/kindlefy/src/Services/JSONDatabaseService.ts
-class JSONDatabaseService<Model extends unknown> {
-	async set (key: string, value: Model): Promise<void> { /* ... */ } // Define valor
-	async get (key: string): Promise<Model | null> { /* ... */ } // Recupera valor
-	// ...
-}
-```
-
-**Não seguindo o padrão (Exemplo Hipotético):**
-
-Se, por exemplo, o método `getMimetypeByFileName` fosse chamado `calcType` ou `findMimetype`. O código fornecido mostra alta consistência nesses prefixos.
-
-## Tratamento Centralizado de Erros
-
-### Descrição
-
-A aplicação utiliza um serviço dedicado, `ErrorHandlerService`, para lidar e registrar erros que ocorrem durante a execução. Em vários pontos do código, blocos `try...catch` capturam exceções e as passam para `ErrorHandlerService.handle(error)`. Isso promove um mecanismo consistente para o registro de erros, desacoplando a lógica de tratamento (como logar) do local onde o erro ocorre.
-
-### Exemplos
-
-**Seguindo o padrão:**
-
-```typescript
-// Arquivo: examples/kindlefy/src/Services/NotificationService.ts
-import ErrorHandlerService from "@/Services/ErrorHandlerService"
-
-class NotificationService {
-	private async CLITask<Result extends unknown>(title: string, callbackFn: TaskCallback<Result>): Promise<Result> {
-		try {
-			const runner = await task(title, async (taskConfig) => {
-				try {
-					return await callbackFn(taskConfig)
-				} catch (error) {
-					ErrorHandlerService.handle(error) // Erro tratado pelo serviço centralizado
-					taskConfig.setError(error)
-				}
-			})
-			return runner.result
-		} catch (error) {
-			ErrorHandlerService.handle(error) // Erro tratado pelo serviço centralizado
-		}
-	}
-	// ... similar logic in githubActionTask
-}
-```
-
-```typescript
-// Arquivo: examples/kindlefy/src/Services/JSONDatabaseService.ts
-import ErrorHandlerService from "@/Services/ErrorHandlerService" // Não está importado neste arquivo, mas usado no ParseUtil que é chamado aqui. Exemplo melhor em NotificationService ou ParseUtil.
-
-// Arquivo: examples/kindlefy/src/Utils/ParseUtil.ts
-import ErrorHandlerService from "@/Services/ErrorHandlerService" // Importa o serviço
-
-class ParseUtil {
-	safelyParseArray<Data extends unknown>(value: string): Data[] {
-		try {
-			return JSON.parse(value)
-		} catch (error) {
-			ErrorHandlerService.handle(new ArrayParsingException(value, error)) // Erro tratado pelo serviço centralizado
-			return []
-		}
-	}
-}
-```
-
-**Não seguindo o padrão (Exemplo Hipotético):**
-
-Se em vez de chamar `ErrorHandlerService.handle(error)`, diferentes partes do código simplesmente usassem `console.error(error)` ou logassem o erro de maneiras inconsistentes, ou se tentassem lidar com a lógica de log ou notificação diretamente em cada `catch`.
 
 ---
 
-Estes são os principais padrões arquiteturais e de design identificados com base no código fornecido.
+## Convenção de Nomenclatura por Sufixo
+
+### Descrição
+
+O código utiliza sufijos específicos para identificar o tipo ou o propósito de classes e arquivos, reforçando a organização por camadas e domínios. Esta convenção torna claro o papel de cada componente apenas olhando para o seu nome.
+
+Os sufijos comuns incluem:
+
+*   `Module`: Para classes que orquestram fluxos de alto nível (`ImportationModule`, `ConversionModule`).
+*   `Service`: Para classes que fornecem funcionalidades de infraestrutura ou baixo nível (`HttpService`, `NotificationService`).
+*   `Tool`: Para classes que implementam lógicas de domínio específicas e são usadas pelos `Modules` (`RSSImporterTool`, `MangaConverterTool`, `SMTPSenderTool`).
+*   `Util`: Para classes com funções auxiliares genéricas (`FileUtil`, `DateUtil`).
+*   `Validation`: Para classes que contêm lógica de validação (`EnvironmentValidation`, `ConfigValidation`).
+*   `Protocol`: Para arquivos que definem interfaces e tipos (`HttpProtocol`, `StorageProtocol`).
+*   `Model`: Para classes que representam estruturas de dados principais (`DocumentModel`).
+*   `Exception`: Para classes de erro customizadas (`ProcessCommandException`, `ArrayParsingException`).
+*   `Contract`: Usado em interfaces (`ImporterContract`, `SenderContract`).
+*   `Input` ou `Options`: Usados em tipos para parâmetros de entrada ou configurações.
+*   `Result` ou `Response`: Usados em tipos para resultados de operações.
+
+### Exemplos
+
+**Seguindo o padrão:**
+
+*   `HttpService.ts`: Uma classe que lida com operações HTTP (infraestrutura).
+    ```typescript
+    // File: examples/kindlefy/src/Services/HttpService.ts
+    class HttpService {
+        // ... métodos como toBuffer, toString, toJSON, makeRawRequest
+    }
+    export default HttpService
+    ```
+*   `RSSImporterTool.ts`: Uma classe que implementa a lógica específica de importação de RSS (ferramenta de domínio).
+    ```typescript
+    // File: examples/kindlefy/src/Tools/Importers/RSSImporterTool.ts
+    import { Content, ImporterContract } from "@/Protocols/ImporterProtocol"
+    import { SourceConfig } from "@/Protocols/SetupInputProtocol"
+
+    import HttpService from "@/Services/HttpService" // Usa um Service
+
+    class RSSImporterTool implements ImporterContract<Buffer> {
+        private readonly httpService = new HttpService({})
+
+        async import (sourceConfig: SourceConfig): Promise<Content<Buffer>> {
+            // Lógica de importação de RSS
+            const buffer = await this.httpService.toBuffer(sourceConfig.url)
+
+            return {
+                data: buffer,
+                sourceConfig
+            }
+        }
+    }
+
+    export default new RSSImporterTool() // Exporta uma instância
+    ```
+*   `FileUtil.ts`: Uma classe com funções utilitárias para manipulação de arquivos.
+    ```typescript
+    // File: examples/kindlefy/src/Utils/FileUtil.ts
+    import mimetype from "mime-types"
+    import path from "path"
+
+    import { ParsedFilePath } from "@/Protocols/FileProtocol" // Usa um Protocol
+
+    class FileUtil {
+        getMimetypeByFileName (filename: string): string | null {
+            return mimetype.lookup(filename) || null
+        }
+        // ... outros métodos utilitários
+    }
+    export default new FileUtil() // Exporta uma instância
+    ```
+
+**Não seguindo o padrão (Exemplo Hipotético de Violação):**
+
+*   Se o arquivo `HttpManager.ts` fosse usado em vez de `HttpService.ts`, ou `RssFetcher.ts` em vez de `RSSImporterTool.ts`.
+    ```typescript
+    // Exemplo hipotético (VIOLAÇÃO DO PADRÃO)
+    // File: examples/kindlefy/src/Infrastructure/HttpManager.ts // Viola nome da pasta e sufixo
+    class HttpManager { // Viola sufixo
+       // ...
+    }
+    export default HttpManager
+    ```
+
+---
+
+## Padrão Singleton (para Services e Utilities)
+
+### Descrição
+
+Muitas das classes localizadas nos diretórios `Services` e `Utils` seguem o padrão Singleton. Elas são projetadas para terem apenas uma instância em toda a aplicação, que é criada diretamente no ponto de exportação do módulo (`export default new ...()`). Isso é apropriado para serviços e utilitários que gerenciam estado global (como `BrowserService` ou `JSONDatabaseService` com sua fila e cache estáticos) ou que não possuem estado e oferecem funções puramente utilitárias (`FileUtil`, `SanitizationUtil`, `ErrorHandlerService`).
+
+### Exemplos
+
+**Seguindo o padrão:**
+
+*   `ErrorHandlerService.ts`: A classe é instanciada e exportada como padrão, garantindo uma única instância global.
+    ```typescript
+    // File: examples/kindlefy/src/Services/ErrorHandlerService.ts
+    class ErrorHandlerService {
+        handle (error: Error): void {
+            console.error(error)
+        }
+    }
+
+    export default new ErrorHandlerService() // Instanciado e exportado como Singleton
+    ```
+*   `BrowserService.ts`: Gerencia uma única instância de navegador Puppeteer. A lógica para criar a instância da classe é dentro do próprio módulo, mas a instância pública é única.
+    ```typescript
+    // File: examples/kindlefy/src/Services/BrowserService.ts
+    import puppeteer, { Browser, Page } from "puppeteer"
+
+    class BrowserService {
+        private static browser: Browser // Estado compartilhado
+
+        async start (): Promise<void> {
+            if (!BrowserService.browser) {
+                BrowserService.browser = await puppeteer.launch({
+                    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+                })
+            }
+        }
+        // ... outros métodos que usam BrowserService.browser
+    }
+
+    export default new BrowserService() // Instanciado e exportado como Singleton
+    ```
+*   `JSONDatabaseService.ts`: Embora a *classe* possa ser instanciada com caminhos diferentes, ela utiliza estado *estático* (`databases`, `actionFIFOQueue`) que é compartilhado entre todas as instâncias. A fila `actionFIFOQueue` é um singleton implícito dentro da classe, garantindo acesso serializado ao estado compartilhado.
+    ```typescript
+    // File: examples/kindlefy/src/Services/JSONDatabaseService.ts
+    import fs from "fs"
+    import { Database } from "@/Protocols/JSONDatabaseProtocol"
+    import QueueService from "@/Services/QueueService"
+
+    class JSONDatabaseService<Model extends unknown> {
+        private static databases: Record<string, Database> = {} // Estado compartilhado
+        private static readonly actionFIFOQueue = new QueueService({ concurrency: 1 }) // Singleton implícito para gerenciar acesso ao estado compartilhado
+        // ...
+    }
+    export default JSONDatabaseService // A classe é exportada, mas o estado compartilhado e a fila estática atuam como singletons
+    ```
+
+**Não seguindo o padrão (Exemplo de classe que *não* é um Singleton):**
+
+*   `HttpService.ts`: Esta classe *não* é exportada como um Singleton. Cada instância de `HttpService` é configurada com opções específicas (`baseURL`, `headers`) e, portanto, múltiplas instâncias são necessárias.
+    ```typescript
+    // File: examples/kindlefy/src/Services/HttpService.ts
+    import axios, { AxiosInstance } from "axios"
+    import { HttpOptions } from "@/Protocols/HttpProtocol"
+
+    class HttpService {
+        private readonly client: AxiosInstance
+        private readonly options: HttpOptions
+
+        constructor (options: HttpOptions) { // Recebe configurações por instância
+            this.options = options
+            this.client = axios.create({ // Cria um cliente axios por instância
+                baseURL: options.baseURL,
+                // ...
+            })
+        }
+        // ... métodos
+    }
+    // export default new HttpService(...) -- Não é o que acontece.
+    export default HttpService // A classe é exportada, permitindo múltiplas instâncias
+    ```
+
+---
+
+## Padrão Strategy
+
+### Descrição
+
+Os `Modules` (`ImportationModule`, `ConversionModule`, `SyncModule`, `StoreModule`) utilizam o padrão Strategy para selecionar a implementação concreta de uma operação com base em uma configuração de entrada (geralmente o campo `type` em `SourceConfig`, `SenderConfig` ou `StorageConfig`). Em vez de ter lógica condicional complexa (`if/else if/else` ou `switch`) dentro do módulo para cada tipo possível, o módulo delega a execução a uma "estratégia" específica (implementação de `ImporterContract`, `ConverterContract`, `SenderContract`, `StorageContract`) selecionada de um mapa. Isso torna os módulos mais limpos e extensíveis, pois novas estratégias podem ser adicionadas sem modificar o código dos módulos.
+
+### Exemplos
+
+**Seguindo o padrão:**
+
+*   `ImportationModule.ts`: Seleciona a implementação correta de `ImporterContract` (`RSSImporterTool`, `MangaImporterTool`) com base em `sourceConfig.type`.
+    ```typescript
+    // File: examples/kindlefy/src/Modules/ImportationModule.ts
+    import { Content, ImporterContract } from "@/Protocols/ImporterProtocol"
+    import { SourceConfig } from "@/Protocols/SetupInputProtocol"
+
+    import RSSImporterTool from "@/Tools/Importers/RSSImporterTool"
+    import MangaImporterTool from "@/Tools/Importers/MangaImporterTool"
+
+    class ImportationModule {
+        async import (sourceConfig: SourceConfig): Promise<Content<unknown>> {
+            const importer = this.getImporterBySourceConfig(sourceConfig) // Seleciona a estratégia
+            return await importer.import(sourceConfig) // Executa a estratégia
+        }
+
+        private getImporterBySourceConfig (sourceConfig: SourceConfig): ImporterContract<unknown> {
+            const importerMap: Record<SourceConfig["type"], ImporterContract<unknown>> = {
+                rss: RSSImporterTool,
+                manga: MangaImporterTool
+            }
+            return importerMap[sourceConfig.type] // Seleção baseada no tipo
+        }
+    }
+    export default ImportationModule
+    ```
+*   `SyncModule.ts`: Seleciona a implementação correta de `SenderContract` (`SMTPSenderTool`, `GmailSenderTool`, `OutlookSenderTool`) com base em `senderConfig[0].type`.
+    ```typescript
+    // File: examples/kindlefy/src/Modules/SyncModule.ts
+    // ... imports de Senders e Protocols
+
+    class SyncModule {
+        // ... constructor
+
+        async sync (document: DocumentModel): Promise<void> {
+            await this.sender.sendToKindle(document, this.kindleConfig) // Executa a estratégia
+        }
+
+        private get sender (): SenderContract {
+            const [config] = this.senderConfig // Assume que há pelo menos um sender
+            const senderMap: Record<SenderConfig["type"], SenderContract> = {
+                smtp: new SMTPSenderTool(config as SMTPConfig),
+                gmail: new GmailSenderTool(config.email, config.password),
+                outlook: new OutlookSenderTool(config.email, config.password)
+            }
+            return senderMap[config.type] // Seleção baseada no tipo
+        }
+    }
+    export default SyncModule
+    ```
+
+**Não seguindo o padrão (Exemplo Hipotético de Violação):**
+
+*   Se o `ImportationModule` contivesse lógica condicional (`if/else`) para lidar com diferentes tipos de fonte diretamente:
+    ```typescript
+    // Exemplo hipotético (VIOLAÇÃO DO PADRÃO)
+    // File: examples/kindlefy/src/Modules/ImportationModule.ts
+    // ... imports de Importers e Services
+
+    class ImportationModule {
+        async import (sourceConfig: SourceConfig): Promise<Content<unknown>> {
+            if (sourceConfig.type === 'rss') {
+                const rssImporter = new RSSImporterTool(); // Cria a estratégia aqui
+                const buffer = await rssImporter.import(sourceConfig);
+                return { data: buffer, sourceConfig };
+            } else if (sourceConfig.type === 'manga') {
+                 const mangaImporter = new MangaImporterTool(); // Cria a estratégia aqui
+                 const manga = await mangaImporter.import(sourceConfig);
+                 return { data: manga, sourceConfig };
+            } else {
+                 throw new Error("Unknown source type"); // Lógica de seleção acoplada
+            }
+        }
+        // ... sem getImporterBySourceConfig
+    }
+    ```
+
+---
+
+## Abstração por Contratos (Interfaces e Types)
+
+### Descrição
+
+O código faz uso extensivo de interfaces e tipos definidos no diretório `Protocols` para definir os "contratos" que as diferentes partes do sistema devem seguir. Isso inclui a definição da forma dos dados esperados (tipos) e dos métodos que as classes devem implementar (interfaces com sufixo `Contract`). Essa prática promove o baixo acoplamento entre os componentes, pois eles dependem de abstrações (`ImporterContract`, `SenderContract`, etc.) em vez de implementações concretas.
+
+### Exemplos
+
+**Seguindo o padrão:**
+
+*   O `ImportationModule` depende do `ImporterContract`, que é uma interface, e não de classes concretas como `RSSImporterTool` ou `MangaImporterTool` (embora a implementação do `getImporterBySourceConfig` crie as instâncias concretas, o método `import` opera sobre o tipo de interface `ImporterContract`).
+    ```typescript
+    // File: examples/kindlefy/src/Modules/ImportationModule.ts
+    import { Content, ImporterContract } from "@/Protocols/ImporterProtocol" // Importa a interface
+    // ...
+
+    class ImportationModule {
+        async import (sourceConfig: SourceConfig): Promise<Content<unknown>> {
+            const importer = this.getImporterBySourceConfig(sourceConfig) as ImporterContract<unknown> // Usando o tipo de interface
+            return await importer.import(sourceConfig)
+        }
+        // ...
+    }
+    ```
+*   O arquivo `Protocols/ImporterProtocol.ts` define o contrato para qualquer importador.
+    ```typescript
+    // File: examples/kindlefy/src/Protocols/ImporterProtocol.ts
+    import { SourceConfig } from "@/Protocols/SetupInputProtocol"
+
+    export type Content<Data extends unknown> = {
+        data: Data
+        sourceConfig: SourceConfig
+    }
+
+    export interface ImporterContract<Data extends unknown> { // Interface define o contrato
+        import: (sourceConfig: SourceConfig) => Promise<Content<Data>>
+    }
+    ```
+*   O arquivo `Protocols/EbookGeneratorProtocol.ts` define tipos para opções de geração de ebooks.
+    ```typescript
+    // File: examples/kindlefy/src/Protocols/EbookGeneratorProtocol.ts
+    export type EpubContent = { // Tipo define a forma dos dados
+        title: string
+        author: string
+        data: string
+    }
+
+    export type GenerateEPUBOptions = { // Tipo define a forma dos dados
+        title: string
+        author: string
+        publisher: string
+        cover: string
+        content: EpubContent[]
+        metadata: {
+            title: string
+            subTitle: string
+        }
+    }
+    // ...
+    ```
+
+**Não seguindo o padrão (Exemplo Hipotético de Violação):**
+
+*   Se o `ImportationModule` importasse e dependesse diretamente das classes concretas `RSSImporterTool` e `MangaImporterTool` em sua assinatura ou declarações, sem usar a interface `ImporterContract`.
+    ```typescript
+    // Exemplo hipotético (VIOLAÇÃO DO PADRÃO)
+    // File: examples/kindlefy/src/Modules/ImportationModule.ts
+    // ... imports de classes concretas
+    import RSSImporterTool from "@/Tools/Importers/RSSImporterTool"
+    import MangaImporterTool from "@/Tools/Importers/MangaImporterTool"
+
+    class ImportationModule {
+         // O tipo do retorno ou parâmetro seria uma união das classes concretas em vez da interface
+        async import (sourceConfig: SourceConfig): Promise<ReturnType<typeof RSSImporterTool['import']> | ReturnType<typeof MangaImporterTool['import']>> { // Alta acoplamento com implementações concretas
+            const importer = this.getImporterBySourceConfig(sourceConfig); // Retornaria a classe concreta
+            return await importer.import(sourceConfig);
+        }
+        // ...
+        private getImporterBySourceConfig (sourceConfig: SourceConfig): RSSImporterTool | MangaImporterTool { // Baixo nível de abstração
+           // ...
+        }
+    }
+    ```
+
+---
+
+## Centralização do Tratamento de Erros
+
+### Descrição
+
+O código demonstra um padrão de tratamento de erros onde um `ErrorHandlerService` é utilizado para lidar com exceções. Embora a propagação de erros (lançar exceções) ocorra em vários pontos, a lógica final de "lidar" com o erro (neste caso, imprimir no console) é centralizada no `ErrorHandlerService`. Isso facilita a modificação da forma como os erros são registrados ou reportados globalmente. Adicionalmente, exceções customizadas são definidas, o que melhora a clareza sobre os tipos de erros que podem ocorrer.
+
+### Exemplos
+
+**Seguindo o padrão:**
+
+*   O `ErrorHandlerService.ts` fornece um método centralizado para lidar com erros.
+    ```typescript
+    // File: examples/kindlefy/src/Services/ErrorHandlerService.ts
+    class ErrorHandlerService {
+        handle (error: Error): void { // Método centralizado para lidar com erros
+            console.error(error) // Lógica de tratamento (simplesmente loga no console neste caso)
+        }
+    }
+
+    export default new ErrorHandlerService()
+    ```
+*   Componentes como `RSSContentEnricherService`, `NotificationService`, `GithubActionsUtil` e `ParseUtil` delegam o tratamento final dos erros para o `ErrorHandlerService`.
+    ```typescript
+    // File: examples/kindlefy/src/Services/RSSContentEnricherService.ts
+    // ...
+    import ErrorHandlerService from "@/Services/ErrorHandlerService"
+
+    class RSSContentEnricherService {
+        // ...
+        private async enrichMediumContent (parsedRSSItem: ParsedRSSItem): Promise<string> {
+            let content = parsedRSSItem.content
+
+            const contentUrl = MediumImporterService.getPostUrlFromSeeMoreContent(parsedRSSItem.content)
+
+            if (contentUrl) {
+                try {
+                    content = await MediumImporterService.getPostHTML(contentUrl)
+                } catch (error) {
+                    ErrorHandlerService.handle(error) // Delega o tratamento final
+                }
+            }
+            return content
+        }
+        // ...
+    }
+    // ...
+    ```
+*   Exceções customizadas como `ProcessCommandException` são definidas para fornecer mais contexto sobre a falha.
+    ```typescript
+    // File: examples/kindlefy/src/Exceptions/ProcessCommandException.ts
+    import { ExecException } from "child_process"
+
+    export class ProcessCommandException extends Error { // Exceção customizada
+        stdout: string
+        stderr: string
+        error: ExecException
+
+        constructor (error: ExecException, stdout: string, stderr: string) {
+            super(error.message)
+            this.name = error.name
+            this.error = error
+        }
+    }
+    ```
+
+**Não seguindo o padrão (Exemplo Hipotético de Violação):**
+
+*   Se múltiplos arquivos tivessem sua própria lógica de `console.error` ou outro tipo de logging sem usar o `ErrorHandlerService`.
+    ```typescript
+    // Exemplo hipotético (VIOLAÇÃO DO PADRÃO)
+    // File: examples/kindlefy/src/SomeService.ts
+    class SomeService {
+        async doSomethingRisky() {
+            try {
+                // ... operação que pode falhar
+            } catch (error) {
+                console.error("Error in SomeService:", error); // Lógica de tratamento duplicada
+                // ou
+                // throw new Error("Failed in SomeService"); // Exceção genérica sem customização
+            }
+        }
+    }
+    ```
+
+---
+
+## Padrão de Orquestração de Processos (em `App`)
+
+### Descrição
+
+A classe `App` no arquivo `App.ts` age como um orquestrador central do fluxo principal da aplicação. Ela define a sequência de passos a serem executados (buscar configuração, preparar ambiente, sincronizar fontes, armazenar resultados, limpar ambiente), delegando a execução de cada passo para os `Modules` e `Services` apropriados. Isso separa a lógica de coordenação da lógica de negócio e de infraestrutura, tornando o fluxo principal claro e fácil de seguir.
+
+### Exemplos
+
+**Seguindo o padrão:**
+
+*   O método `run` da classe `App` define a sequência completa de operações.
+    ```typescript
+    // File: examples/kindlefy/src/App.ts
+    // ... imports de Modules e Services
+    class App {
+        private readonly setupInputModule = new SetupInputModule()
+        private readonly importationModule = new ImportationModule()
+        private readonly conversionModule = new ConversionModule()
+        // ...
+
+        async run (): Promise<void> {
+            // Sequência de passos orquestrados
+            const config = await NotificationService.task("Fetch setup input", async (task) => { /* ... */ }) // Passo 1
+            await TempFolderService.generate() // Passo 2
+            await BrowserService.start() // Passo 3
+
+            const syncModule = new SyncModule(config.senders, config.kindle)
+            const storeModule = new StoreModule(config.storages, config.sync)
+
+            for (const source of config.sources) { // Itera sobre as fontes
+                await NotificationService.task(`Sync ${source.type} source (${source.name || source.url})`, async (task) => {
+                    // Sub-passos dentro da iteração, delegados a Modules
+                    const importedSource = await this.importationModule.import(source)
+                    const documents = await this.conversionModule.convert(importedSource)
+
+                    for (const documentIndex in documents) {
+                       // ... delega para StoreModule e SyncModule
+                       const isDocumentAlreadySync = await storeModule.isDocumentAlreadySync(document)
+                       if (!isDocumentAlreadySync) {
+                          await syncModule.sync(document)
+                          await storeModule.markDocumentSync(document)
+                       }
+                    }
+                })
+            }
+
+            await storeModule.commitDocumentSyncChanges() // Passo final de armazenamento
+            await TempFolderService.clean() // Passo de limpeza
+            await BrowserService.close() // Passo de limpeza
+        }
+    }
+    export default App
+    ```
+
+**Não seguindo o padrão (Exemplo Hipotético de Violação):**
+
+*   Se a lógica de orquestração estivesse espalhada por diferentes módulos, ou se um módulo de negócio contivesse lógica para chamar outros módulos de forma desordenada.
+    ```typescript
+    // Exemplo hipotético (VIOLAÇÃO DO PADRÃO)
+    // File: examples/kindlefy/src/Modules/ImportationModule.ts
+    // ...
+    class ImportationModule {
+        async import (sourceConfig: SourceConfig): Promise<Content<unknown>> {
+             // ... importa a fonte
+
+             // Lógica de orquestração inesperada: chamando módulos de Conversão e Sincronização diretamente
+             const conversionModule = new ConversionModule();
+             const documents = await conversionModule.convert(/* ... */);
+
+             const syncModule = new SyncModule(/* ... */);
+             await syncModule.sync(documents[0]); // Chama sync aqui
+             // ...
+        }
+    }
+    ```
+
+---
+
+## Padrão de Fila FIFO para Gerenciamento de Concorrência (em `JSONDatabaseService`)
+
+### Descrição
+
+A classe `JSONDatabaseService` implementa um padrão específico para gerenciar o acesso concorrente a um recurso compartilhado (o arquivo JSON do banco de dados e seu cache em memória). Ela utiliza uma fila de processamento First-In, First-Out (FIFO) estática (`actionFIFOQueue` do tipo `QueueService` com `concurrency: 1`) para garantir que todas as operações de leitura e escrita (`set`, `get`) no banco de dados sejam executadas sequencialmente, uma de cada vez. Isso evita problemas de concorrência como race conditions ao manipular o estado compartilhado em memória e no arquivo.
+
+### Exemplos
+
+**Seguindo o padrão:**
+
+*   Os métodos `set` e `get` do `JSONDatabaseService` envolvem suas lógicas principais em chamadas `enqueue` para a fila estática.
+    ```typescript
+    // File: examples/kindlefy/src/Services/JSONDatabaseService.ts
+    // ... imports
+
+    class JSONDatabaseService<Model extends unknown> {
+        private static databases: Record<string, Database> = {}
+        private static readonly actionFIFOQueue = new QueueService({ concurrency: 1 }) // Fila FIFO estática
+        private readonly path: string
+
+        constructor (path: string) {
+            this.path = path
+        }
+
+        async set (key: string, value: Model): Promise<void> {
+            return await JSONDatabaseService.actionFIFOQueue.enqueue(async () => { // Enqueue garante execução sequencial
+                await this.syncInMemoryDatabaseByFileDatabaseIfNotAlreadySync()
+                JSONDatabaseService.databases[this.path][key] = value
+                await this.refreshFileDatabaseFromInMemoryDatabase()
+            })
+        }
+
+        async get (key: string): Promise<Model | null> {
+            return await JSONDatabaseService.actionFIFOQueue.enqueue(async () => { // Enqueue garante execução sequencial
+                await this.syncInMemoryDatabaseByFileDatabaseIfNotAlreadySync()
+                const data = JSONDatabaseService.databases[this.path][key]
+                if (data) {
+                    return data as Model
+                } else {
+                    return null
+                }
+            })
+        }
+        // ... outros métodos
+    }
+    export default JSONDatabaseService
+    ```
+
+**Não seguindo o padrão (Exemplo Hipotético de Violação):**
+
+*   Se os métodos `set` e `get` acessassem diretamente o estado estático (`JSONDatabaseService.databases`) ou o arquivo sem usar a fila FIFO, poderiam ocorrer race conditions se múltiplas chamadas `set` ou `get` acontecessem simultaneamente.
+    ```typescript
+    // Exemplo hipotético (VIOLAÇÃO DO PADRÃO)
+    // File: examples/kindlefy/src/Services/JSONDatabaseService.ts
+    // ... imports
+
+    class JSONDatabaseService<Model extends unknown> {
+        private static databases: Record<string, Database> = {}
+        // private static readonly actionFIFOQueue = new QueueService({ concurrency: 1 }) // Fila removida
+        // ...
+
+        async set (key: string, value: Model): Promise<void> {
+             // Sem enqueue - acesso direto ao estado compartilhado
+            await this.syncInMemoryDatabaseByFileDatabaseIfNotAlreadySync() // Acessa estado estático
+            JSONDatabaseService.databases[this.path][key] = value // Modifica estado estático
+            await this.refreshFileDatabaseFromInMemoryDatabase() // Modifica arquivo
+        }
+
+        async get (key: string): Promise<Model | null> {
+             // Sem enqueue - acesso direto ao estado compartilhado
+            await this.syncInMemoryDatabaseByFileDatabaseIfNotAlreadySync() // Acessa estado estático
+            const data = JSONDatabaseService.databases[this.path][key] // Lê estado estático
+            if (data) {
+                return data as Model
+            } else {
+                return null
+            }
+        }
+        // ...
+    }
+    ```
