@@ -1,0 +1,8 @@
+{
+  "extends": "next",
+  "rules": {
+    "no-mixed-spaces-and-tabs": "warn",
+    "indent": ["error", "tab"],
+    "quotes": ["error", "double"]
+  }
+}

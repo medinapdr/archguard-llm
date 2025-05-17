@@ -19,10 +19,18 @@ jobs:
             folder_path: "examples/kindlefy"
             llm_provider: "gemini"
             target_files: "*.ts"
-          - project_name: "js"
-            folder_path: "examples/js"
+          - project_name: "simple-express-crud"
+            folder_path: "examples/simple-express-crud"
             llm_provider: "openai"
             target_files: "*.js"
+          - project_name: "investy"
+            folder_path: "examples/investy"
+            llm_provider: "gemini"
+            target_files: "*.ts *.tsx"
+          - project_name: "alexa-skills"
+            folder_path: "examples/alexa-skills"
+            llm_provider: "gemini"
+            target_files: "*.ts"
 
     steps:
       - name: Checkout Repository
@@ -45,8 +53,17 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
-          all_files=$(find ${{ matrix.target.folder_path }} -type f -name '${{ matrix.target.target_files }}')
-          python3 ai-agents/code-architecture-checker/run.py --provider ${{ matrix.target.llm_provider }} $all_files > ai-agents/code-architecture-checker/outputs/${{ matrix.target.project_name }}-architecture-description.md
+          patterns=(${{ matrix.target.target_files }})
+          find_cmd="find ${{ matrix.target.folder_path }} -type f"
+
+          for pattern in "${patterns[@]}"; do
+            find_cmd +=" -o -name \"$pattern\""
+          done
+
+          find_cmd=$(echo "$find_cmd" | sed 's/-o -name/-name/')
+          all_files=$(eval "$find_cmd")
+
+          python3 ai-agents/architecture-checker/run.py --provider ${{ matrix.target.llm_provider }} $all_files
 
       - name: Commit and Push Architecture Description
         run: |
