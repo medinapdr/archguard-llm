@@ -50,7 +50,7 @@ def generate_response_from_llm_model(system_prompt: str, user_prompt: str, provi
     else:
         raise ValueError(f"Unsupported provider: {provider}")
 
-def extract_architecture_patterns_from_files(code_file_paths: List[str], provider: str) -> str:
+def extract_architecture_patterns_from_code_files(code_file_paths: List[str], provider: str) -> str:
     system_prompt = load_file_content("ai-agents/architecture-checker/system-prompt.md")
     user_prompt = build_user_prompt(code_file_paths)
 
@@ -70,7 +70,7 @@ def main():
 
     for batch_start_index in range(0, len(code_file_paths), BATCH_CODE_FILE_ANALYSIS_SIZE):
         batch_file_path = code_file_paths[batch_start_index:batch_start_index + BATCH_CODE_FILE_ANALYSIS_SIZE]
-        extracted_architecture_pattern = extract_architecture_patterns_from_files(batch_file_path, provider)
+        extracted_architecture_pattern = extract_architecture_patterns_from_code_files(batch_file_path, provider)
         all_extracted_architecture_patterns.append(extracted_architecture_pattern)
 
     print("\n\n---\n\n".join(all_extracted_architecture_patterns))

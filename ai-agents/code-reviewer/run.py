@@ -54,7 +54,7 @@ def main():
 
     for batch_start_index in range(0, len(diff_file_paths), BATCH_DIFF_FILE_ANALYSIS_SIZE):
         batch_diff_file_path = diff_file_paths[batch_start_index:batch_start_index + BATCH_DIFF_FILE_ANALYSIS_SIZE]
-        code_review_comment = review_code_changes(batch_diff_file_path)
+        code_review_comment = review_code_changes_from_diff_files(batch_diff_file_path)
         all_code_review_comments.append(code_review_comment)
 
     print("\n\n---\n\n".join(all_code_review_comments))
