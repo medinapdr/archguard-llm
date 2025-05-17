@@ -5,7 +5,7 @@ class UserRepository {
 		return UserRepository.#users
 	}
 
-	retrieveOne (id) {
+	getOne (id) {
 		return UserRepository.#users[id]
 	}
 
