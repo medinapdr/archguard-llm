@@ -5,10 +5,6 @@ class UserRepository {
 		return UserRepository.#users
 	}
 
-	retrieveOne (id) {
-		return UserRepository.#users[id]
-	}
-
 	create (user) {
 		UserRepository.#users.push({
 			...user,
