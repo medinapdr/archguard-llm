@@ -17,8 +17,6 @@ def review_code_changes(diff_content: str) -> str:
     architecture_description = load_file("ai-agents/architecture-checker/js-example-output.md")
     system_prompt = system_prompt.replace("{{ARCHITECTURE_DESCRIPTION}}", architecture_description)
 
-    print(system_prompt)
-
     response = openai_client.chat.completions.create(
         model="gpt-4o",
         messages=[
