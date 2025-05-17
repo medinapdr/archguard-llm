@@ -14,6 +14,9 @@ def review_code_changes(diff_content: str) -> str:
     openai_client = get_openai_client()
     system_prompt = load_file("ai-agents/code-reviewer/system-prompt.md")
 
+    architecture_description = load_file("ai-agents/architecture-checker/js-example-output.md")
+    system_prompt = system_prompt.replace("{{ARCHITECTURE_DESCRIPTION}}", architecture_description)
+
     response = openai_client.chat.completions.create(
         model="gpt-4o",
         messages=[
@@ -25,10 +28,6 @@ def review_code_changes(diff_content: str) -> str:
     return response.choices[0].message.content
 
 def main():
-    if len(sys.argv) < 2:
-        print("Uso: python run.py <caminho_para_diff>")
-        sys.exit(1)
-
     diff_path = sys.argv[1]
     diff_content = load_file(diff_path)
 
@@ -36,9 +35,7 @@ def main():
         print("Nenhuma diferença detectada no diff.")
         return
 
-    print("Enviando diff para a IA...\n")
     result = review_code_changes(diff_content)
-    print("Resposta da IA:\n")
     print(result)
 
 if __name__ == "__main__":
