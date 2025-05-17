@@ -1,6 +1,7 @@
 import os
 import sys
 import argparse
+from typing import List
 from openai import OpenAI
 
 BATCH_DIFF_FILE_ANALYSIS_SIZE = 1
