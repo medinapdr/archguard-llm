@@ -41,10 +41,9 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           COMMENT=$(python3 ai-agents/code-reviewer/run.py pr-review.diff)
-          COMMENT_ESCAPED="${COMMENT//'%'/'%25'}"
-          COMMENT_ESCAPED="${COMMENT_ESCAPED//$'\n'/'%0A'}"
-          COMMENT_ESCAPED="${COMMENT_ESCAPED//$'\r'/'%0D'}"
-          echo "body=$COMMENT_ESCAPED" >> $GITHUB_OUTPUT
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMENT" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Post Review Comment to Pull Request
         uses: mshick/add-pr-comment@v2
