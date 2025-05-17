@@ -29,18 +29,26 @@ jobs:
       - name: Install LLM Agent Dependencies
         run: pip install openai
 
-      - name: Generate Diff from Pull Request
+      - name: Generate Individual Diffs from Pull Request
         run: |
           git fetch origin main
-          git diff origin/main...HEAD -- examples/ > pr-review.diff
-          cat pr-review.diff
+
+          mkdir -p diffs
+
+          for file in $(git diff --name-only origin/main...HEAD -- examples/); do
+            safe_name=$(echo "$file" | tr '/' '_')
+            git diff origin/main...HEAD -- "$file" > diffs/"$safe_name.diff"
+          done
 
       - name: Generate Code Review Comment with LLM
         id: generate_code_review_comment
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          COMMENT=$(python3 ai-agents/code-reviewer/run.py pr-review.diff)
+          diff_files=$(find diffs -type f -name '*.diff')
+          python3 ai-agents/code-reviewer/run.py $diff_files > full-code-review-comment.md
+
+          COMMENT=$(cat full-code-review-comment.md)
           echo "body<<EOF" >> $GITHUB_OUTPUT
           echo "$COMMENT" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT

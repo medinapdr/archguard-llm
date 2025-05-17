@@ -6,16 +6,16 @@ from openai import OpenAI
 import google.generativeai as genai
 from google.generativeai import configure, GenerativeModel
 
-BATCH_FILE_ANALYSIS_SIZE = 100
+BATCH_CODE_FILE_ANALYSIS_SIZE = 100
 
 def load_file_content(path: str) -> str:
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
 
-def build_user_prompt(files: List[str]) -> str:
+def build_user_prompt(file_paths: List[str]) -> str:
     parts = []
 
-    for path in files:
+    for path in file_paths:
         content = load_file_content(path)
         parts.append(f"Arquivo: {path}\n{content}")
 
@@ -50,26 +50,26 @@ def generate_response_from_llm_model(system_prompt: str, user_prompt: str, provi
     else:
         raise ValueError(f"Unsupported provider: {provider}")
 
-def extract_architecture_patterns_from_files(file_paths: List[str], provider: str) -> str:
+def extract_architecture_patterns_from_files(code_file_paths: List[str], provider: str) -> str:
     system_prompt = load_file_content("ai-agents/architecture-checker/system-prompt.md")
-    user_prompt = build_user_prompt(file_paths)
+    user_prompt = build_user_prompt(code_file_paths)
 
     return generate_response_from_llm_model(system_prompt, user_prompt, provider)
 
 def main():
     parser = argparse.ArgumentParser(description="Run architecture checker")
     parser.add_argument("--provider", required=True, choices=["openai", "gemini"], help="AI provider to use")
-    parser.add_argument("file_paths", nargs="+", help="Paths to files to analyze")
+    parser.add_argument("code_file_paths", nargs="+", help="Paths to code files to analyze")
 
     args = parser.parse_args()
 
     provider = args.provider
-    file_paths = args.file_paths
+    code_file_paths = args.code_file_paths
 
     all_extracted_architecture_patterns = []
 
-    for batch_start_index in range(0, len(file_paths), BATCH_FILE_ANALYSIS_SIZE):
-        batch_file_path = file_paths[batch_start_index:batch_start_index + BATCH_FILE_ANALYSIS_SIZE]
+    for batch_start_index in range(0, len(code_file_paths), BATCH_CODE_FILE_ANALYSIS_SIZE):
+        batch_file_path = code_file_paths[batch_start_index:batch_start_index + BATCH_CODE_FILE_ANALYSIS_SIZE]
         extracted_architecture_pattern = extract_architecture_patterns_from_files(batch_file_path, provider)
         all_extracted_architecture_patterns.append(extracted_architecture_pattern)
 
