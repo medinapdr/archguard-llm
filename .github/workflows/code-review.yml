@@ -32,7 +32,7 @@ jobs:
       - name: Generate Diff from Pull Request
         run: |
           git fetch origin main
-          git diff origin/main...HEAD > pr-review.diff
+          git diff origin/main...HEAD -- examples/ > pr-review.diff
           cat pr-review.diff
 
       - name: Generate Code Review Comment with LLM
