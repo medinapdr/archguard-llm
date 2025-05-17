@@ -63,7 +63,7 @@ jobs:
           find_cmd=$(echo "$find_cmd" | sed 's/-o -name/-name/')
           all_files=$(eval "$find_cmd")
 
-          python3 ai-agents/code-architecture-checker/run.py --provider ${{ matrix.target.llm_provider }} $all_files
+          python3 ai-agents/code-architecture-checker/run.py --provider ${{ matrix.target.llm_provider }} $all_files > ai-agents/code-architecture-checker/outputs/${{ matrix.target.project_name }}-architecture-description.md
 
       - name: Commit and Push Architecture Description
         run: |
