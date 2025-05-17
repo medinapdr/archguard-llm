@@ -1,307 +1,263 @@
-Com base na análise do código fornecido, identifiquei os seguintes padrões arquiteturais:
+Aqui estão os padrões arquiteturais identificados na base de código do Kindlefy:
 
-## Estrutura Modular e Camadas (Implícito)
+## Organização por Camadas (Layered Architecture)
 
 ### Descrição
 
-O codebase é organizado em diretórios que sugerem uma estrutura modular e, implicitamente, um design em camadas. Embora não seja um modelo de camadas estrito com regras rígidas de dependência, há uma separação clara de responsabilidades em módulos, serviços, ferramentas e utilitários.
--   `Protocols`, `Models`, `Exceptions`: Define estruturas de dados e erros.
--   `Utils`: Funções auxiliares genéricas.
--   `Validations`: Lógica de validação.
--   `Services`: Funções de infraestrutura e interação com recursos externos (HTTP, sistema de arquivos temporário, notificações, execução de processos, etc.). Muitos são projetados como Singletons.
--   `Tools`: Implementações específicas de funcionalidades centrais (importadores, conversores, remetentes, storages) que utilizam Services e Utils. Geralmente implementam interfaces (`*Contract`).
--   `Modules`: Orquestra Services e Tools para executar a lógica de negócio principal e o fluxo da aplicação. `App` atua como o orquestrador de alto nível.
+A base de código é organizada em camadas distintas, onde cada camada tem uma responsabilidade específica. A comunicação geralmente flui de cima para baixo (camadas de nível superior chamam camadas de nível inferior), embora algumas interações laterais ou de baixo para cima (como *callbacks* ou eventos) possam ocorrer. Essa estrutura ajuda a separar preocupações, tornando o código mais fácil de entender, manter e testar. As camadas identificadas incluem:
 
-Essa organização ajuda a separar preocupações e gerenciar a complexidade.
+*   **Entry Point/Orchestration:** A classe `App` atua como o ponto de entrada principal, orquestrando o fluxo geral da aplicação.
+*   **Modules:** Classes que coordenam as operações de nível superior, muitas vezes atuando como *Facades* para conjuntos de *Tools* e *Services*.
+*   **Tools:** Implementações concretas de lógicas de negócio ou funcionalidades específicas (importação, conversão, envio, armazenamento), geralmente seguindo um contrato (*Contract*).
+*   **Services:** Classes que encapsulam interações com serviços externos, preocupações transversais (como notificações ou tratamento de erros) ou funcionalidades de infraestrutura.
+*   **Validations:** Classes dedicadas à lógica de validação de dados ou estado do ambiente.
+*   **Utils:** Classes com funções utilitárias genéricas e reusáveis, geralmente stateless.
+*   **Models:** Classes que representam as estruturas de dados principais da aplicação.
+*   **Protocols:** Arquivos que definem interfaces, tipos e contratos usados em toda a base de código.
+*   **Exceptions:** Classes para definir erros customizados e específicos da aplicação.
 
 ### Exemplos
 
 **Seguindo o Padrão:**
-O arquivo `src/Modules/SyncModule.ts` ilustra a interação entre camadas/módulos. Ele importa e utiliza `DocumentModel` (Model), tipos de `Protocols` (`KindleConfig`, `SenderConfig`, `SenderContract`, `SMTPConfig`) e instâncias de `Tools` específicas (`SMTPSenderTool`, `GmailSenderTool`, `OutlookSenderTool`). Isso mostra o módulo de negócio orquestrando modelos, protocolos e ferramentas.
+
+O arquivo `src/App.ts` demonstra a camada de Orquestração chamando métodos em classes da camada de `Modules` e `Services`:
 
 ```typescript
-// src/Modules/SyncModule.ts
-import { DocumentModel } from "@/Models/DocumentModel" // Importa Model
+// src/App.ts
+class App {
+	// ...
+	async run (): Promise<void> {
+		// Chama um método da camada de Services
+		const config = await NotificationService.task("Fetch setup input", async (task) => {
+			// Chama um método da camada de Modules
+			const result = await this.setupInputModule.fetch()
+			// ...
+			return result
+		})
 
-import { KindleConfig, SenderConfig } from "@/Protocols/SetupInputProtocol" // Importa Protocols
-import { SenderContract } from "@/Protocols/SenderProtocol" // Importa Protocols
-import { SMTPConfig } from "@/Protocols/SMTPSenderProtocol" // Importa Protocols
+		// Chama métodos da camada de Services
+		await TempFolderService.generate()
+		await BrowserService.start()
 
-// Importa Tools (Implementações concretas de SenderContract)
-import SMTPSenderTool from "@/Tools/Senders/SMTPSenderTool"
-import GmailSenderTool from "@/Tools/Senders/GmailSenderTool"
-import OutlookSenderTool from "@/Tools/Senders/OutlookSenderTool"
-
-class SyncModule {
-	// ... constructor ...
-
-	async sync (document: DocumentModel): Promise<void> {
-		// Utiliza a Tool selecionada
-		await this.sender.sendToKindle(document, this.kindleConfig)
+		// Instancia classes da camada de Modules
+		const syncModule = new SyncModule(config.senders, config.kindle)
+		const storeModule = new StoreModule(config.storages, config.sync)
+		// ...
 	}
-
-	private get sender (): SenderContract {
-		const [config] = this.senderConfig
-
-		// Seleção da Tool (Padrão Strategy)
-		const senderMap: Record<SenderConfig["type"], SenderContract> = {
-			smtp: new SMTPSenderTool(config as SMTPConfig),
-			gmail: new GmailSenderTool(config.email, config.password),
-			outlook: new OutlookSenderTool(config.email, config.password)
-		}
-
-		return senderMap[config.type]
-	}
-}
-
-export default SyncModule
-```
-
-**Não Seguindo o Padrão (Exemplo Hipotético de Violação):**
-Se um `Service` de baixo nível, como `HttpService`, importasse e diretamente manipulasse a lógica de negócio de um `Module`, quebraria a separação. No código fornecido, não há exemplos claros dessa violação, o que indica uma aplicação consistente do padrão de organização. Um exemplo seria algo como:
-
-```typescript
-// Exemplo Hipotético de VIOLAÇÃO (NÃO existe no código fornecido)
-import ConversionModule from "@/Modules/ConversionModule"; // Service importando Module
-
-class HttpService {
-    // ...
-    async someMethod() {
-        const conversionModule = new ConversionModule(); // Service instanciando Module
-        // ... lógica de negócio que deveria estar no Module ...
-    }
 }
 ```
 
-## Padrão Strategy (Seleção Baseada em Configuração)
+Neste exemplo, `App` (Orquestração) interage com `NotificationService`, `TempFolderService`, `BrowserService` (Services) e instancia `SyncModule`, `StoreModule` (Modules), que por sua vez coordenam outras camadas.
+
+**Não Seguindo o Padrão (Exemplo Hipotético):**
+
+Uma `Util` class que contém lógica complexa de negócio que deveria estar em um `Tool` ou `Module`:
+
+```typescript
+// Exemplo HIPOTÉTICO e INCONSISTENTE
+// src/Utils/ComplexBusinessLogicUtil.ts
+import JSONDatabaseService from "@/Services/JSONDatabaseService"
+
+class ComplexBusinessLogicUtil {
+	// Esta lógica de salvamento/recuperação complexa deveria estar em um Tool/Module
+	async processAndStoreData (data: any): Promise<void> {
+		// Lógica complexa...
+		const processedData = /* ... processamento ... */
+		await JSONDatabaseService.set("processed", processedData)
+	}
+}
+// A base de código fornecida segue bem a separação, tornando difícil encontrar
+// um exemplo real de inconsistência nesta camada específica.
+```
+
+## Padrão Estratégia (Strategy Pattern) / Fábrica (Factory Pattern)
 
 ### Descrição
 
-Módulos centrais da aplicação (`ImportationModule`, `ConversionModule`, `SyncModule`, `StoreModule`) utilizam um mapa (ou lógica condicional) para selecionar a implementação concreta (`ImporterContract`, `ConverterContract`, `SenderContract`, `StorageContract`) a ser utilizada com base no tipo definido na configuração de entrada (`SourceConfig`, `SenderConfig`, `StorageConfig`). Isso desacopla a lógica de negócio da implementação específica e permite adicionar novos tipos facilmente.
+O sistema utiliza o padrão Estratégia, onde diferentes algoritmos ou comportamentos (as "Estratégias") são encapsulados em classes separadas que implementam uma interface comum (*Contract*). Os Modules (`ConversionModule`, `ImportationModule`, `SyncModule`, `StoreModule`) atuam como Fábricas (*Factories*), selecionando a implementação da Estratégia apropriada (*Tool*) em tempo de execução com base na configuração fornecida (como `SourceConfig["type"]`, `SenderConfig["type"]`, etc.). Isso permite que o sistema seja flexível e extensível para suportar novos tipos de fontes, *senders*, *storages* ou conversores sem modificar o código dos Modules.
 
 ### Exemplos
 
 **Seguindo o Padrão:**
-O arquivo `src/Modules/ConversionModule.ts` mostra claramente este padrão ao selecionar o `ConverterContract` apropriado (`RSSConverterTool` ou `MangaConverterTool`) com base em `sourceConfig.type`.
+
+O `ConversionModule` utiliza um mapa para selecionar o `ConverterContract` correto com base no `sourceConfig.type`:
 
 ```typescript
 // src/Modules/ConversionModule.ts
-// ... imports ...
-import { SourceConfig } from "@/Protocols/SetupInputProtocol" // Importa config type
-import { ConverterContract } from "@/Protocols/ConverterProtocol" // Importa interface
-
-// Importa implementações concretas
-import RSSConverterTool from "@/Tools/Converters/RSSConverterTool"
-import MangaConverterTool from "@/Tools/Converters/MangaConverterTool"
-
 class ConversionModule {
 	async convert (content: Content<unknown>): Promise<DocumentModel[]> {
-		// Seleciona a estratégia (Converter) baseada no tipo da source
+		// Seleciona a Estratégia (ConverterContract) com base no tipo da configuração
 		const converter = this.getConverterBySourceConfig(content.sourceConfig)
-
-		return await converter.convert(content) // Executa a estratégia
+		return await converter.convert(content)
 	}
 
 	private getConverterBySourceConfig (sourceConfig: SourceConfig): ConverterContract<unknown> {
-		// Mapa que associa o tipo de source à implementação do Converter
+		// O mapa atua como a Fábrica para as Estratégias (Tools)
 		const converterMap: Record<SourceConfig["type"], ConverterContract<unknown>> = {
 			rss: RSSConverterTool,
 			manga: MangaConverterTool
 		}
-
-		return converterMap[sourceConfig.type] // Retorna a implementação selecionada
+		return converterMap[sourceConfig.type]
 	}
 }
-
-export default ConversionModule
 ```
 
-**Não Seguindo o Padrão (Exemplo Hipotético de Violação):**
-Uma violação seria verificar explicitamente o tipo da configuração e instanciar a classe diretamente sem usar um mapa ou outra forma de polimorfismo, acoplando a lógica de negócio às implementações concretas.
+**Não Seguindo o Padrão (Exemplo Hipotético):**
+
+O `ConversionModule` usando uma cadeia `if/else` longa para selecionar o conversor, em vez de um mapa ou uma função fábrica dedicada:
 
 ```typescript
-// Exemplo Hipotético de VIOLAÇÃO (NÃO existe no código fornecido)
+// Exemplo HIPOTÉTICO e INCONSISTENTE
+// src/Modules/ConversionModule.ts (versão inconsistente)
 class ConversionModule {
-    async convert (content: Content<unknown>): Promise<DocumentModel[]> {
-        let converter: ConverterContract<unknown>;
+	async convert (content: Content<unknown>): Promise<DocumentModel[]> {
+		let converter: ConverterContract<unknown>
 
-        // Lógica condicional explícita e acoplada
-        if (content.sourceConfig.type === "rss") {
-            converter = new RSSConverterTool(); // Instanciação direta e acoplada
-        } else if (content.sourceConfig.type === "manga") {
-            converter = new MangaConverterTool(); // Instanciação direta e acoplada
-        } else {
-            throw new Error("Unknown source type");
-        }
-
-        return await converter.convert(content);
-    }
-    // ...
-}
-```
-
-## Padrão Singleton (Serviços e Utilitários)
-
-### Descrição
-
-Muitas classes utilitárias e de serviço que não precisam de múltiplos estados independentes (ou gerenciam estado global internamente) são implementadas como Singletons, sendo instanciadas uma única vez e exportadas diretamente. Isso garante que haja apenas uma instância compartilhada desses componentes em toda a aplicação.
-
-### Exemplos
-
-**Seguindo o Padrão:**
-O arquivo `src/Services/BrowserService.ts` gerencia uma única instância global do navegador Puppeteer e é exportado como uma instância Singleton.
-
-```typescript
-// src/Services/BrowserService.ts
-import puppeteer, { Browser, Page } from "puppeteer"
-
-class BrowserService {
-	// Propriedade estática para armazenar a única instância do navegador
-	private static browser: Browser
-
-	async start (): Promise<void> {
-		// Cria a instância apenas se ela não existir
-		if (!BrowserService.browser) {
-			BrowserService.browser = await puppeteer.launch({
-				args: ["--no-sandbox", "--disable-setuid-sandbox"]
-			})
-		}
-	}
-
-	async getPage (): Promise<Page | null> {
-		if (BrowserService.browser) {
-			return await BrowserService.browser.newPage()
+		// Seleção manual e verbosa da Estratégia
+		if (content.sourceConfig.type === "rss") {
+			converter = new RSSConverterTool() // Assumindo que as Tools são instanciáveis
+		} else if (content.sourceConfig.type === "manga") {
+			converter = new MangaConverterTool() // Assumindo que as Tools são instanciáveis
 		} else {
-			return null
+			throw new Error("Unknown source type")
 		}
-	}
 
-	async close (): Promise<void> {
-		if (BrowserService.browser) {
-			await BrowserService.browser.close()
-		}
+		return await converter.convert(content)
 	}
+	// O método getConverterBySourceConfig não existiria ou seria diferente
 }
-
-// Exporta a instância única da classe
-export default new BrowserService()
+// A base de código fornecida usa consistentemente mapas para seleção de Tools,
+// demonstrando adesão ao padrão Fábrica para selecionar Estratégias.
 ```
 
-Outros exemplos incluem `ErrorHandlerService`, `TempFolderService`, `CrawlerService`, `ProcessCommandService`, etc., que são exportados diretamente como `export default new ClassName()`.
-
-**Não Seguindo o Padrão:**
-Classes como `App`, `SyncModule`, `StoreModule`, `ConversionModule`, `ImportationModule` e a maioria das classes em `Tools` (exceto aquelas exportadas como Singleton) não são Singletons e são instanciadas conforme necessário. Por exemplo, a classe `App` é exportada para ser instanciada uma vez no ponto de entrada (`index.ts`), mas a classe em si não implementa o padrão Singleton para garantir que *apenas* uma instância possa existir globalmente.
-
-```typescript
-// src/App.ts
-// ... imports ...
-
-class App {
-	// ... properties and methods ...
-	async run (): Promise<void> {
-		// ...
-	}
-}
-
-// Exporta a CLASSE, não uma instância única controlada pela própria classe
-export default App
-```
-A classe `JSONDatabaseService` também é exportada como uma classe (`export default JSONDatabaseService`), mas utiliza propriedades e métodos estáticos (`JSONDatabaseService.databases`, `JSONDatabaseService.actionFIFOQueue`) para gerenciar o estado e o acesso a bancos de dados específicos de forma global, mostrando uma variação do gerenciamento de instância global.
-
-## Convenção de Nomenclatura
+## Padrão Singleton (Singleton Pattern)
 
 ### Descrição
 
-Há uma consistência razoável no uso de prefixos e verbos para indicar a finalidade de funções e métodos, especialmente em Services e Utils.
-
--   `get*`, `fetch*`, `retrieve*`, `dump*`: Usados para recuperação de dados ou recursos.
--   `is*`, `no*`: Usados para verificações booleanas.
--   Verbos de ação (`import`, `convert`, `sync`, `save`, `generate`, `clean`, `handle`, `build`, `format`, `parse`, `sanitize`, `turn`, `run`): Usados para métodos que executam uma ação ou transformação.
-
-### Exemplos
-
-**Seguindo a Convenção:**
--   `get*`: `JSONDatabaseService.get`, `BrowserService.getPage`, `AppUtil.appName`.
--   `is*`: `EnvironmentValidation.isGithubActionEnvironment`, `ConfigValidation.isNoDuplicatedSyncEnabledWithoutStorageConfig`.
--   Verbo de Ação: `ImportationModule.import`, `ConversionModule.convert`, `SyncModule.sync`, `StoreModule.saveDocuments`, `TempFolderService.generate`, `TempFolderService.clean`, `ErrorHandlerService.handle`, `App.run`.
-
-```typescript
-// src/Services/JSONDatabaseService.ts
-class JSONDatabaseService<Model extends unknown> {
-	// ... constructor ...
-	async get (key: string): Promise<Model | null> { // Recuperação de dados
-		// ...
-	}
-	// ...
-}
-
-// src/Validations/ConfigValidation.ts
-class ConfigValidation {
-	// ...
-	isNoDuplicatedSyncEnabledWithoutStorageConfig (config: Config): boolean { // Verificação booleana (com prefixo 'is')
-		return config.sync?.noDuplicatedSync && !config.storages?.length
-	}
-	// ...
-}
-
-// src/Modules/ImportationModule.ts
-class ImportationModule {
-	async import (sourceConfig: SourceConfig): Promise<Content<unknown>> { // Ação/Processo (verbo 'import')
-		// ...
-	}
-	// ...
-}
-```
-
-**Não Seguindo a Convenção:**
--   `get*` vs `fetch*`: `SetupInputModule.fetch` é usado para recuperação de dados de configuração, enquanto outros serviços usam `get`.
-
-```typescript
-// src/Modules/SetupInputModule.ts
-class SetupInputModule {
-	async fetch (): Promise<Config> { // Recuperação de dados usando 'fetch'
-		// ...
-	}
-	private fetchGithubActionsConfig (): Config { // Recuperação de dados usando 'fetch'
-		// ...
-	}
-	private fetchEnvConfig (): Config { // Recuperação de dados usando 'fetch'
-		// ...
-	}
-}
-```
--   `is*` vs `no*`: `ConfigValidation.noValidSetupInputFound` usa `no` em vez de `is`.
-
-```typescript
-// src/Validations/ConfigValidation.ts
-class ConfigValidation {
-	noValidSetupInputFound (config: Config): boolean { // Verificação booleana (começa com 'no')
-		// ...
-	}
-	// ...
-}
-```
-
-## Estratégia de Tratamento de Erros Centralizada
-
-### Descrição
-
-A aplicação utiliza um serviço centralizado, `ErrorHandlerService`, para lidar com a log de erros. Exceções customizadas são definidas para erros específicos. Em muitos pontos de execução (notificações, manipulação de arquivos, execução de comandos), blocos `try...catch` capturam erros e os passam para o `ErrorHandlerService.handle()`.
+Muitas classes que representam serviços de infraestrutura, preocupações transversais ou coleções de funções utilitárias são implementadas como Singletons. Isso significa que apenas uma única instância da classe é criada durante a execução da aplicação, e essa instância é reutilizada. Isso é comum para recursos como tratamento de erros, serviços de sistema operacional (arquivos temporários, processos), acesso a banco de dados (neste caso, baseado em arquivo) ou utilitários stateless, onde a criação de múltiplas instâncias seria desnecessária ou prejudicial (ex: gerenciar uma única instância do browser).
 
 ### Exemplos
 
 **Seguindo o Padrão:**
-O arquivo `src/Services/NotificationService.ts` demonstra o uso do `ErrorHandlerService` dentro de blocos `try...catch` para logar erros durante a execução de tarefas. Exceções customizadas como `NoValidSetupInputFoundException` e `EnabledNoDuplicatedSyncWithoutStorageConfigException` são lançadas em `SetupInputModule`.
+
+Muitas classes na pasta `Services` e `Utils` são exportadas como uma única instância:
+
+```typescript
+// src/Services/ErrorHandlerService.ts
+class ErrorHandlerService {
+	handle (error: Error): void {
+		console.error(error)
+	}
+}
+
+export default new ErrorHandlerService() // Exportando uma única instância
+
+// src/Utils/FileUtil.ts
+class FileUtil {
+	// ... métodos utilitários ...
+}
+
+export default new FileUtil() // Exportando uma única instância
+```
+
+**Não Seguindo o Padrão (Exemplo Hipotético):**
+
+Uma classe utilitária sendo instanciada múltiplas vezes em diferentes locais, embora pudesse ser um Singleton:
+
+```typescript
+// Exemplo HIPOTÉTICO e INCONSISTENTE
+// Algum arquivo de módulo ou tool
+import FileUtil from "@/Utils/FileUtil" // Suponha que FileUtil NÃO seja exportado como Singleton
+
+class SomeTool {
+	async someMethod () {
+		// Instanciação desnecessária
+		const fileUtil1 = new FileUtil()
+		fileUtil1.parseFilePath("path1")
+
+		// Outra instanciação desnecessária
+		const fileUtil2 = new FileUtil()
+		fileUtil2.parseFilePath("path2")
+	}
+}
+// Na base de código fornecida, quase todos os Utilities e muitos Services são
+// implementados corretamente como Singletons, demonstrando conformidade.
+```
+
+## Separação de Preocupações (Separation of Concerns - SoC)
+
+### Descrição
+
+O código é escrito de forma que diferentes aspectos ou funcionalidades da aplicação sejam mantidos em unidades de código separadas e distintas. Por exemplo, o código que lida com requisições HTTP está em `HttpService`, o código para manipulação de arquivos está em `FileUtil` e `TempFolderService`, a lógica de validação está na pasta `Validations`, e a lógica de negócio de importação/conversão/envio/armazenamento está nas pastas `Tools` e `Modules`. Essa separação melhora a modularidade, a manutenabilidade e a testabilidade.
+
+### Exemplos
+
+**Seguindo o Padrão:**
+
+O `HttpService` foca apenas em fazer requisições HTTP, sem misturar lógica de negócio ou manipulação de dados brutos (exceto pela conversão para tipos básicos como Buffer, String, JSON, Stream):
+
+```typescript
+// src/Services/HttpService.ts
+import axios, { AxiosInstance } from "axios"
+
+class HttpService {
+	private readonly client: AxiosInstance
+	// ... constructor ...
+
+	// Métodos focados exclusivamente em comunicação HTTP e formatos de resposta
+	async toBuffer (url: string): Promise<Buffer> { /* ... */ }
+	async toString (url: string): Promise<string> { /* ... */ }
+	async toJSON<Result extends Record<string, unknown>>(url: string): Promise<Result> { /* ... */ }
+	async toReadStream (url: string): Promise<Readable> { /* ... */ }
+	async exists (url: string): Promise<boolean> { /* ... */ }
+	async makeRawRequest<Result>(method: RequestMethod, url: string, data: unknown = undefined, options?: HttpOptions): Promise<Result> { /* ... */ }
+	// ... métodos privados relacionados a HTTP ...
+}
+```
+
+**Não Seguindo o Padrão (Exemplo Hipotético):**
+
+Um `Service` que mistura responsabilidades, como um `HttpService` que também lida com parsing de RSS:
+
+```typescript
+// Exemplo HIPOTÉTICO e INCONSISTENTE
+// src/Services/HttpService.ts (versão inconsistente)
+import axios from "axios"
+import RSSParser from "rss-parser" // Mistura de responsabilidades
+
+class HttpService {
+	// ...
+	async fetchAndParseRSS (url: string): Promise<ParsedRSS> { // Mistura HTTP e Parsing
+		const rssString = await this.toString(url) // Responsabilidade HTTP
+		const rssParser = new RSSParser()
+		const parsedRSS = await rssParser.parseString(rssString) // Responsabilidade Parsing
+		return parsedRSS
+	}
+	// ...
+}
+// Na base de código fornecida, o parsing de RSS está corretamente separado em ParserService,
+// demonstrando adesão à Separação de Preocupações.
+```
+
+## Tratamento Centralizado de Erros (Centralized Error Handling)
+
+### Descrição
+
+A base de código utiliza um serviço dedicado, `ErrorHandlerService`, para lidar com erros de forma consistente em toda a aplicação. Em vez de espalhar a lógica de tratamento (como logar erros) por várias classes, os erros são passados para este serviço. Isso facilita a modificação ou extensão do comportamento de tratamento de erros no futuro (por exemplo, enviando erros para um serviço de monitoramento ou formatando-os de maneira diferente).
+
+### Exemplos
+
+**Seguindo o Padrão:**
+
+Erros são capturados e passados para `ErrorHandlerService.handle`:
 
 ```typescript
 // src/Services/NotificationService.ts
-// ... imports ...
-import ErrorHandlerService from "@/Services/ErrorHandlerService" // Importa o serviço centralizado
+import ErrorHandlerService from "@/Services/ErrorHandlerService"
 
 class NotificationService {
 	async task<Result extends unknown>(title: string, callback: TaskCallback<Result>): Promise<Result> {
-		// ... lógica para escolher ambiente ...
-		return await this.CLITask(title, callback) // Exemplo usando CLITask
+		// ... lógica de ambiente ...
 	}
 
 	private async CLITask<Result extends unknown>(title: string, callbackFn: TaskCallback<Result>): Promise<Result> {
@@ -310,88 +266,156 @@ class NotificationService {
 				try {
 					return await callbackFn(taskConfig)
 				} catch (error) {
-					ErrorHandlerService.handle(error) // Chama o handler centralizado ao capturar erro
-					taskConfig.setError(error) // Notifica a tarefa sobre o erro
+					ErrorHandlerService.handle(error) // Tratamento centralizado
+					taskConfig.setError(error)
 				}
 			})
-
 			return runner.result
 		} catch (error) {
-			ErrorHandlerService.handle(error) // Chama o handler centralizado para erros na task externa
+			ErrorHandlerService.handle(error) // Tratamento centralizado
 		}
 	}
-	// ... githubActionTask similar ...
-}
-
-// src/Modules/SetupInputModule.ts
-// ... imports ...
-import { NoValidSetupInputFoundException } from "@/Exceptions/SetupInputException" // Importa exceção customizada
-import { EnabledNoDuplicatedSyncWithoutStorageConfigException } from "@/Exceptions/EnabledNoDuplicatedSyncWithoutStorageConfigException" // Importa exceção customizada
-
-class SetupInputModule {
-	async fetch (): Promise<Config> {
-		// ...
-		if (ConfigValidation.noValidSetupInputFound(config)) {
-			throw new NoValidSetupInputFoundException() // Lança exceção customizada
-		}
-		// ...
-	}
+	// ...
 }
 ```
 
-**Não Seguindo o Padrão (Exemplo Hipotético de Violação):**
-Uma violação seria ter lógica de log de erros ou tratamento complexo espalhada por várias classes em vez de usar o serviço centralizado.
+**Não Seguindo o Padrão (Exemplo Hipotético):**
+
+Erros sendo logados diretamente ou tratados de forma inconsistente sem usar o serviço centralizado:
 
 ```typescript
-// Exemplo Hipotético de VIOLAÇÃO (NÃO existe no código fornecido)
-class SomeService {
-    async performAction() {
-        try {
-            // ...
-        } catch (error) {
-            console.error("Erro em SomeService:", error); // Log de erro local, não centralizado
-            // ... lógica complexa de tratamento local ...
-        }
-    }
+// Exemplo HIPOTÉTICO e INCONSISTENTE
+// Algum arquivo de tool ou service
+class SomeServiceOrTool {
+	async performOperation () {
+		try {
+			// ... alguma operação que pode falhar ...
+		} catch (error) {
+			console.error("An error occurred:", error.message) // Tratamento inconsistente
+			// Não usa ErrorHandlerService.handle()
+			throw error // Ou talvez apenas loga e continua, dependendo da lógica
+		}
+	}
 }
+// A base de código fornecida demonstra uso consistente de ErrorHandlerService
+// para o tratamento de erros capturados.
 ```
 
-## Gerenciamento de Concorrência com Fila
+## Padrão Command (Command Pattern) / Orquestração de Processos
 
 ### Descrição
 
-O `QueueService` (baseado em P-Queue) é utilizado em pontos onde é crucial limitar a execução concorrente de tarefas assíncronas ou adicionar retry logic. Notavelmente, ele garante que as operações no `JSONDatabaseService` (acesso ao arquivo JSON) ocorram sequencialmente para evitar corrupção de dados, e gerencia a concorrência na conversão de capítulos de mangá no `MangaConverterTool`.
+O método `run` da classe `App` age como um Orquestrador ou sequencia uma série de "Comandos" (as chamadas para Modules e Services) para executar o fluxo principal da aplicação (fetch config -> import -> convert -> sync -> store -> cleanup). Embora não seja uma implementação formal do padrão Command com objetos de comando explícitos, ele segue o princípio de encapsular uma solicitação como um objeto (neste caso, cada passo é uma chamada para um Module/Service) e parametrizá-la para processamento. Isso define o fluxo de execução da aplicação de ponta a ponta.
 
 ### Exemplos
 
 **Seguindo o Padrão:**
-O arquivo `src/Services/JSONDatabaseService.ts` utiliza uma instância estática do `QueueService` com `concurrency: 1` para serializar todas as operações de leitura/escrita no banco de dados em arquivo.
+
+A sequência de chamadas no método `run` da classe `App`:
+
+```typescript
+// src/App.ts
+class App {
+	// ...
+	async run (): Promise<void> {
+		// Comando 1: Fetch Setup Input
+		const config = await NotificationService.task("Fetch setup input", async (task) => { /* ... */ })
+
+		// Comando 2 & 3: Prepare Environment
+		await TempFolderService.generate()
+		await BrowserService.start()
+
+		// Configurações para os próximos comandos/módulos
+		const syncModule = new SyncModule(config.senders, config.kindle)
+		const storeModule = new StoreModule(config.storages, config.sync)
+
+		// Comando 4 (Iterado): Process Sources
+		for (const source of config.sources) {
+			await NotificationService.task(`Sync ${source.type} source (${source.name || source.url})`, async (task) => {
+				// Comando 4a: Import Source
+				const importedSource = await this.importationModule.import(source)
+				// Comando 4b: Convert Source
+				const documents = await this.conversionModule.convert(importedSource)
+
+				// Comando 4c (Iterado): Sync & Store Documents
+				for (const documentIndex in documents) {
+					const document = documents[documentIndex]
+					// ... check if already sync ...
+					if (!isDocumentAlreadySync) {
+						await syncModule.sync(document) // Comando 4c.i: Sync Document
+						await storeModule.markDocumentSync(document) // Comando 4c.ii: Mark Document
+					}
+				}
+				// ...
+			})
+		}
+
+		// Comando 5: Commit Storage Changes
+		await storeModule.commitDocumentSyncChanges()
+
+		// Comando 6 & 7: Cleanup Environment
+		await TempFolderService.clean()
+		await BrowserService.close()
+	}
+}
+```
+
+**Não Seguindo o Padrão (Exemplo Hipotético):**
+
+Lógica de negócio detalhada sendo executada diretamente na classe `App`, em vez de ser delegada a Modules ou Tools:
+
+```typescript
+// Exemplo HIPOTÉTICO e INCONSISTENTE
+// src/App.ts (versão inconsistente)
+class App {
+	// ...
+	async run (): Promise<void> {
+		// ... fetch config ...
+
+		// Mistura de orquestração e lógica de negócio detalhada
+		const httpService = new HttpService({})
+		const rawRSS = await httpService.toBuffer(config.sources[0].url)
+		const rssString = rawRSS.toString()
+		// Lógica de parsing de RSS detalhada aqui...
+		const parsedRSS = /* ... parsing manual ... */
+
+		// Lógica de conversão detalhada aqui...
+		const epubContent = /* ... conversão manual ... */
+
+		// Lógica de envio detalhada aqui...
+		const transporter = nodeMailer.createTransport(...)
+		await transporter.sendMail(...)
+
+		// ... cleanup ...
+	}
+}
+// A base de código fornecida delega a maior parte da lógica para Modules e Tools,
+// mantendo a classe App focada na orquestração do fluxo.
+```
+
+## Gerenciamento de Concorrência / Sincronização
+
+### Descrição
+
+O `JSONDatabaseService` implementa um mecanismo de sincronização baseado em fila para garantir que as operações de leitura/escrita em um arquivo JSON compartilhado sejam processadas sequencialmente. Isso impede condições de corrida (`race conditions`) que poderiam ocorrer se múltiplas instâncias do serviço tentassem modificar o mesmo arquivo ao mesmo tempo. O serviço utiliza uma fila estática (`actionFIFOQueue`) para gerenciar o acesso exclusivo ao recurso de arquivo. O `QueueService` genérico também é usado em outros locais (`RSSConverterTool`, `MangaConverterTool`) para limitar a concorrência de tarefas assíncronas.
+
+### Exemplos
+
+**Seguindo o Padrão:**
+
+Uso da fila estática no `JSONDatabaseService` para serializar o acesso ao arquivo:
 
 ```typescript
 // src/Services/JSONDatabaseService.ts
-import fs from "fs"
-
-import { Database } from "@/Protocols/JSONDatabaseProtocol"
-
-import QueueService from "@/Services/QueueService" // Importa o serviço de fila
+import QueueService from "@/Services/QueueService"
 
 class JSONDatabaseService<Model extends unknown> {
-	private static databases: Record<string, Database> = {}
-	/**
-	 * Since there can be multiple instances of this class accessing the same file,
-	 * we control all the actions by using a fifo queue, to make sure there will be
-	 * no concurrency able to cause bugs.
-	 */
-	// Instância estática da fila com concorrência 1
+	// Fila estática para garantir acesso sequencial ao arquivo
 	private static readonly actionFIFOQueue = new QueueService({ concurrency: 1 })
-	private readonly path: string
-
-	constructor (path: string) {
-		this.path = path
-	}
+	// ...
 
 	async set (key: string, value: Model): Promise<void> {
-		// Enfileira a operação para garantir execução serial
+		// Todas as operações de set/get são enfileiradas aqui
 		return await JSONDatabaseService.actionFIFOQueue.enqueue(async () => {
 			await this.syncInMemoryDatabaseByFileDatabaseIfNotAlreadySync()
 			JSONDatabaseService.databases[this.path][key] = value
@@ -400,7 +424,7 @@ class JSONDatabaseService<Model extends unknown> {
 	}
 
 	async get (key: string): Promise<Model | null> {
-		// Enfileira a operação para garantir execução serial
+		// Todas as operações de set/get são enfileiradas aqui
 		return await JSONDatabaseService.actionFIFOQueue.enqueue(async () => {
 			await this.syncInMemoryDatabaseByFileDatabaseIfNotAlreadySync()
 			const data = JSONDatabaseService.databases[this.path][key]
@@ -411,31 +435,176 @@ class JSONDatabaseService<Model extends unknown> {
 			}
 		})
 	}
-	// ... dump methods ...
+	// ...
 }
-
-export default JSONDatabaseService
 ```
-O `MangaConverterTool` também usa uma fila (`queueService`) para limitar a concorrência na conversão de capítulos.
 
-**Não Seguindo o Padrão (Exemplo Hipotético de Violação):**
-A execução de operações assíncronas concorrentes que acessam um recurso compartilhado sem usar uma fila ou outro mecanismo de sincronização. No código principal (`App.run`), o loop sobre `config.sources` executa as tarefas notificadas de forma potencialmente concorrente (dependendo de como o `NotificationService.task` gerencia suas próprias tarefas, embora ele use uma biblioteca `tasuku`). No entanto, como as operações internas de armazenamento e importação/conversão usam filas ou são Singletons que gerenciam estado global cuidadosamente, isso não causa problemas aparentes. A "não-aplicação" do padrão na orquestração principal da `App` permite que múltiplos fluxos de processamento de `source` ocorram em paralelo.
+**Não Seguindo o Padrão (Exemplo Hipotético):**
+
+Múltiplas operações de escrita no mesmo arquivo sem um mecanismo de sincronização explícito:
 
 ```typescript
-// src/App.ts
-class App {
-	// ...
-	async run (): Promise<void> {
-		// ... setup tasks ...
+// Exemplo HIPOTÉTICO e INCONSISTENTE
+// Algum arquivo onde JSONDatabaseService não usa fila
+import JSONDatabaseService from "@/Services/JSONDatabaseService" // Suponha que JSONDatabaseService NÃO use fila
 
-		// Loop sobre sources, permite execução concorrente de tarefas de sync
-		for (const source of config.sources) {
-			await NotificationService.task(`Sync ${source.type} source (${source.name || source.url})`, async (task) => {
-				// Esta tarefa pode rodar em paralelo com outras tarefas de source
-				// ... import, convert, sync ...
-			})
-		}
-		// ... commit and cleanup ...
+class SomeConcurrentWriter {
+	private readonly db = new JSONDatabaseService("shared-db.json") // Várias instâncias podem existir
+
+	async writeConcurrently (data: Record<string, any>): Promise<void> {
+		// Escrevendo sem sincronização - pode causar corrupção de dados
+		await Promise.all(Object.entries(data).map(([key, value]) => this.db.set(key, value)))
+		// Se set() não for atômico ou sincronizado externamente,
+		// chamadas simultâneas podem sobrescrever ou perder dados.
 	}
 }
+// O JSONDatabaseService fornecido demonstra o uso correto de uma fila estática para sincronização.
+```
+
+## Convenção de Nomes de Métodos (Method Naming Convention)
+
+### Descrição
+
+Existe uma convenção clara no uso de prefixos em nomes de métodos para indicar a sua finalidade:
+- `get...`: Para recuperar dados ou instâncias existentes.
+- `set...`: Para definir um valor.
+- `is...`: Para métodos que retornam um booleano (verificação).
+- `fetch...`: Para buscar dados (geralmente de fontes externas ou assíncronas).
+- `convert...`: Para transformar dados de um formato para outro.
+- `import...`: Para trazer dados para o sistema.
+- `sync...`: Para sincronizar estado ou dados.
+- `run`: Para iniciar a execução principal ou de um processo.
+- `handle`: Para processar um evento ou erro.
+- `build...`: Para construir ou gerar algo (estruturas de dados, HTML).
+- `format...`: Para formatar dados (strings, datas).
+- `sanitize...`: Para limpar ou validar entrada.
+- `parse...`: Para analisar dados e extrair informações.
+- `manipulate...`: Para modificar estruturas de dados (arrays).
+- `update...`: Para modificar um recurso existente.
+- `dump...`: Para serializar ou obter a representação bruta de dados.
+- `retrieve...`: Similar a `get` ou `fetch`, para recuperar algo.
+- `save...`: Para persistir dados.
+- `mark...`: Para marcar um estado.
+- `commit...`: Para finalizar um conjunto de mudanças.
+- `start`, `close`: Para gerenciar o ciclo de vida de um recurso.
+- `pipe`, `addFile`, `compress`: Para operações de compressão.
+- `findElement`: Para busca em estruturas.
+- `wait`: Para controle de tempo.
+
+### Exemplos
+
+**Seguindo o Padrão:**
+
+Exemplos de métodos usando prefixos convencionais:
+
+```typescript
+// src/Services/HttpService.ts
+async toBuffer (url: string): Promise<Buffer> { /* ... */ } // to + Formato
+async exists (url: string): Promise<boolean> { /* ... */ } // exists / is + Verificação
+
+// src/Modules/StoreModule.ts
+async isDocumentAlreadySync (document: DocumentModel): Promise<boolean> { /* ... */ } // is + Verificação
+
+// src/Utils/SanitizationUtil.ts
+sanitizeFilename (filename: string): string { /* ... */ } // sanitize + Objeto
+
+// src/Utils/DateUtil.ts
+get todayFormattedDate (): string { /* ... */ } // get + Descrição
+formatDate (date: Date): string { /* ... */ } // format + Objeto
+```
+
+**Não Seguindo o Padrão (Exemplo Hipotético):**
+
+Métodos que não seguem a convenção de prefixos ou usam nomes ambíguos:
+
+```typescript
+// Exemplo HIPOTÉTICO e INCONSISTENTE
+// src/Services/FileService.ts (versão inconsistente)
+class FileService {
+	// Deveria ser getFileContent ou readFile
+	getContent (filePath: string): Promise<Buffer> { /* ... */ }
+
+	// Deveria ser writeToFile ou saveContentToFile
+	persistData (filePath: string, data: Buffer): Promise<void> { /* ... */ }
+
+	// Deveria ser isPathValid ou checkPathExists
+	validatePath (filePath: string): boolean { /* ... */ }
+}
+// A base de código fornecida demonstra um uso consistente de prefixos,
+// indicando boa adesão à convenção de nomes de métodos.
+```
+
+## Convenção de Nomes de Classes (Class Naming Convention)
+
+### Descrição
+
+As classes na base de código seguem uma forte convenção de nomes baseada em sufixos para indicar seu propósito ou o padrão que implementam. Isso complementa a organização por camadas e torna a estrutura do código mais previsível e compreensível. Os sufixos comuns incluem:
+
+- `...Service`: Classes que encapsulam lógica de infraestrutura, preocupações transversais ou interações com serviços externos.
+- `...Util`: Classes que contêm funções utilitárias genéricas e reusáveis.
+- `...Tool`: Classes que implementam funcionalidades específicas de negócio ou "ferramentas" que seguem um contrato (*Contract*).
+- `...Module`: Classes que atuam como coordenadores ou *Facades* para um conjunto de funcionalidades, geralmente orquestrando Tools e Services.
+- `...Validation`: Classes dedicadas à lógica de validação.
+- `...Exception`: Classes que definem erros customizados.
+- `...Protocol`: Arquivos que definem interfaces, tipos e contratos.
+- `...Model`: Classes que representam estruturas de dados.
+- `...Contract`: (Dentro de Protocols) Interfaces que definem contratos.
+
+### Exemplos
+
+**Seguindo o Padrão:**
+
+Classes com sufixos que indicam sua responsabilidade ou padrão:
+
+```typescript
+// src/Services/HttpService.ts (Service)
+class HttpService { /* ... */ }
+
+// src/Utils/FileUtil.ts (Util)
+class FileUtil { /* ... */ }
+
+// src/Tools/Converters/RSSConverterTool.ts (Tool)
+class RSSConverterTool implements ConverterContract<Buffer> { /* ... */ }
+
+// src/Modules/SyncModule.ts (Module)
+class SyncModule { /* ... */ }
+
+// src/Validations/ConfigValidation.ts (Validation)
+class ConfigValidation { /* ... */ }
+
+// src/Exceptions/ArrayParsingException.ts (Exception)
+export class ArrayParsingException extends Error { /* ... */ }
+
+// src/Protocols/HttpProtocol.ts (Protocol)
+// ... types and interfaces ...
+
+// src/Protocols/SenderProtocol.ts (Protocol containing Contract)
+export interface SenderContract { /* ... */ }
+
+// src/Models/DocumentModel.ts (Model)
+export class DocumentModel { /* ... */ }
+```
+
+**Não Seguindo o Padrão (Exemplo Hipotético):**
+
+Classes com nomes que não seguem a convenção de sufixos, tornando seu propósito menos claro:
+
+```typescript
+// Exemplo HIPOTÉTICO e INCONSISTENTE
+// src/misc/HttpRequester.ts // Deveria ser HttpService
+class HttpRequester { /* ... */ }
+
+// src/lib/StringHelper.ts // Deveria ser StringUtil ou SanitizationUtil
+class StringHelper { /* ... */ }
+
+// src/logic/RssConverter.ts // Deveria ser RSSConverterTool ou RSSConverterService
+class RssConverter { /* ... */ }
+
+// src/processes/FileSync.ts // Deveria ser FileSyncModule ou FileSyncTool
+class FileSync { /* ... */ }
+
+// src/validation/ConfigurationCheck.ts // Deveria ser ConfigValidation
+class ConfigurationCheck { /* ... */ }
+// A base de código fornecida demonstra um uso muito consistente de sufixos,
+// indicando forte adesão à convenção de nomes de classes.
 ```
