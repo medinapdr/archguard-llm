@@ -1,65 +1,107 @@
-## Convecção de Nomenclatura de Funções
+### Arquitetura em Camadas
 
 ### Descrição
 
-Na codebase, as funções seguem um padrão de nomenclatura baseado em ações, como `getAll`, `create`, `validateCreateUserParams`, o que sugere a utilização de prefixos descritivos que refletem a operação executada pela função. Este padrão oferece clara leitura sobre a finalidade de cada função.
+No código fornecido, podemos identificar um padrão de arquitetura em camadas, onde diferentes responsabilidades são separadas em módulos distintos. Essa abordagem melhora a organização do código e a manutenção, permitindo que cada camada trate de uma parte específica da operação do aplicativo. Aqui estão as camadas identificadas:
+
+1. **Roteamento (Rotas):** O arquivo `UserRoute.js` gerencia o roteamento das solicitações HTTP, direcionando as requisições para os controladores relevantes.
+   
+2. **Controladores:** `UserController.js` contém a lógica de controle. Recebe as requisições, interage com os serviços e devolve respostas HTTP apropriadas.
+
+3. **Serviços:** O arquivo `UserService.js` encapsula a lógica de negócios, facilitando a interação entre controladores e repositórios.
+
+4. **Repositórios:** `UserRepository.js` é responsável por gerenciar o acesso a dados, atuando aqui como um armazenamento em memória de usuários.
+
+5. **Validações:** `UserValidation.js` lida com a validação de dados, assegurando que os dados do usuário atendam aos critérios esperados.
+
+6. **Utilitários:** `ValidatorUtil.js` oferece funcionalidades de suporte, como a validação de dados usando manipuladores personalizáveis.
 
 ### Exemplos
 
-- Conforme o padrão: `getAll`, `createUser`, `validateCreateUserParams`.
-- Não conforme o padrão: `allUsers`, `addUser`, `checkUserParams` (não utiliza o mesmo estilo de prefixos).
+- **Seguindo o Padrão:**
 
-## Arquitetura em Camadas
+  O uso de `UserRoute.js` para definir rotas, que então são gerenciadas por métodos em `UserController.js`, ilustra a separação entre a camada de roteamento e de controle.
+
+  ```javascript
+  // UserRoute.js
+  route.get("/users", UserController.getAllUsers)
+  ```
+
+  ```javascript
+  // UserController.js
+  getAllUsers (req, res) {
+    const users = UserService.getAll() // Interação com a camada de serviço
+    return res.status(200).json({ users })
+  }
+  ```
+
+- **Não Seguindo o Padrão:**
+
+  Se funções de validação do usuário fossem diretamente integradas ao controle, ao invés de serem chamadas de `UserValidation.js`, isto quebraria o princípio de separação de preocupações.
+
+  ```javascript
+  // Exemplo da falta de separação
+  // UserController.js (hipotético)
+  getAllUsers (req, res) {
+    if (!Boolean(req.body.name)) {
+      return res.status(400).json({ error: "name must_be_filled" })
+    }
+  }
+  ```
+
+### Singleton (Utilização Parcial)
 
 ### Descrição
 
-A codebase demonstra uma arquitetura em camadas, onde responsabilidades distintas são divididas entre camadas separadas como Controllers, Services, Repositories, Validations, e Routes. Isso promove a separação de preocupações (SoC), facilitando a manutenção e evolução do código.
+O padrão Singleton é utilizado no `UserRepository.js`, onde uma única instância da classe é exportada e usada em outras partes do código. Isso é realizado com a exportação de uma nova instância (`module.exports = new UserRepository()`) no módulo. O acesso direto a variáveis de classe, como `UserRepository.#users`, ajuda a manter um único estado global de usuários na aplicação.
 
 ### Exemplos
 
-- Conforme o padrão: A camada de Controladores (`UserController`) lida com a lógica de requisições HTTP, enquanto a camada de Serviços (`UserService`) trata das regras de negócio. A camada de Repositórios (`UserRepository`) é responsável por interagir com os dados.
-- Não conforme o padrão: Misturar chamada de banco de dados diretamente no controlador sem utilizar os serviços e repositórios definidos.
+- **Seguindo o Padrão:**
 
-## Singleton Pattern
+  ```javascript
+  // UserRepository.js
+  module.exports = new UserRepository()
+  ```
+
+  Isto garante que em todos os locais onde `UserRepository` é importado, a mesma instância é usada, mantendo um conjunto de dados compartilhado.
+
+- **Não Seguindo o Padrão:**
+
+  Caso criássemos novas instâncias em vez de usar uma única instância exportada:
+
+  ```javascript
+  // Exemplo incorreto
+  const repo1 = new UserRepository()  // Inconsistência de dados entre diferentes instâncias
+  const repo2 = new UserRepository()
+  ```
+
+Essa abordagem assegura que todas as partes do código interajam com a mesma coleção de dados, respeitando o padrão Singleton.
+
+### Convensão de Nomes de Funções de Acesso a Dados
 
 ### Descrição
 
-O padrão Singleton é utilizado na implementação de módulos como `ValidatorUtil`, `UserService`, `UserValidation`, e `UserController`, uma vez que cada um é exportado como uma instância única através do uso de `module.exports = new ClassName()`.
+No código, funções que acessam dados no `UserRepository.js` utilizam uma convenção de nomenclatura baseada em ações, como `getAll` e `create`. Esse padrão facilita a identificação das operações realizadas pelas funções sem precisar ler suas implementações.
 
 ### Exemplos
 
-- Conforme o padrão: `module.exports = new UserValidation();`
-- Não conforme o padrão: `module.exports = UserValidation;` (isso não garantiria uma única instância da classe).
+- **Seguindo o Padrão:**
 
-## Convenções de Modulação e Organização de Código
+  ```javascript
+  // UserRepository.js
+  getAll () { ... }
+  
+  create (user) { ... }
+  ```
 
-### Descrição
+- **Não Seguindo o Padrão:**
 
-O código está organizado de forma modular, cada módulo contendo lógicas específicas. Observa-se isso em pastas como `Routes`, `Controllers`, `Services`, entre outras, que separam funcionalidades e mantêm o código bem organizado e escalável.
+  Caso as funções fossem nomeadas sem refletir claramente suas ações principais:
 
-### Exemplos
+  ```javascript
+  // Nome impróprio e não informativo
+  fetchAllData () { ... } // Não específico quanto ao contexto do "Data"
+  ``` 
 
-- Conforme o padrão: Arquivos como `UserRoute.js`, `UserController.js`, `UserService.js` demonstram uma clara modularização.
-- Não conforme o padrão: Colocar todas as funções e implementações dentro de um único arquivo, desrespeitando a separação lógica por módulos.
-
-## Gerenciamento Consistente de Erros
-
-### Descrição
-
-Os controladores, exemplificados pelo `UserController`, seguem um padrão consistente para lidar com erros, utilizando blocos `try-catch` e retornando respostas com status apropriados ao cliente (`500` para errors de servidor).
-
-### Exemplos
-
-- Conforme o padrão: Uso de blocos `try-catch` em `createUser` e `getAllUsers`.
-- Não conforme o padrão: Não capturar exceções que podem lançar erros de runtime sem tratamento adequado.
-
-## Convenção de Acesso a Bancos de Dados
-
-### Descrição
-
-O acesso aos dados segue a convenção de utilização de Repositórios, onde o `UserRepository` gerencia a interação com os dados dos usuários, encapsulando a lógica de acesso aos dados em métodos como `getAll` e `create`.
-
-### Exemplos
-
-- Conforme o padrão: `UserRepository.getAll()` e `UserRepository.create(user)`.
-- Não conforme o padrão: Implementar diretamente a manipulação dos arrays de usuários nos controladores ou serviços.
+Essa prática padroniza o entendimento imediato do comportamento esperado das funções e melhora a legibilidade do código.
