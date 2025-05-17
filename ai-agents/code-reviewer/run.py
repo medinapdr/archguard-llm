@@ -6,7 +6,7 @@ from openai import OpenAI
 
 BATCH_DIFF_FILE_ANALYSIS_SIZE = 1
 
-def load_file(path: str) -> str:
+def load_file_content(path: str) -> str:
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
 
@@ -27,9 +27,9 @@ def review_code_changes_from_diff_files(diff_file_paths: List[str]) -> str:
     openai_client = get_openai_client()
 
     user_prompt = build_user_prompt(diff_file_paths)
-    system_prompt = load_file("ai-agents/code-reviewer/system-prompt.md")
+    system_prompt = load_file_content("ai-agents/code-reviewer/system-prompt.md")
 
-    architecture_description = load_file("ai-agents/architecture-checker/js-example-output.md")
+    architecture_description = load_file_content("ai-agents/architecture-checker/js-example-output.md")
     system_prompt = system_prompt.replace("{{ARCHITECTURE_DESCRIPTION}}", architecture_description)
 
     response = openai_client.chat.completions.create(
