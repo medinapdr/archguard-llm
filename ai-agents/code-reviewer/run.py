@@ -41,7 +41,7 @@ def review_diff_code_changes(diff_file_path: str) -> str:
 
 def main():
     parser = argparse.ArgumentParser(description="Run code reviewer")
-    parser.add_argument("diff_file_paths", nargs="+", help="Paths to diff files to analyze")
+    parser.add_argument("diff_file_paths", nargs="*", help="Paths to diff files to analyze")
 
     args = parser.parse_args()
 
