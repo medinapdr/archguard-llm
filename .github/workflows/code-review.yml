@@ -7,7 +7,7 @@ on:
       - main
 
 jobs:
-  run_code_reveiewer_ai_agent:
+  run_code_reviewer_ai_agent:
     runs-on: ubuntu-latest
 
     permissions:

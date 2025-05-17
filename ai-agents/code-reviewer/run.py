@@ -48,7 +48,7 @@ def main():
     diff_file_paths = args.diff_file_paths
 
     if not diff_file_paths:
-        print("No changes were found in the /examples folder for analysis.")
+        print("No changes were found in the '/examples' folder for analysis.")
         return
 
     all_code_review_comments = []
