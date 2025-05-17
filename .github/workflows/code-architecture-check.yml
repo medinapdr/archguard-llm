@@ -46,14 +46,14 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           all_files=$(find ${{ matrix.target.folder_path }} -type f -name '${{ matrix.target.target_files }}')
-          python3 ai-agents/code-architecture-checker/run.py --provider ${{ matrix.target.llm_provider }} $all_files > ai-agents/code-architecture-checker/${{ matrix.target.project_name }}-example-output.md
+          python3 ai-agents/code-architecture-checker/run.py --provider ${{ matrix.target.llm_provider }} $all_files > ai-agents/code-architecture-checker/outputs/${{ matrix.target.project_name }}-architecture-description.md
 
       - name: Commit and Push Architecture Description
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          git add ai-agents/code-architecture-checker/${{ matrix.target.project_name }}-example-output.md
+          git add ai-agents/code-architecture-checker/outputs/${{ matrix.target.project_name }}-architecture-description.md
           git commit -m "chore: update ${{ matrix.target.project_name }} architecture pattern result" || echo "No changes to commit"
           
           git pull --rebase https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} main

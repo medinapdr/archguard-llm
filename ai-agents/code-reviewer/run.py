@@ -24,7 +24,7 @@ def review_diff_code_changes(diff_file_path: str) -> str:
     user_prompt = diff_file_content
     system_prompt = load_file_content("ai-agents/code-reviewer/system-prompt.md")
 
-    architecture_description = load_file_content(f"ai-agents/code-architecture-checker/{project_name}-example-output.md")
+    architecture_description = load_file_content(f"ai-agents/code-architecture-checker/outputs/{project_name}-architecture-description.md")
     system_prompt = system_prompt.replace("{{ARCHITECTURE_DESCRIPTION}}", architecture_description)
 
     openai_client = get_openai_client()
