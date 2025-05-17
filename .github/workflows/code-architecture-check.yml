@@ -57,7 +57,7 @@ jobs:
           find_cmd="find ${{ matrix.target.folder_path }} -type f"
 
           for pattern in "${patterns[@]}"; do
-            find_cmd +=" -o -name \"$pattern\""
+            find_cmd+=" -o -name \"$pattern\""
           done
 
           find_cmd=$(echo "$find_cmd" | sed 's/-o -name/-name/')
