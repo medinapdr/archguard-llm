@@ -1,43 +1,47 @@
-## Padrão de Arquitetura MVC (Model-View-Controller)
+## Padrão de Estrutura de Camadas
 
 ### Descrição
 
-O padrão MVC é claramente seguido na estrutura do código, onde há uma separação clara entre as responsabilidades de controle, serviço e repositório. O `UserController` lida com as requisições HTTP e interage com o `UserService`, que por sua vez, realiza operações de negócio e interage com o `UserRepository` para acessar os dados. Essa separação de responsabilidades facilita a manutenção e a escalabilidade do sistema.
+O código segue um padrão de arquitetura em camadas, onde há uma clara separação entre as responsabilidades de controle, serviço, repositório e validação. Este padrão é importante porque promove a separação de preocupações, facilitando a manutenção e evolução do código. Cada camada tem uma responsabilidade específica: 
+
+- **Controllers**: Lidam com a lógica de entrada e saída HTTP.
+- **Services**: Contêm a lógica de negócios.
+- **Repositories**: Gerenciam o acesso aos dados.
+- **Validations**: Realizam validações de dados.
 
 ### Exemplos
 
-- **Segue o padrão:**
-  - `UserController` lida com a lógica de requisição e resposta HTTP.
-  - `UserService` contém a lógica de negócio.
-  - `UserRepository` gerencia o acesso aos dados.
+- **Exemplo que segue o padrão**: 
+  - `UserController` utiliza `UserService` para lógica de negócios e `UserValidation` para validação de dados.
+  - `UserService` utiliza `UserRepository` para operações de dados.
 
-- **Viola o padrão:**
-  - Se o `UserController` acessasse diretamente o `UserRepository` sem passar pelo `UserService`, isso violaria o padrão MVC, pois misturaria a lógica de controle com a lógica de acesso a dados.
+- **Exemplo que viola o padrão**:
+  - Se `UserController` acessasse diretamente `UserRepository` para buscar dados, isso violaria a separação de camadas, pois a lógica de negócios estaria misturada com a lógica de controle.
 
-## Convenção de Nomenclatura para Métodos de Acesso a Dados
+## Convenção de Nomenclatura para Métodos de Repositório
 
 ### Descrição
 
-Os métodos de acesso a dados no `UserRepository` seguem uma convenção de nomenclatura clara, onde métodos de recuperação de dados começam com `get` e métodos de criação começam com `create`. Essa consistência ajuda a entender rapidamente o propósito dos métodos e a manter a uniformidade no código.
+Os métodos nos repositórios seguem uma convenção de nomenclatura que reflete a operação que realizam, como `getAll`, `getById` e `create`. Esta convenção é importante para a clareza e previsibilidade do código, facilitando a compreensão das operações realizadas por cada método.
 
 ### Exemplos
 
-- **Segue o padrão:**
-  - `getAll()`, `getById(id)`, `create(user)` no `UserRepository`.
+- **Exemplo que segue o padrão**:
+  - `UserRepository.getAll()`, `UserRepository.create(user)`, `UserRepository.getById(id)`
 
-- **Viola o padrão:**
-  - Se houvesse um método chamado `fetchAllUsers()` ou `addUser()` no `UserRepository`, isso violaria a convenção de nomenclatura observada.
+- **Exemplo que viola o padrão**:
+  - Se um método no repositório fosse nomeado de forma genérica ou não descritiva, como `doSomething()`, isso violaria a convenção de nomenclatura, tornando o código menos claro.
 
-## Estrutura de Diretórios por Responsabilidade
+## Uso Consistente de Instâncias Singleton
 
 ### Descrição
 
-A estrutura de diretórios do projeto é organizada por responsabilidade, com pastas separadas para `Controllers`, `Services`, `Repositories`, `Routes`, `Validations` e `Utils`. Essa organização facilita a navegação no projeto e a localização de arquivos relacionados a uma funcionalidade específica.
+O código utiliza instâncias singleton para classes de serviço, validação e utilitários, garantindo que apenas uma instância de cada classe seja criada e utilizada em toda a aplicação. Isso é importante para economizar recursos e manter o estado compartilhado quando necessário.
 
 ### Exemplos
 
-- **Segue o padrão:**
-  - `src/Controllers/UserController.js`, `src/Services/UserService.js`, `src/Repositories/UserRepository.js`.
+- **Exemplo que segue o padrão**:
+  - `module.exports = new UserService()`, `module.exports = new UserValidation()`, `module.exports = new ValidatorUtil()`
 
-- **Viola o padrão:**
-  - Se o `UserController` estivesse localizado diretamente em `src/` ao invés de `src/Controllers/`, isso violaria a estrutura de diretórios por responsabilidade.
+- **Exemplo que viola o padrão**:
+  - Se `UserService` fosse exportado como `module.exports = UserService`, permitindo múltiplas instâncias, isso violaria o padrão singleton, potencialmente levando a inconsistências de estado.
