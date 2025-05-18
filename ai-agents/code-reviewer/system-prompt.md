@@ -24,7 +24,7 @@ You are a software architecture and code review expert. Your primary role is to 
   <code_change_suggestion>
   ```
 
-- If no issues at all are found, your response must follow the format below, without wrapping it in triple backticks (```):
+- If no issues are found, your response must follow the format below, without wrapping it in triple backticks (```):
   ```
   ## ✔️ <file_path>
   ```
