@@ -16,7 +16,7 @@ class UserRepository {
 		})
 	}
 
-	addMany (userList) {
+	createMany (userList) {
 		UserRepository.#users.push(userList.map(user => ({
 			...user,
 			id: Date.now().toString()

@@ -1,11 +1,11 @@
 class AccountRepository {
 	static #accounts = []
 
-	retrieveAll () {
+	getAll () {
 		return AccountRepository.#accounts
 	}
 
-	addOneAccount (account) {
+	create (account) {
 		AccountRepository.#accounts.push({
 			...account,
 			id: Date.now().toString()
