@@ -1,494 +1,435 @@
-Olá! Analisei o código fornecido e identifiquei os seguintes padrões arquiteturais que se repetem em múltiplas partes da base de código:
-
-## Estrutura de Diretórios por Camada e Tipo
-
-### Descrição
-
-O código organiza arquivos em diretórios distintos com base em seu papel arquitetural ou tipo de funcionalidade. Isso cria uma separação clara de responsabilidades entre as camadas, como infraestrutura, acesso a dados, lógica de negócio, utilitários, configurações e componentes de interface.
-
-### Exemplos
-
-- **Seguindo o Padrão:**
-  - Todos os arquivos relacionados à infraestrutura de baixo nível (como banco de dados e fila) estão localizados em `/server/infra`. Por exemplo: `examples/investy/server/infra/database/index.ts` e `examples/investy/server/infra/queue/index.ts`.
-  - Arquivos contendo lógicas de acesso a dados de entidades específicas (como usuários, integrações, etc.) estão agrupados em `/server/repositories`. Por exemplo: `examples/investy/server/repositories/UserRepository.ts` e `examples/investy/server/repositories/IntegrationRepository.ts`.
-  - Arquivos contendo lógicas de negócio e orquestração de serviços estão em `/server/services`. Por exemplo: `examples/investy/server/services/AuthService.ts` e `examples/investy/server/services/IntegrationService.ts`.
-
-## Padrão Singleton para Instâncias de Classes
+```
+## Estrutura de Camadas (Server-side)
 
 ### Descrição
 
-Muitas classes que representam módulos, utilitários, controladores, middlewares e adaptadores são instanciadas uma única vez e exportadas como a exportação padrão do módulo. Isso garante que haja apenas uma instância dessas classes em toda a aplicação, funcionando como singletons implícitos.
+O código do lado do servidor segue uma estrutura de camadas clara, organizando as responsabilidades em diretórios dedicados como `controllers`, `services`, `repositories`, `infra`, `lib`, `utils`, `config`, `entities`, `schemas`, `adapters`, `exceptions`, `protocols`, `contracts`, `middlewares`, `validations` e `queues`. Essa organização promove a separação de preocupações (SoC), onde cada camada tem um papel específico (por exemplo, `controllers` lidam com requisições HTTP, `services` contêm lógica de negócio, `repositories` acessam dados).
 
 ### Exemplos
 
-- **Seguindo o Padrão:**
-  ```typescript
-  // examples/investy/server/infra/database/index.ts
-  class DatabaseModule { /* ... */ }
-  export default new DatabaseModule() // Exporta a instância
-  ```
-  ```typescript
-  // examples/investy/server/controllers/UserController.ts
-  class UserController { /* ... */ }
-  export default new UserController() // Exporta a instância
-  ```
-  ```typescript
-  // examples/investy/server/utils/ValidationUtil.ts
-  class ValidationUtil { /* ... */ }
-  export default new ValidationUtil() // Exporta a instância
-  ```
+**Segue o padrão:**
 
-- **Violando o Padrão (na base de código fornecida, algumas classes são exportadas para serem instanciadas, em vez da própria instância):**
-  ```typescript
-  // examples/investy/server/lib/NotionLib.ts
-  class NotionLib { /* ... */ }
-  export default NotionLib // Exporta a classe
-  ```
-  ```typescript
-  // examples/investy/server/adapters/NodeCacheAdapter.ts
-  class NodeCacheAdapter<Entity> extends CacheContract<Entity> { /* ... */ }
-  export default NodeCacheAdapter // Exporta a classe
-  ```
+- O arquivo `examples/investy/server/controllers/UserController.ts` lida com requisições HTTP relacionadas a usuários, utilizando `AuthService` (camada de serviço) e `UserRepository` (camada de repositório) para realizar as operações necessárias.
+- O arquivo `examples/investy/server/services/AuthService.ts` contém lógica de negócio relacionada à autenticação, utilizando `HashService` e `CryptService` (outros serviços ou utilitários) e não acessa diretamente o banco de dados ou lida com requisições HTTP.
 
-## Padrão Repository com Adapter Genérico
+**Viola o padrão:**
+
+- Não há violações explícitas deste padrão na estrutura de diretórios fornecida. As responsabilidades parecem bem segregadas entre as pastas.
+```
+
+```
+## Padrão Repository
 
 ### Descrição
 
-A lógica de acesso a dados para entidades do banco de dados é centralizada em classes chamadas Repositories. Esses Repositories não implementam diretamente a lógica de interação com o ORM (Mongoose), mas a delegam a um Adapter genérico (`MongooseRepositoryAdapter`) que implementa o `RepositoryContract`. Cada Repository específico estende esse adapter para a entidade correspondente.
+O código utiliza o Padrão Repository para abstrair a lógica de acesso a dados. Classes dedicadas, localizadas no diretório `repositories`, são responsáveis por interagir com a fonte de dados (neste caso, Mongoose via `MongooseRepositoryAdapter`). Essas classes fornecem métodos para operações CRUD (Create, Retrieve, Update, Delete) em entidades específicas, desacoplando a lógica de negócio da implementação do banco de dados.
 
 ### Exemplos
 
-- **Seguindo o Padrão:**
-  ```typescript
-  // examples/investy/server/repositories/IntegrationRepository.ts
-  import MongooseRepositoryAdapter from "@server/adapters/MongooseRepositoryAdapter"
-  import IntegrationEntity from "@server/entities/IntegrationEntity"
-  import IntegrationSchema from "@server/schemas/IntegrationSchema"
+**Segue o padrão:**
 
-  class IntegrationRepository extends MongooseRepositoryAdapter<IntegrationEntity> {} // Estende o Adapter
-  export default new IntegrationRepository(IntegrationSchema)
-  ```
-  ```typescript
-  // examples/investy/server/repositories/UserRepository.ts
-  import MongooseRepositoryAdapter from "@server/adapters/MongooseRepositoryAdapter"
-  import UserEntity from "@server/entities/UserEntity"
-  import UserSchema from "@server/schemas/UserSchema"
+- O arquivo `examples/investy/server/repositories/UserRepository.ts` define `UserRepository` que estende `MongooseRepositoryAdapter<UserEntity>`, fornecendo métodos como `create`, `retrieveOne`, etc., para a entidade `UserEntity`.
+- O arquivo `examples/investy/server/repositories/AssetSyncRepository.ts` define `AssetSyncRepository` que estende `MongooseRepositoryAdapter<AssetSyncEntity>`, encapsulando o acesso a dados para `AssetSyncEntity`.
 
-  class UserRepository extends MongooseRepositoryAdapter<UserEntity> {} // Estende o Adapter
-  export default new UserRepository(UserSchema)
-  ```
+**Viola o padrão:**
 
-## Uso Consistente de Adapters
+- Não há violações explícitas deste padrão na base de código fornecida. Todas as interações com o banco de dados Mongoose parecem ocorrer através das classes `*Repository`.
+```
+
+```
+## Padrão Service
 
 ### Descrição
 
-A interação com frameworks ou bibliotecas externas (como Mongoose, Quirrel, Next.js HTTP, NodeCache) é encapsulada em classes "Adapter". Essas classes geralmente implementam contratos específicos (definidos em `/server/contracts`) e fornecem uma interface padronizada para a aplicação, desacoplando-a das implementações concretas das bibliotecas.
+O código utiliza o Padrão Service, onde classes localizadas no diretório `services` encapsulam a lógica de negócio e orquestram operações que podem envolver múltiplos repositórios, utilitários ou outros serviços. Controladores e handlers de fila interagem com essas classes de serviço para executar tarefas complexas.
 
 ### Exemplos
 
-- **Seguindo o Padrão:**
-  ```typescript
-  // examples/investy/server/adapters/MongooseRepositoryAdapter.ts
-  class MongooseRepositoryAdapter<Entity extends DefaultEntity> implements RepositoryContract<Entity> { /* ... */ } // Implementa Contract
-  export default MongooseRepositoryAdapter
-  ```
-  ```typescript
-  // examples/investy/server/adapters/NextHttpAdapter.ts
-  class NextHttpAdapter implements HttpContract<RawApiHandler> { /* ... */ } // Implementa Contract
-  export default new NextHttpAdapter()
-  ```
+**Segue o padrão:**
 
-- **Violando o Padrão (classes que interagem com libs externas, mas não seguem a convenção `*Adapter` ou implementam um `*Contract` explícito para essa interação):**
-  ```typescript
-  // examples/investy/server/lib/NotionLib.ts
-  import { Client } from "@notionhq/client" // Interage diretamente com a lib
-  class NotionLib { /* ... */ }
-  export default NotionLib
-  ```
-  ```typescript
-  // examples/investy/server/lib/StatusInvestLib.ts
-  import axios from "axios" // Interage diretamente com a lib
-  class StatusInvestLib implements InvestmentHandler { /* ... */ } // Implementa um InvestmentHandler, mas não um adapter genérico para interações HTTP externas
-  export default new StatusInvestLib()
-  ```
+- O arquivo `examples/investy/server/services/AuthService.ts` contém a lógica para hashing de senhas, validação e geração/decodificação de tokens de autenticação, utilizando `HashService` e `CryptService`.
+- O arquivo `examples/investy/server/services/AssetSyncSchedulerService.ts` lida com a lógica de agendamento de sincronizações, interagindo com o módulo de fila (`@server/infra/queue`).
 
-## Camada de Serviço para Lógica de Negócios
+**Viola o padrão:**
+
+- Não há violações explícitas deste padrão na base de código fornecida. A lógica de negócio parece estar consistentemente localizada nas classes `*Service`.
+```
+
+```
+## Padrão Controller (Server-side)
 
 ### Descrição
 
-A lógica de negócio e a orquestração de operações complexas envolvendo múltiplos repositórios, libs ou utilitários são encapsuladas em classes na camada de "services". Controladores e handlers de fila geralmente chamam métodos nesses serviços para executar ações de negócio.
+As classes localizadas no diretório `controllers` atuam como a camada de interface para requisições HTTP. Elas recebem a entrada da requisição, validam os dados (geralmente delegando para classes de validação), interagem com a camada de serviço ou repositório para executar a lógica e formatam a resposta usando um conjunto padronizado de métodos (`ok`, `badRequest`, `notFound`, etc.) fornecidos pelo `ApiHandlerResponse` (parte do `HttpContract`).
 
 ### Exemplos
 
-- **Seguindo o Padrão:**
-  ```typescript
-  // examples/investy/server/controllers/NotionAssetSyncController.ts
-  // ...
-  await IntegrationService.getNotionIntegration(userId) // Chama um serviço
-  // ...
-  await AssetSyncSchedulerService.scheduleNotionAssetSync(notionAssetSync.id) // Chama um serviço
-  // ...
-  ```
-  ```typescript
-  // examples/investy/server/queues/SyncNotionAssetPriceQueue.ts
-  // ...
-  await AssetSyncSchedulerService.scheduleNotionAssetSync(assetSyncId) // Chama um serviço
-  // ...
-  ```
+**Segue o padrão:**
 
-- **Violando o Padrão (classes que interagem diretamente com libs ou repositórios que poderiam ser orquestrados por um serviço):**
-  ```typescript
-  // examples/investy/server/queues/SyncNotionAssetPriceQueue.ts
-  // ...
-  const notion = new NotionLib(integration.token) // Instancia e usa lib diretamente
-  const databaseRows = await notion.getDatabaseRows(notionData.database_id) // Usa lib diretamente
-  // ...
-  await notion.updateDatabaseRow(notionData.asset_price_property_id, row.id, formattedAssetPrice) // Usa lib diretamente
-  // ...
-  ```
-  ```typescript
-  // examples/investy/server/controllers/NotionIntegrationController.ts
-  // ...
-  const notion = new NotionLib(notionIntegration.token) // Instancia e usa lib diretamente
-  const databases = await notion.searchDatabases(name) // Usa lib diretamente
-  // ...
-  ```
+- O arquivo `examples/investy/server/controllers/UserController.ts` define métodos como `signup` e `login` que recebem `ApiHandlerInput`, validam a entrada usando `UserValidation`, chamam `AuthService` e `UserRepository` e retornam respostas formatadas usando `response.created` ou `response.ok`.
+- O arquivo `examples/investy/server/controllers/NotionAssetSyncController.ts` define métodos como `create`, `update`, `retrieveAll`, `forceSync` que seguem a mesma estrutura, utilizando `NotionAssetSyncValidation`, `AssetSyncValidation`, `IntegrationService`, `AssetSyncRepository`, `AssetSyncSchedulerService`, etc., e retornando respostas padronizadas.
 
-## Padrão Middleware para Processamento de Requisição
+**Viola o padrão:**
+
+- Não há violações explícitas deste padrão na base de código fornecida. Todas as classes no diretório `controllers` parecem seguir essa estrutura e responsabilidade.
+```
+
+```
+## Padrão Adapter
 
 ### Descrição
 
-A aplicação utiliza classes de "Middleware" para processar requisições HTTP antes que elas atinjam os controladores finais. Esses middlewares são definidos no diretório `/server/middlewares` e seguem o padrão de receber um objeto `ApiHandlerInput` e chamar `response.next()` para passar o controle para o próximo handler ou para o controlador.
+O código utiliza o Padrão Adapter para fornecer uma interface consistente para interagir com bibliotecas externas ou frameworks. Classes no diretório `adapters` encapsulam a lógica específica de uma biblioteca (como Mongoose, Next.js HTTP, Quirrel, NodeCache) e a expõem através de contratos (`*Contract`) que são independentes da implementação subjacente.
 
 ### Exemplos
 
-- **Seguindo o Padrão:**
-  ```typescript
-  // examples/investy/server/middlewares/InfraMiddleware.ts
-  import { ApiHandlerInput } from "@server/contracts/HttpContract"
-  import Infra from "@server/infra"
+**Segue o padrão:**
 
-  class InfraMiddleware {
-      async setup ({ response }: ApiHandlerInput<{}, {}, {}>): Promise<void> {
-          await Infra.setup()
-          return response.next() // Chama response.next()
-      }
-  }
-  export default new InfraMiddleware()
-  ```
-  ```typescript
-  // examples/investy/server/middlewares/AuthMiddleware.ts
-  import { ApiHandlerInput } from "@server/contracts/HttpContract"
-  // ...
-  class AuthMiddleware {
-      async requireAuth ({ request, response }: ApiHandlerInput<{}, {}, {}>): Promise<void> {
-          // ... validation logic ...
-          request.context.set({ auth: authTokenPayload })
-          return response.next() // Chama response.next()
-      }
-  }
-  export default new AuthMiddleware()
-  ```
+- O arquivo `examples/investy/server/adapters/MongooseRepositoryAdapter.ts` adapta a API do Mongoose para o `RepositoryContract`, fornecendo métodos CRUD genéricos que funcionam com qualquer schema Mongoose.
+- O arquivo `examples/investy/server/adapters/NextHttpAdapter.ts` adapta a API de requisição/resposta do Next.js (`NextApiRequest`, `NextApiResponse`) para o `HttpContract`, fornecendo uma interface padronizada (`ApiHandlerInput`, `ApiHandlerResponse`) para os controladores.
 
-## Centralização da Lógica de Validação
+**Viola o padrão:**
+
+- Não há violações explícitas deste padrão na base de código fornecida. As interações com bibliotecas externas parecem ser consistentemente encapsuladas em adaptadores.
+```
+
+```
+## Padrão Singleton (Server-side)
 
 ### Descrição
 
-A lógica para validar dados (principalmente de entrada de requisições) é agrupada em classes dedicadas no diretório `/server/validations`. Essas classes frequentemente utilizam um utilitário comum (`ValidationUtil`) para executar verificações padrão e retornar um objeto `ValidationResult` padronizado com erros por campo.
+A maioria das classes no lado do servidor (Controladores, Serviços, Repositórios, Utilitários, Módulos de Infraestrutura, Bibliotecas) é instanciada uma única vez e exportada como a exportação padrão do módulo. Isso garante que haja apenas uma instância dessas classes em toda a aplicação, o que é um padrão comum para gerenciar recursos compartilhados e lógica de negócio sem estado.
 
 ### Exemplos
 
-- **Seguindo o Padrão:**
-  ```typescript
-  // examples/investy/server/validations/UserValidation.ts
-  import { ValidationResult } from "@server/protocols/ValidationProtocol"
-  import ValidationUtil from "@server/utils/ValidationUtil"
-  import UserRepository from "@server/repositories/UserRepository"
+**Segue o padrão:**
 
-  class UserValidation {
-      async validateSignupData (data: SignupBody): Promise<ValidationResult<SignupBody>> {
-          return await ValidationUtil.validate(data as SignupBody, { // Usa ValidationUtil.validate
-              email: [
-                  ValidationUtil.defaultValidations.wasSupplied,
-                  {
-                      isValid: this.isUserEmailAvailable,
-                      errorCode: "UserAlreadyExists"
-                  }
-              ],
-              // ... other fields ...
-          })
-      }
-      // ...
-  }
-  export default new UserValidation()
-  ```
-  ```typescript
-  // examples/investy/server/validations/NotionAssetSyncValidation.ts
-  import { ValidationResult } from "@server/protocols/ValidationProtocol"
-  import ValidationUtil from "@server/utils/ValidationUtil"
-  import { NotionBody } from "@server/validations/NotionAssetSyncValidation"
+- O arquivo `examples/investy/server/services/LogService.ts` exporta `export default new LogService()`.
+- O arquivo `examples/investy/server/repositories/UserRepository.ts` exporta `export default new UserRepository(UserSchema)`.
+- O arquivo `examples/investy/server/controllers/UserController.ts` exporta `export default new UserController()`.
 
-  class NotionAssetSyncValidation {
-      async validateNotionData (data: NotionBody): Promise<ValidationResult<NotionBody>> {
-          return await ValidationUtil.validate(data, { // Usa ValidationUtil.validate
-              assetCodePropertyId: [
-                  ValidationUtil.defaultValidations.wasSupplied
-              ],
-              // ... other fields ...
-          })
-      }
-  }
-  export default new NotionAssetSyncValidation()
-  ```
+**Viola o padrão:**
 
-- **Violando o Padrão (classe de validação que não usa o método `ValidationUtil.validate`, embora ainda esteja no diretório de validação):**
-  ```typescript
-  // examples/investy/server/validations/AssetSyncValidation.ts
-  import AssetSyncRepository from "@server/repositories/AssetSyncRepository"
+- O arquivo `examples/investy/server/services/HashService.ts` exporta a classe `HashService` em vez de uma instância: `export default HashService`.
+- O arquivo `examples/investy/server/services/CryptService.ts` exporta a classe `CryptService` em vez de uma instância: `export default CryptService`.
+- O arquivo `examples/investy/server/lib/NotionLib.ts` exporta a classe `NotionLib` em vez de uma instância: `export default NotionLib`.
+```
 
-  class AssetSyncValidation {
-      async belongsToUser (assetSyncId: string, userId: string): Promise<boolean> { // Lógica de validação, mas não usa ValidationUtil.validate
-          const assetSync = await AssetSyncRepository.retrieveOne({
-              user_id: userId,
-              id: assetSyncId
-          })
-          return Boolean(assetSync)
-      }
-  }
-  export default new AssetSyncValidation()
-  ```
-
-## Padronização de Respostas de Erro HTTP
+```
+## Padrão de Validação
 
 ### Descrição
 
-As respostas de erro para requisições HTTP são padronizadas usando os métodos definidos no `ApiHandlerResponse` (parte do `HttpContract`). Controladores e middlewares utilizam métodos como `response.badRequest()`, `response.notFound()`, `response.serverError()`, etc., para retornar respostas HTTP consistentes com status codes e formatos de corpo predefinidos.
+O código utiliza classes dedicadas no diretório `validations` para centralizar e encapsular a lógica de validação dos dados de entrada. Essas classes geralmente utilizam um utilitário comum (`ValidationUtil`) para executar validações e retornar um resultado padronizado (`ValidationResult`) que indica se os dados são válidos e quais campos contêm erros.
 
 ### Exemplos
 
-- **Seguindo o Padrão:**
-  ```typescript
-  // examples/investy/server/controllers/NotionIntegrationController.ts
-  class NotionIntegrationController {
-      async searchDatabase ({ request, response, context }: ApiHandlerInput): Promise<void> {
-          // ... logic ...
-          if (!notionIntegration) {
-              return response.notFound("NotionIntegrationNotFound") // Resposta padronizada
-          }
-          // ... logic ...
-          if (!name) {
-              return response.ok([]) // Resposta padronizada (sucesso)
-          }
-          // ...
-      }
-  }
-  export default new NotionIntegrationController()
-  ```
-  ```typescript
-  // examples/investy/server/controllers/UserController.ts
-  class UserController {
-      async signup ({ request, response }: ApiHandlerInput): Promise<void> {
-          const validation = await UserValidation.validateSignupData(request.body)
-          if (!validation.valid) {
-              return response.badRequest(validation.fieldErrors) // Resposta padronizada
-          }
-          // ... success logic ...
-          return response.created({ authToken }) // Resposta padronizada
-      }
-      // ...
-  }
-  export default new UserController()
-  ```
+**Segue o padrão:**
 
-## Centralização de Log de Erros
+- O arquivo `examples/investy/server/validations/UserValidation.ts` define métodos como `validateSignupData` e `validateLoginData` que usam `ValidationUtil.validate` e regras de validação específicas para verificar os dados de usuário.
+- O arquivo `examples/investy/server/validations/NotionAssetSyncValidation.ts` define `validateNotionData` que valida os dados de entrada para a sincronização com o Notion usando `ValidationUtil`.
+
+**Viola o padrão:**
+
+- Não há violações explícitas deste padrão na base de código fornecida. A lógica de validação parece estar consistentemente localizada nas classes `*Validation`.
+```
+
+```
+## Padrão de Componente (Client-side)
 
 ### Descrição
 
-Erros que ocorrem na aplicação são capturados em pontos chave (como no adapter HTTP e no handler de fila) e registrados consistentemente utilizando a classe `LogService`. Isso centraliza a lógica de logging e garante que os erros sejam tratados e reportados de maneira uniforme.
+O código do lado do cliente organiza a interface do usuário em componentes reutilizáveis, localizados no diretório `client/components`. Cada componente é geralmente definido em seu próprio diretório com um arquivo `index.tsx` e encapsula sua própria lógica, estado e marcação.
 
 ### Exemplos
 
-- **Seguindo o Padrão:**
-  ```typescript
-  // examples/investy/server/adapters/NextHttpAdapter.ts
-  class NextHttpAdapter implements HttpContract<RawApiHandler> {
-      adaptApiHandler (handler: ApiHandler): RawApiHandler {
-          return async (req: NextApiRequest, res: NextApiResponse) => {
-              // ... setup ...
-              try {
-                  return await handler(input)
-              } catch (error) {
-                  LogService.error(error) // Loga o erro
-                  return input.response.serverError()
-              }
-          }
-      }
-      // ...
-  }
-  export default new NextHttpAdapter()
-  ```
-  ```typescript
-  // examples/investy/server/contracts/QueueContract.ts (BaseQueue class)
-  import LogService from "@server/services/LogService"
+**Segue o padrão:**
 
-  export abstract class BaseQueue {
-      // ... process method ...
-      protected async onError (handler: QueueHandler, payload: QueuePayload[QueueName], error: Error): Promise<void> {
-          LogService.info(`[Queue][${handler.name}] ERROR!`)
-          LogService.error(error) // Loga o erro
-          // ...
-      }
-      // ...
-  }
-  ```
+- O arquivo `examples/investy/client/components/Button/index.tsx` define um componente `Button` reutilizável com propriedades para variante, largura total, estado de carregamento, etc.
+- O arquivo `examples/investy/client/components/TextInput/index.tsx` define um componente `TextInput` com suporte para adornos iniciais, mensagens de erro, etc.
 
-## Estrutura de Componentes Client-side com SubComponentes Anexados
+**Viola o padrão:**
+
+- Não há violações explícitas deste padrão na base de código fornecida. A UI parece estar consistentemente organizada em componentes.
+```
+
+```
+## Padrão de Sub-componente (Client-side)
 
 ### Descrição
 
-No lado do cliente, componentes React mais complexos que são compostos por partes menores (como tabelas, modais, inputs de seleção) são construídos utilizando um padrão onde os "subcomponentes" (como `Table.Head`, `Table.Body`, `Table.Row`, `Table.Column` para `Table`) são definidos separadamente e depois "anexados" à componente principal utilizando a função `attachSubComponents`. Isso organiza o código dos componentes compostos.
+Alguns componentes complexos no lado do cliente (como `Table`, `Modal`, `SelectInput`, `Dropdown`) utilizam um padrão onde componentes relacionados são definidos separadamente e anexados como propriedades estáticas ao componente principal. Isso permite uma sintaxe de uso mais declarativa e organizada (ex: `<Table.Head>`, `<Modal.Trigger>`). Utilitários como `attachSubComponents` e `buildSubComponents` facilitam essa implementação.
 
 ### Exemplos
 
-- **Seguindo o Padrão:**
-  ```typescript
-  // examples/investy/client/components/Table/index.tsx
-  import TableBody from "@client/components/Table/TableBody"
-  import TableColumn from "@client/components/Table/TableColumn"
-  import TableHead from "@client/components/Table/TableHead"
-  import TableRow from "@client/components/Table/TableRow"
-  import { attachSubComponents, buildSubComponents } from "@client/hooks/useSubComponents"
+**Segue o padrão:**
 
-  const SubComponents = buildSubComponents({ // Constrói os subcomponentes
-      Body: TableBody,
-      Column: TableColumn,
-      Head: TableHead,
-      Row: TableRow
-  })
+- O arquivo `examples/investy/client/components/Table/index.tsx` define o componente `Table` e anexa `TableBody`, `TableColumn`, `TableHead` e `TableRow` como sub-componentes (`Table.Body`, `Table.Column`, `Table.Head`, `Table.Row`).
+- O arquivo `examples/investy/client/components/Modal/index.tsx` define o componente `Modal` e anexa `ModalContent` e `ModalTrigger` como sub-componentes (`Modal.Content`, `Modal.Trigger`).
 
-  const Table: FC = (props) => { /* ... */ }
+**Viola o padrão:**
 
-  export default attachSubComponents(Table, SubComponents) // Anexa os subcomponentes
-  ```
-  ```typescript
-  // examples/investy/client/components/Modal/index.tsx
-  import ModalContent from "@client/components/Modal/ModalContent"
-  import ModalTrigger from "@client/components/Modal/ModalTrigger"
-  import useSubComponents, { attachSubComponents, buildSubComponents } from "@client/hooks/useSubComponents"
-
-  const SubComponents = buildSubComponents({ // Constrói os subcomponentes
-      Trigger: ModalTrigger,
-      Content: ModalContent
-  })
-
-  const Modal: FC<ModalProps> = (props) => { /* ... */ }
-
-  export default attachSubComponents(Modal, SubComponents) // Anexa os subcomponentes
-  ```
-
-- **Violando o Padrão (componentes que não utilizam essa estrutura de subcomponentes anexados, pois não são compostos dessa forma):**
-  ```typescript
-  // examples/investy/client/components/Button/index.tsx
-  // Nenhuma definição de subcomponentes anexados
-  const Button: FC<ButtonProps> = (props) => { /* ... */ }
-  export default Button
-  ```
-  ```typescript
-  // examples/investy/client/components/Chip/index.tsx
-  // Nenhuma definição de subcomponentes anexados
-  const Chip: FC<ChipProps> = (props) => { /* ... */ }
-  export default Chip
-  ```
-
-## Organização de Arquivos Client-side por Papel
-
-### Descrição
-
-Similar ao lado do servidor, os arquivos do lado do cliente são organizados em diretórios com base em seu papel ou tipo de funcionalidade (componentes de UI, utilitários, configurações, hooks, páginas, etc.). Isso mantém o código client-side organizado e facilita a localização de arquivos com base em sua responsabilidade.
-
-### Exemplos
-
-- **Seguindo o Padrão:**
-  - Todos os componentes de UI reutilizáveis estão localizados em `/client/components`. Por exemplo: `examples/investy/client/components/Button/index.tsx`, `examples/investy/client/components/Table/index.tsx`.
-  - Funções auxiliares específicas do cliente estão em `/client/utils`. Por exemplo: `examples/investy/client/utils/style.ts`, `examples/investy/client/utils/route.ts`.
-  - Definições de configuração estão em `/client/config`. Por exemplo: `examples/investy/client/config/route.ts`, `examples/investy/client/config/api.ts`.
-
-## Centralização de Configurações Client-side
-
-### Descrição
-
-As configurações específicas do lado do cliente (como chaves de autenticação, URLs de API, rotas) são definidas em arquivos separados dentro do diretório `/client/config`. Cada arquivo geralmente agrupa configurações relacionadas e as exporta como objetos constantes.
-
-### Exemplos
-
-- **Seguindo o Padrão:**
-  ```typescript
-  // examples/investy/client/config/api.ts
-  export const apiConfig = { // Objeto de configuração
-      baseURL: process.env.NEXT_PUBLIC_API_BASE_URL
-  }
-  ```
-  ```typescript
-  // examples/investy/client/config/route.ts
-  export const routeConfig: Record<PageName, RouteInfo> = { // Objeto de configuração
-      root: { /* ... */ },
-      login: { /* ... */ },
-      // ...
-  }
-  ```
-  ```typescript
-  // examples/investy/client/config/auth.ts
-  export const authConfig = { // Objeto de configuração
-      authTokenKey: "x-investy-auth-token"
-  }
-  ```
+- Não há violações explícitas deste padrão na base de código fornecida. Os componentes que utilizam sub-componentes parecem seguir essa estrutura consistentemente.
+```
 
 ---
 
 ```
-## Padrão de Componentes Compostos
+## Estrutura de Diretórios de Componentes/Módulos
 
 ### Descrição
 
-Componentes de interface do usuário que consistem em múltiplas partes inter-relacionadas são frequentemente estruturados utilizando o padrão de Componentes Compostos. Isso envolve anexar sub-componentes (como `Content`, `Trigger`, `Head`, `Body`, `Column`, `Row`, `Item`) como propriedades ao componente principal (como `Modal`, `Table`, `Dropdown`). Essa abordagem permite uma maneira declarativa de compor estruturas de UI complexas, onde a relação entre as partes é clara no uso. No entanto, este padrão não é aplicado universalmente a todas as composições de componentes na base de código fornecida.
+Componentes React do lado do cliente, hooks e serviços, bem como módulos do lado do servidor como controllers, middlewares e adapters, são organizados em diretórios de nível superior dedicados (`client/components`, `client/hooks`, `client/services`, `@server/controllers`, `@server/middlewares`, `@server/adapters`, etc.). Dentro desses diretórios, entidades individuais (componentes, hooks, serviços, etc.) geralmente residem em seu próprio subdiretório nomeado após a entidade, contendo um arquivo `index.ts` ou `index.tsx` que exporta a entidade principal.
 
 ### Exemplos
 
-**Exemplo que segue o padrão:**
-A utilização do componente `Modal` em `examples/investy/client/components/PopConfirm/index.tsx` demonstra a composição usando sub-componentes `Modal.Content` e `Modal.Trigger`:
+**Seguindo o padrão:**
 
-```typescript
-<Modal
-	title="Are you sure?"
-	onConfirm={onConfirm}
->
-	<Modal.Content>
-		{description}
-	</Modal.Content>
+- `client/components/InputLabel/index.tsx`: O componente `InputLabel` está em seu próprio diretório `InputLabel` dentro de `client/components`, com o componente exportado de `index.tsx`.
+- `@server/controllers/NotionAssetSyncController`: Importado usando um alias que implica uma estrutura de diretório semelhante a `@server/controllers/NotionAssetSyncController/index.ts`.
 
-	<Modal.Trigger>
-		{children}
-	</Modal.Trigger>
-</Modal>
+**Violando o padrão:**
+
+- Com base nos trechos de código fornecidos, este padrão parece ser aplicado consistentemente. Não há exemplos claros de violação dentro do escopo do código analisado.
+
 ```
 
-**Exemplo que viola o padrão:**
-A composição de um rótulo (`InputLabel`) e um campo de texto (`TextInput`) em `examples/investy/client/pages/Login/index.tsx` não utiliza um componente composto (`FormGroup` ou similar), tratando `InputLabel` e `TextInput` como componentes separados, apesar de estarem semanticamente relacionados em um formulário:
-
-```typescript
-<div>
-	<InputLabel
-		inputName="email"
-	>
-		Email
-	</InputLabel>
-	<TextInput
-		fullWidth
-		name="email"
-		value={data.email}
-		onValueChange={value => handleChange("email", value)}
-		errorMessage={validation.messages.email}
-	/>
-</div>
 ```
+## Definição de Componentes Funcionais React
+
+### Descrição
+
+Componentes funcionais React são definidos consistentemente usando a sintaxe `const ComponentName: FC<Props> = (props) => { ... }` (ou `FC` sem tipo de props explícito se nenhuma for esperada). As props são tipicamente desestruturadas no início do corpo da função. O componente principal é exportado como o `default export` do seu módulo.
+
+### Exemplos
+
+**Seguindo o padrão:**
+
+- `client/components/InputLabel/index.tsx`:
+  ```typescript
+  const InputLabel: FC<InputLabelProps> = (props) => {
+  	const {
+  		inputName,
+  		children
+  	} = props
+
+  	return (
+  		// ... JSX
+  	)
+  }
+
+  export default InputLabel
+  ```
+- `client/components/PopConfirm/index.tsx`:
+  ```typescript
+  const PopConfirm: FC<PopConfirmProps> = (props) => {
+  	const {
+  		description,
+  		children,
+  		onConfirm
+  	} = props
+
+  	return (
+  		// ... JSX
+  	)
+  }
+
+  export default PopConfirm
+  ```
+
+**Violando o padrão:**
+
+- `client/components/PageContainer/index.tsx`:
+  ```typescript
+  const PageContainer: FC = (props) => (
+  	<div className="fixed inset-0 flex justify-center p-4">
+  		{props.children} // Props não desestruturadas
+  	</div>
+  )
+
+  export default PageContainer
+  ```
+
+```
+
+```
+## Composição de Handlers de Rotas de API
+
+### Descrição
+
+Rotas de API do lado do servidor definidas em `pages/api/` utilizam o adaptador `NextHttpAdapter.createApiHandlerRoute` para mapear métodos HTTP (como `post`, `get`, `put`) para um array de funções handler. Esses arrays tipicamente incluem funções middleware adaptadas por `NextHttpAdapter.adaptApiHandler` antes da função controller final, estabelecendo uma cadeia de execução.
+
+### Exemplos
+
+**Seguindo o padrão:**
+
+- `pages/api/users/login.ts`:
+  ```typescript
+  export default NextHttpAdapter.createApiHandlerRoute({
+  	post: [
+  		NextHttpAdapter.adaptApiHandler(InfraMiddleware.setup),
+  		NextHttpAdapter.adaptApiHandler(UserController.login)
+  	]
+  })
+  ```
+- `pages/api/asset-syncs/notion.ts`:
+  ```typescript
+  export default NextHttpAdapter.createApiHandlerRoute({
+  	post: [
+  		NextHttpAdapter.adaptApiHandler(InfraMiddleware.setup),
+  		NextHttpAdapter.adaptApiHandler(AuthMiddleware.requireAuth),
+  		NextHttpAdapter.adaptApiHandler(NotionAssetSyncController.create)
+  	],
+  	get: [
+  		NextHttpAdapter.adaptApiHandler(InfraMiddleware.setup),
+  		NextHttpAdapter.adaptApiHandler(AuthMiddleware.requireAuth),
+  		NextHttpAdapter.adaptApiHandler(NotionAssetSyncController.retrieveAll)
+  	]
+  })
+  ```
+
+**Violando o padrão:**
+
+- `pages/api/queues/SyncNotionAssetPrice.ts`:
+  ```typescript
+  export default QuirrelQueueAdapter.adaptQueueHandler(SyncNotionAssetPriceQueue) // Não usa createApiHandlerRoute
+  ```
+
+```
+
+```
+## Uso Centralizado do Cliente API
+
+### Descrição
+
+Todas as interações do lado do cliente com a API de backend são realizadas utilizando uma única instância Axios pré-configurada chamada `api`, importada do módulo `@client/services/api`. Esta instância é configurada com a URL base da API e interceptadores para lidar com autenticação e erros.
+
+### Exemplos
+
+**Seguindo o padrão:**
+
+- `client/pages/AssetSyncs/Notion/index.tsx`:
+  ```typescript
+  const response = await api.get<NotionAssetSync[]>("/asset-syncs/notion")
+  // ...
+  await api.post(`/asset-syncs/${notionAssetSync.id}/notion`)
+  ```
+- `client/pages/Login/index.tsx`:
+  ```typescript
+  const response = await api.post<{ authToken: string }>("/users/login", data)
+  ```
+
+**Violando o padrão:**
+
+- Com base nos trechos de código fornecidos, este padrão parece ser aplicado consistentemente. Não há exemplos claros de violação onde uma instância Axios diferente ou `fetch` nativo seja usado para chamadas de API de backend.
+
+```
+
+```
+## Gerenciamento Centralizado de Autenticação
+
+### Descrição
+
+A lógica relacionada à autenticação, incluindo o armazenamento e recuperação do token de autenticação no `localStorage`, bem como o tratamento de redirecionamentos após login e logout, é encapsulada dentro do módulo `@client/services/auth.ts`. O cliente API (`@client/services/api.ts`) integra-se a este serviço através de interceptadores para adicionar o token aos cabeçalhos das requisições e lidar com respostas não autorizadas (status 401).
+
+### Exemplos
+
+**Seguindo o padrão:**
+
+- `client/services/auth.ts`: Define funções como `setAuthToken`, `getAuthToken`, `loginAndRedirect`, `logoutAndRedirect`.
+- `client/services/api.ts`:
+  ```typescript
+  api.interceptors.request.use(async config => {
+  	config.headers[authConfig.authTokenKey] = getAuthToken() // Usa getAuthToken
+  	return config
+  })
+
+  api.interceptors.response.use(async requestConfig => requestConfig, async error => {
+  	const statusCode = getErrorResponseStatusCode(error)
+
+  	if (statusCode) {
+  		logoutAndRedirect() // Usa logoutAndRedirect
+  	}
+
+  	return Promise.reject(error)
+  })
+  ```
+- `client/pages/Login/index.tsx`:
+  ```typescript
+  loginAndRedirect(response.data.authToken) // Usa loginAndRedirect
+  ```
+
+**Violando o padrão:**
+
+- Com base nos trechos de código fornecidos, este padrão parece ser aplicado consistentemente. Não há exemplos claros de violação onde a lógica de autenticação (como acesso direto ao `localStorage` para o token de auth) seja tratada fora do serviço `@client/services/auth.ts` ou dos interceptadores da API.
+
+```
+
+```
+## Validação de Formulários com Hook `useValidation`
+
+### Descrição
+
+Formulários que interagem com a API e requerem validação utilizam o hook customizado `useValidation` para gerenciar o estado da validação, processar erros retornados pelas respostas da API (`digestRequestError`), limpar erros de campos específicos (`clearFieldError`) e fornecer mensagens de erro formatadas (`validation.messages`) para exibição ao lado dos campos de input.
+
+### Exemplos
+
+**Seguindo o padrão:**
+
+- `client/pages/Login/index.tsx`:
+  ```typescript
+  const validation = useValidation()
+  // ...
+  onValueChange={value => handleChange("email", value)}
+  errorMessage={validation.messages.email} // Exibe mensagem de erro
+  // ...
+  validation.digestRequestError(error) // Processa erro da API
+  ```
+- `client/pages/Signup/index.tsx`:
+  ```typescript
+  const validation = useValidation()
+  // ...
+  onValueChange={value => handleChange("name", value)}
+  errorMessage={validation.messages.name} // Exibe mensagem de erro
+  // ...
+  validation.digestRequestError(error) // Processa erro da API
+  ```
+
+**Violando o padrão:**
+
+- `client/pages/AssetSyncs/Notion/components/EditAssetSyncModal/index.tsx`: Este componente contém campos de formulário (`TextInput`, `SelectInput`) e lida com a atualização de dados (`handleChange`) e uma ação de salvamento (`handleSave` que chama `onSave`), mas não utiliza o hook `useValidation` para gerenciar ou exibir erros de validação, incluindo potenciais erros retornados pela API na função `onSave`.
+
+```
+
+```
+## Gerenciamento de Estado Local com `useState`
+
+### Descrição
+
+Componentes funcionais React gerenciam seu estado interno e mutável utilizando o hook `useState` fornecido pelo React. Este é o mecanismo padrão para armazenar e atualizar dados que afetam a renderização do componente.
+
+### Exemplos
+
+**Seguindo o padrão:**
+
+- `client/pages/AssetSyncs/Notion/index.tsx`:
+  ```typescript
+  const [notionAssetSyncs, setNotionAssetSyncs] = useState<NotionAssetSync[]>([])
+  const [loading, setLoading] = useState(true)
+  ```
+- `client/pages/Login/index.tsx`:
+  ```typescript
+  const [data, setData] = useState({} as Data)
+  const [loading, setLoading] = useState(false)
+  ```
+- `client/pages/AssetSyncs/Notion/components/EditAssetSyncModal/index.tsx`:
+  ```typescript
+  const [updatedData, setUpdatedData] = useState<Data>(data)
+  const [foundDatabases, setFoundDatabases] = useState<Database[]>([mockedCurrentDatabase])
+  ```
+
+**Violando o padrão:**
+
+- Com base nos trechos de código fornecidos, este padrão parece ser aplicado consistentemente. Todos os componentes que precisam gerenciar estado local utilizam o hook `useState`.
+
 ```
