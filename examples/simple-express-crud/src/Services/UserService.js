@@ -5,10 +5,6 @@ class UserService {
 		return UserRepository.getAll()
 	}
 
-	retrieveOne (id) {
-		return UserRepository.getById(id)
-	}
-
 	create (user) {
 		return UserRepository.create(user)
 	}
