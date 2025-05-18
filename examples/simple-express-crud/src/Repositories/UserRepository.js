@@ -16,7 +16,7 @@ class UserRepository {
 		})
 	}
 
-	createMany (userList) {
+	createMultiple (userList) {
 		UserRepository.#users.push(userList.map(user => ({
 			...user,
 			id: Date.now().toString()
