@@ -16,14 +16,14 @@ jobs:
       max-parallel: 1
       matrix:
         target:
+          - project_name: "simple-express-crud"
+            folder_path: "examples/simple-express-crud"
+            llm_provider: "gemini"
+            target_files: "*.js"
           - project_name: "kindlefy"
             folder_path: "examples/kindlefy"
             llm_provider: "gemini"
             target_files: "*.ts"
-          - project_name: "simple-express-crud"
-            folder_path: "examples/simple-express-crud"
-            llm_provider: "openai"
-            target_files: "*.js"
           - project_name: "investy"
             folder_path: "examples/investy"
             llm_provider: "gemini"
