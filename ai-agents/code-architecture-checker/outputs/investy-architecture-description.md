@@ -1,132 +1,146 @@
-## Estrutura de Diretórios Baseada em Camadas/Funções
+## Padrão de Organização por Camadas (Server)
 
 ### Descrição
 
-O código organiza os arquivos em diretórios que correspondem a camadas arquiteturais ou funções específicas dentro da aplicação. No lado do servidor (`server`), há diretórios distintos para `adapters`, `config`, `controllers`, `entities`, `exceptions`, `infra`, `lib`, `middlewares`, `protocols`, `queues`, `repositories`, `schemas`, `services`, e `utils`. No lado do cliente (`client`), há diretórios para `adapters`, `assets`, `components`, `config`, `hooks`, `pages`, `protocols`, `routes`, e `utils`. Essa estrutura promove a separação de responsabilidades e facilita a localização de código relacionado.
+O código do lado do servidor segue um padrão de organização por camadas, onde as responsabilidades são separadas em diretórios distintos. Cada diretório tende a conter módulos com um propósito específico dentro da arquitetura da aplicação.
 
 ### Exemplos
 
-- **Segue o padrão:**
-  - Arquivos relacionados à lógica de negócio estão em `server/services` (ex: `LogService.ts`, `AuthService.ts`).
-  - Arquivos que definem a interação com o banco de dados estão em `server/repositories` (ex: `UserRepository.ts`, `IntegrationRepository.ts`).
-  - Componentes de interface do usuário estão em `client/components` (ex: `Button/index.tsx`, `Table/index.tsx`).
+*   **Seguindo o padrão:**
+    *   `server/controllers/`: Contém a lógica para lidar com requisições HTTP. Ex: `NotionIntegrationController.ts`.
+    *   `server/services/`: Contém a lógica de negócio e orquestração. Ex: `AuthService.ts`.
+    *   `server/repositories/`: Contém a lógica de acesso a dados. Ex: `UserRepository.ts`.
+    *   `server/lib/`: Contém wrappers para APIs externas. Ex: `NotionLib.ts`.
+    *   `server/adapters/`: Contém wrappers para bibliotecas externas. Ex: `MongooseRepositoryAdapter.ts`.
+    *   `server/middlewares/`: Contém lógica para pré-processar requisições. Ex: `AuthMiddleware.ts`.
+    *   `server/utils/`: Contém funções utilitárias genéricas. Ex: `StringUtil.ts`.
+    *   `server/config/`: Contém configurações da aplicação. Ex: `DatabaseConfig.ts`.
+    *   `server/entities/`: Contém definições de entidades de dados. Ex: `UserEntity.ts`.
+    *   `server/schemas/`: Contém definições de schemas de banco de dados. Ex: `UserSchema.ts`.
+    *   `server/protocols/`: Contém definições de tipos e interfaces. Ex: `HttpContract.ts`.
+    *   `server/exceptions/`: Contém definições de exceções customizadas. Ex: `QueueProcessException.ts`.
+    *   `server/queues/`: Contém handlers para processamento de filas. Ex: `SyncNotionAssetPriceQueue.ts`.
+    *   `server/infra/`: Contém módulos para inicialização de infraestrutura. Ex: `DatabaseModule.ts`.
 
-- **Viola o padrão:** (Não há violações explícitas no código fornecido, pois a estrutura é consistentemente aplicada).
+*   **Violando o padrão:** Não há violações óbvias deste padrão na estrutura de diretórios fornecida.
 
-## Convenção de Nomenclatura `[Nome][Tipo]`
+## Padrão de Nomenclatura por Responsabilidade (Server)
 
 ### Descrição
 
-Uma convenção de nomenclatura consistente é utilizada, onde os nomes de arquivos e classes frequentemente terminam com um sufixo que indica seu tipo ou função arquitetural (por exemplo, `Service`, `Repository`, `Controller`, `Util`, `Lib`, `Middleware`, `Validation`, `Config`, `Entity`, `Schema`, `Adapter`, `Contract`, `Protocol`, `Component`, `Hook`). Isso torna a função de um arquivo ou classe imediatamente clara a partir de seu nome.
+No lado do servidor, os arquivos e classes são nomeados com um sufixo que indica sua principal responsabilidade ou camada na arquitetura.
 
 ### Exemplos
 
-- **Segue o padrão:**
-  - `LogService.ts` (indica um serviço de log).
-  - `UserRepository.ts` (indica um repositório para a entidade User).
-  - `NotionIntegrationController.ts` (indica um controlador para integrações Notion).
-  - `StringUtil.ts` (indica uma classe de utilidades para strings).
-  - `DatabaseConfig.ts` (indica um arquivo de configuração de banco de dados).
-  - `UserEntity.ts` (indica uma entidade de usuário).
-  - `UserSchema.ts` (indica um schema Mongoose para usuário).
-  - `MongooseRepositoryAdapter.ts` (indica um adapter para repositórios Mongoose).
-  - `AuthMiddleware.ts` (indica um middleware de autenticação).
-  - `UserValidation.ts` (indica lógica de validação para usuários).
-  - `RepositoryContract.ts` (indica um contrato/interface para repositórios).
-  - `AuthProtocol.ts` (indica um protocolo/tipo para autenticação).
-  - `Button/index.tsx` (indica um componente Button).
-  - `useDidMount.ts` (indica um hook React).
+*   **Seguindo o padrão:**
+    *   `*Controller`: `UserController`, `NotionIntegrationController`.
+    *   `*Service`: `AuthService`, `LogService`, `IntegrationService`.
+    *   `*Repository`: `UserRepository`, `IntegrationRepository`, `AssetSyncRepository`.
+    *   `*Lib`: `NotionLib`, `StatusInvestLib`.
+    *   `*Adapter`: `MongooseRepositoryAdapter`, `NextHttpAdapter`, `QuirrelQueueAdapter`.
+    *   `*Middleware`: `AuthMiddleware`, `InfraMiddleware`.
+    *   `*Util`: `StringUtil`, `MongooseUtil`, `ValidationUtil`.
+    *   `*Config`: `AuthConfig`, `DatabaseConfig`.
+    *   `*Entity`: `UserEntity`, `IntegrationEntity`.
+    *   `*Schema`: `UserSchema`, `IntegrationSchema`.
+    *   `*Protocol`: `HttpContract`, `RepositoryContract`.
+    *   `*Exception`: `QueueProcessException`.
+    *   `*Queue`: `SyncNotionAssetPriceQueue`.
 
-- **Viola o padrão:** (Não há violações explícitas no código fornecido, pois a convenção é consistentemente aplicada).
+*   **Violando o padrão:** Não há violações óbvias deste padrão na nomenclatura dos arquivos fornecidos.
 
-## Padrão Repository com Adapter Mongoose
+## Padrão de Módulos Singleton
 
 ### Descrição
 
-O acesso ao banco de dados (Mongoose) é abstraído através do padrão Repository. Classes de repositório específicas (como `UserRepository`, `IntegrationRepository`, `AssetSyncRepository`) não interagem diretamente com o Mongoose, mas sim estendem uma classe `MongooseRepositoryAdapter`. Este adapter encapsula a lógica genérica de interação com o Mongoose (criar, buscar, atualizar, deletar), promovendo a reutilização de código e desacoplando a lógica de negócio da implementação específica do ORM.
+Muitos módulos são implementados como classes e exportados como uma única instância padrão (`export default new ClassName()`). Isso garante que haja apenas uma instância desses módulos em toda a aplicação, funcionando de forma semelhante ao padrão Singleton.
 
 ### Exemplos
 
-- **Segue o padrão:**
-  - `UserRepository` estende `MongooseRepositoryAdapter<UserEntity>` e é instanciado com `UserSchema`.
-  - `IntegrationRepository` estende `MongooseRepositoryAdapter<IntegrationEntity>` e é instanciado com `IntegrationSchema`.
-  - `AssetSyncRepository` estende `MongooseRepositoryAdapter<AssetSyncEntity>` e é instanciado com `AssetSyncSchema`.
+*   **Seguindo o padrão:**
+    *   `export default new DatabaseModule()` em `server/infra/database/index.ts`.
+    *   `export default new LogService()` em `server/services/LogService.ts`.
+    *   `export default new UserRepository(UserSchema)` em `server/repositories/UserRepository.ts`.
+    *   `export default new NextHttpAdapter()` em `server/adapters/NextHttpAdapter.ts`.
 
-- **Viola o padrão:** (Não há violações explícitas no código fornecido, pois todos os repositórios Mongoose seguem este padrão).
+*   **Violando o padrão:**
+    *   `export default NotionLib` em `server/lib/NotionLib.ts` (exporta a classe, não uma instância).
+    *   `export default NodeCacheAdapter` em `server/adapters/NodeCacheAdapter.ts` (exporta a classe, que é instanciada em `InMemoryCacheService`).
 
-## Padrão Controller (API Server) com Resposta Padronizada
+## Padrão Repository
 
 ### Descrição
 
-As classes localizadas no diretório `server/controllers` são responsáveis por lidar com as requisições HTTP recebidas. Cada método de um controlador recebe um objeto `ApiHandlerInput` que contém objetos `request` e `response` padronizados. O objeto `response` fornece métodos consistentes (`ok`, `badRequest`, `notFound`, `serverError`, `noContent`, `created`, `unauthorized`, `forbidden`, `next`) para enviar respostas HTTP, garantindo um formato de resposta uniforme em toda a API.
+A lógica de acesso a dados para entidades específicas é encapsulada em classes dedicadas (`*Repository`), que abstraem os detalhes da implementação do banco de dados (neste caso, Mongoose) do restante da aplicação. Essas classes geralmente estendem um adaptador genérico de repositório.
 
 ### Exemplos
 
-- **Segue o padrão:**
-  - Em `NotionIntegrationController.ts`, o método `searchDatabase` recebe `ApiHandlerInput` e usa `response.notFound()` ou `response.ok()`.
-  - Em `UserController.ts`, o método `signup` recebe `ApiHandlerInput` e usa `response.badRequest()` ou `response.created()`.
-  - Em `IntegrationController.ts`, o método `create` recebe `ApiHandlerInput` e usa `response.badRequest()` ou `response.created()`.
+*   **Seguindo o padrão:**
+    *   `class IntegrationRepository extends MongooseRepositoryAdapter<IntegrationEntity> {}` em `server/repositories/IntegrationRepository.ts`.
+    *   `class UserRepository extends MongooseRepositoryAdapter<UserEntity> {}` em `server/repositories/UserRepository.ts`.
+    *   `class AssetSyncRepository extends MongooseRepositoryAdapter<AssetSyncEntity> {}` em `server/repositories/AssetSyncRepository.ts`.
 
-- **Viola o padrão:** (Não há violações explícitas no código fornecido, pois todos os controladores seguem este padrão de entrada e saída).
+*   **Violando o padrão:** Não há violações óbvias deste padrão no código fornecido, pois todas as interações com o Mongoose (além da conexão inicial na infraestrutura) parecem ocorrer dentro dos adaptadores ou repositórios.
 
-## Exportação Singleton-like para Módulos
+## Padrão Adapter
 
 ### Descrição
 
-Muitas classes que representam módulos ou serviços (como `Services`, `Repositories`, `Controllers`, `Utils`, `Libs`, `Middlewares`, `Infra` modules) são exportadas como uma única instância utilizando `export default new ClassName()`. Isso garante que haja apenas uma instância desses módulos em toda a aplicação, facilitando o gerenciamento de estado e a injeção de dependências implícita.
+Bibliotecas externas ou frameworks são encapsulados em classes `*Adapter` localizadas no diretório `server/adapters/`. Isso cria uma camada de abstração, isolando o código principal dos detalhes específicos dessas dependências.
 
 ### Exemplos
 
-- **Segue o padrão:**
-  - `export default new DatabaseModule()` em `server/infra/database/index.ts`.
-  - `export default new LogService()` em `server/services/LogService.ts`.
-  - `export default new UserRepository(UserSchema)` em `server/repositories/UserRepository.ts`.
-  - `export default new NotionIntegrationController()` em `server/controllers/NotionIntegrationController.ts`.
-  - `export default new StringUtil()` em `server/utils/StringUtil.ts`.
-  - `export default new AuthMiddleware()` em `server/middlewares/AuthMiddleware.ts`.
-  - `export default new UserValidation()` em `server/validations/UserValidation.ts`.
+*   **Seguindo o padrão:**
+    *   `MongooseRepositoryAdapter` encapsula a interação com modelos Mongoose.
+    *   `QuirrelQueueAdapter` encapsula a interação com a biblioteca Quirrel.
+    *   `NextHttpAdapter` encapsula a interação com os objetos de requisição e resposta do Next.js API.
+    *   `NodeCacheAdapter` encapsula a interação com a biblioteca node-cache.
 
-- **Viola o padrão:**
-  - `export default NotionLib` em `server/lib/NotionLib.ts`. Esta classe é exportada como a própria classe, permitindo múltiplas instanciações (como visto em `SyncNotionAssetPriceQueue.ts` e `NotionAssetSyncController.ts` onde `new NotionLib(token)` é chamado).
-  - `export default MongooseRepositoryAdapter` em `server/adapters/MongooseRepositoryAdapter.ts`. Esta classe é exportada para ser estendida e instanciada por outras classes.
-  - `export default NodeCacheAdapter` em `server/adapters/NodeCacheAdapter.ts`. Esta classe é exportada para ser instanciada (como visto em `NotionAssetSyncController.ts`).
+*   **Violando o padrão:** Uso direto de APIs de bibliotecas externas (como `mongoose.connect`, `new Queue(...)`, `new Client(...)` do `@notionhq/client`, `axios.create`, `new NodeCache(...)`) fora dos diretórios `adapters/`, `infra/` ou `lib/`. `StatusInvestLib` usa `axios.create` diretamente, o que poderia ser considerado uma violação se o padrão fosse "tudo que não é lógica de negócio vai para adapters", mas aqui `axios` é usado dentro de uma `Lib`, que é outra forma de encapsulamento para APIs externas. O padrão de `adapters/` parece focado em encapsular tecnologias de infraestrutura ou frameworks usados em várias camadas.
 
----
-
-## Desestruturação de Props em Componentes
+## Padrão de Resposta Padronizada (Server API)
 
 ### Descrição
 
-Componentes funcionais frequentemente desestruturam o objeto `props` no início da função para acessar propriedades individuais como `children` e outras props específicas. Este padrão torna o acesso às props mais direto e legível dentro do corpo do componente.
+Os controladores de API utilizam consistentemente os métodos definidos na interface `ApiHandlerResponse` (fornecida pelo `NextHttpAdapter`) para construir e enviar respostas HTTP. Isso garante um formato de resposta uniforme em toda a API.
 
 ### Exemplos
 
-**Seguindo o padrão:**
+*   **Seguindo o padrão:**
+    *   `return response.ok(databases)` em `NotionIntegrationController.ts`.
+    *   `return response.badRequest(validation.fieldErrors)` em `UserController.ts`.
+    *   `return response.noContent()` em `NotionAssetSyncController.ts`.
+    *   `return response.unauthorized()` em `AuthMiddleware.ts`.
 
-```typescript
-const InputLabel: FC<InputLabelProps> = (props) => {
-	const {
-		inputName,
-		children
-	} = props
+*   **Violando o padrão:** Não há violações óbvias deste padrão no código fornecido; todos os controladores e middlewares utilizam os métodos do objeto `response`.
 
-	return (
-		<label
-			className="block text-gray-900 text-sm font-medium mb-2"
-			htmlFor={inputName}
-		>
-			{children}
-		</label>
-	)
-}
-```
+## Padrão de Composição de Componentes com Sub-Componentes (Client)
 
-**Violando o padrão:**
+### Descrição
 
-```typescript
-const PageContainer: FC = (props) => (
-	<div className="fixed inset-0 flex justify-center p-4">
-		{props.children}
-	</div>
-)
-```
+Alguns componentes React no lado do cliente utilizam um padrão específico para gerenciar e renderizar seus sub-componentes. Eles definem sub-componentes e os anexam ao componente principal usando `attachSubComponents`, e então utilizam o hook `useSubComponents` para extrair e renderizar esses sub-componentes a partir dos `children`.
+
+### Exemplos
+
+*   **Seguindo o padrão:**
+    *   O componente `Table` define `TableBody`, `TableColumn`, `TableHead`, `TableRow` como sub-componentes e os anexa. Ele usa `useSubComponents` para acessar `subComponents.Body`, `subComponents.Head`.
+    *   O componente `Modal` define `ModalContent` e `ModalTrigger` como sub-componentes e os anexa. Ele usa `useSubComponents` para acessar `subComponents.Content` e `subComponents.Trigger`.
+    *   O componente `Dropdown` define `DropdownItem` e `DropdownTrigger` como sub-componentes e os anexa. Ele usa `useSubComponents` para acessar `subComponents.Item` e `subComponents.Trigger`.
+    *   O componente `SelectInput` define `SelectInputOption` como sub-componente e o anexa. Ele usa `useSubComponents` para acessar `subComponents.Option`.
+
+*   **Violando o padrão:**
+    *   O componente `ApplicationLayout` renderiza seus componentes filhos (`AsideMenu`, `Breadcrumb`, `Divider`, `Link`, `MenuItem`) diretamente usando composição padrão do React, sem definir ou usar o mecanismo `attachSubComponents`/`useSubComponents`.
+
+## Padrão de Cadeia de Middlewares e Controller (Server API)
+
+### Descrição
+
+As rotas de API no Next.js (`pages/api/`) são definidas como uma cadeia de handlers (middlewares e o controller final) utilizando o método `createApiHandlerRoute` do `NextHttpAdapter`. Isso permite a aplicação sequencial de lógica (como autenticação, inicialização de infraestrutura) antes de chegar ao controlador principal.
+
+### Exemplos
+
+*   **Seguindo o padrão:**
+    *   `pages/api/asset-syncs/notion.ts` define handlers `InfraMiddleware.setup`, `AuthMiddleware.requireAuth` e `NotionAssetSyncController.create` (para POST) e `NotionAssetSyncController.retrieveAll` (para GET) em uma cadeia.
+    *   `pages/api/users/login.ts` define handlers `InfraMiddleware.setup` e `UserController.login` em uma cadeia.
+
+*   **Violando o padrão:** Não há violações óbvias deste padrão no código fornecido; todas as rotas de API parecem seguir essa estrutura.
