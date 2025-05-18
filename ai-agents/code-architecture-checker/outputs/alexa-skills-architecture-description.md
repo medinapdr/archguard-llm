@@ -1,102 +1,75 @@
-## Organização de Arquivos por Tipo e Funcionalidade
+## Convenções de Nomenclatura
 
 ### Descrição
 
-O código organiza os arquivos em diretórios baseados no tipo de funcionalidade que eles representam. Existem diretórios de nível superior como `Config`, `Services`, `Modules`, `Utils` e `Protocols`. Dentro do diretório `Skills`, há subdiretórios para cada skill específica (`OnePieceMangaSpoiler`), que por sua vez contêm subdiretórios para os tipos de arquivos relacionados a essa skill (`Constants`, `Modules`, `Services`, `Utils`, `Protocols`). Este padrão promove a separação de interesses e facilita a localização de arquivos por sua função e pela skill a que pertencem.
+O código segue convenções de nomenclatura consistentes para diferentes tipos de componentes e funções. Classes que fornecem funcionalidades genéricas ou específicas de domínio são frequentemente nomeadas com sufixos como `Service` ou `Util`. Módulos que orquestram lógica ou adaptam frameworks são nomeados com o sufixo `Module`. Arquivos de definição de tipos são nomeados com o sufixo `Protocol`. Arquivos de constantes são nomeados com o sufixo `Constant`. Funções que recuperam dados geralmente começam com `get`, funções que verificam condições começam com `is` ou `canHandle`, e métodos de manipuladores de eventos começam com `on`.
 
 ### Exemplos
 
-**Seguindo o padrão:**
+- **Segue:**
+  - `OpexService.ts`, `HttpService.ts`, `CrawlerService.ts` (Sufixo `Service` para classes de funcionalidade).
+  - `DateUtil.ts`, `SanitizationUtil.ts`, `HandlerUtil.ts`, `ServerlessUtil.ts` (Sufixo `Util` para classes de utilidade).
+  - `OpexModule.ts`, `HandlerAdapterModule.ts`, `HandlerModule.ts` (Sufixo `Module` para classes de módulo/orquestração).
+  - `OpexProtocol.ts`, `CrawlerProtocol.ts`, `HandlerProtocol.ts`, `ServerlessProtocol.ts`, `HttpProtocol.ts`, `SkillProtocol.ts` (Sufixo `Protocol` para definições de tipo).
+  - `SpoilerContentPhrasesConstant.ts` (Sufixo `Constant` para constantes).
+  - `getSpoilerPageUrlByLandingPageHTML`, `getSpoilerInfoBySpoilerPageHTML`, `getTodayDate` (Funções que recuperam dados começam com `get`).
+  - `isSameWeek`, `canHandleCustomIntent` (Funções que verificam condições começam com `is` ou `canHandle`).
+  - `onLaunch`, `onOnePieceMangaSpoilerIntent`, `onHelp` (Métodos de manipuladores de eventos começam com `on`).
 
--   `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`: Um serviço específico da skill `OnePieceMangaSpoiler` localizado no diretório `Services` dentro do diretório da skill.
--   `examples/alexa-skills/src/Protocols/HandlerProtocol.ts`: Um arquivo de definição de tipos (protocolo) para handlers, localizado no diretório `Protocols` de nível superior.
+- **Viola:** Nenhuma violação explícita das convenções de nomenclatura repetidas foi encontrada no código fornecido.
 
-**Violando o padrão:**
-
--   Nenhum exemplo de violação deste padrão foi encontrado no código fornecido. Todos os arquivos parecem seguir a estrutura de diretórios baseada em tipo e funcionalidade.
-
-## Exportação de Instância Única (Singleton Implícito)
+## Organização de Arquivos/Módulos
 
 ### Descrição
 
-Um padrão recorrente é a definição de uma classe e a exportação direta de uma nova instância dessa classe usando `export default new ClassName()`. Isso garante que, ao importar o módulo, o código receba sempre a mesma instância da classe, funcionando como um Singleton implícito para o ponto de importação.
+O código organiza arquivos e módulos em diretórios específicos com base em seu propósito ou domínio. Componentes genéricos ou de infraestrutura compartilhada (como serviços HTTP, utilitários gerais, definições de protocolo e configuração) residem em diretórios de nível superior (`src/Services`, `src/Utils`, `src/Protocols`, `src/Config`). A lógica específica de cada skill (habilidade da Alexa) é agrupada em um diretório dedicado dentro de `src/Skills/<SkillName>`, contendo seus próprios subdiretórios para constantes, protocolos, serviços, módulos e utilitários específicos da skill, além do ponto de entrada principal (`index.ts`). Arquivos de teste são colocados ao lado do código que testam, usando sufixos `.unit.test.ts` ou `.integration.test.ts`.
 
 ### Exemplos
 
-**Seguindo o padrão:**
+- **Segue:**
+  - `src/Services/HttpService.ts` e `src/Services/CrawlerService.ts` (Serviços genéricos em `src/Services`).
+  - `src/Utils/DateUtil.ts` e `src/Utils/SanitizationUtil.ts` (Utilitários genéricos ou específicos de domínio em `src/Utils` ou `src/Skills/<SkillName>/Utils`).
+  - `src/Protocols/OpexProtocol.ts` e `src/Protocols/HandlerProtocol.ts` (Definições de tipo em `src/Protocols` ou `src/Skills/<SkillName>/Protocols`).
+  - `src/Config/SkillConfig.ts` (Configuração em `src/Config`).
+  - `src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts` (Serviço específico da skill em `src/Skills/<SkillName>/Services`).
+  - `src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.ts` (Módulo específico da skill em `src/Skills/<SkillName>/Modules`).
+  - `src/Skills/OnePieceMangaSpoiler/index.ts` (Ponto de entrada da skill em `src/Skills/<SkillName>/index.ts`).
+  - `src/Skills/OnePieceMangaSpoiler/Services/OpexService.unit.test.ts` (Teste unitário ao lado do serviço).
 
--   `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`: Exporta `export default new OpexService()`.
--   `examples/alexa-skills/src/Utils/DateUtil.ts`: Exporta `export default new DateUtil()`.
+- **Viola:** Nenhuma violação explícita do padrão de organização de arquivos/módulos repetido foi encontrada no código fornecido.
 
-**Violando o padrão:**
-
--   `examples/alexa-skills/src/Services/HttpService.ts`: Exporta a classe em si (`export default HttpService`) em vez de uma instância.
--   `examples/alexa-skills/src/Modules/HandlerModule.ts`: Exporta a classe abstrata em si (`export default HandlerModule`) em vez de uma instância.
-
-## Definição de Tipos em Arquivos Separados
+## Arquitetura em Camadas
 
 ### Descrição
 
-As definições de tipos e interfaces (protocolos) são consistentemente agrupadas em arquivos separados, localizados dentro de diretórios nomeados `Protocols`. Este padrão mantém as definições de contrato de dados e comportamento separadas da lógica de implementação, melhorando a clareza e a manutenibilidade.
+O código demonstra uma estrutura em camadas onde componentes de nível superior dependem de componentes de nível inferior, mas não o contrário. A lógica de interação com a Alexa (Manipuladores/Handlers) reside na camada mais alta, dependendo de Módulos e Utilitários. Módulos orquestram a lógica de negócio, dependendo de Serviços e outros Módulos. Serviços encapsulam detalhes de implementação ou interações externas (como HTTP ou crawling), dependendo de outros Serviços, Utilitários e Constantes. Utilitários, Constantes e Protocolos formam as camadas mais baixas, sendo dependidos por componentes de níveis superiores.
 
 ### Exemplos
 
-**Seguindo o padrão:**
+- **Segue:**
+  - `OnePieceMangaSpoilerHandler` (Camada Handler) depende de `OpexModule` (Camada Module) e `DateUtil` (Camada Util).
+  - `OpexModule` (Camada Module) depende de `OpexService` (Camada Service) e `HttpService` (Camada Service).
+  - `OpexService` (Camada Service) depende de `CrawlerService` (Camada Service), `DateUtil` (Camada Util), `SanitizationUtil` (Camada Util) e `SpoilerContentPhrasesConstant` (Camada Constant).
+  - `HttpService` (Camada Service) depende de `HttpProtocol` (Camada Protocol).
+  - `DateUtil` (Camada Util) não depende de componentes internos de níveis superiores.
 
--   `examples/alexa-skills/src/Protocols/HandlerProtocol.ts`: Define tipos relacionados a handlers.
--   `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Protocols/OpexProtocol.ts`: Define tipos específicos para a funcionalidade Opex dentro da skill.
+- **Viola:** Nenhuma violação explícita do padrão de arquitetura em camadas repetido (dependência de camada inferior para superior) foi encontrada no código fornecido.
 
-**Violando o padrão:**
-
--   Nenhum exemplo de violação deste padrão foi encontrado no código fornecido. Todas as definições de tipo parecem estar localizadas em arquivos dentro de diretórios `Protocols`.
-
-## Convenção de Nomenclatura para Arquivos de Teste
+## Separação de Preocupações (SoC)
 
 ### Descrição
 
-Os arquivos de teste seguem uma convenção de nomenclatura específica, terminando com `.unit.test.ts` para testes unitários ou `.integration.test.ts` para testes de integração. Este padrão facilita a identificação rápida do propósito de um arquivo de teste e do tipo de teste que ele contém.
+O código separa responsabilidades distintas em componentes dedicados. Cada classe ou módulo tende a focar em uma única preocupação ou um conjunto coeso de preocupações relacionadas. Por exemplo, há serviços dedicados para HTTP, crawling, lógica específica de scraping de um site, utilitários para datas ou sanitização, módulos para orquestração de lógica de negócio e manipuladores para a interação com a plataforma Alexa.
 
 ### Exemplos
 
-**Seguindo o padrão:**
+- **Segue:**
+  - `HttpService` lida exclusivamente com requisições HTTP.
+  - `CrawlerService` lida exclusivamente com a análise e busca em HTML.
+  - `DateUtil` lida exclusivamente com operações de data.
+  - `SanitizationUtil` lida exclusivamente com a sanitização de strings.
+  - `OpexService` lida com os detalhes específicos da extração de dados do site Opex.
+  - `OpexModule` orquestra o processo de obtenção de informações do Opex, utilizando outros serviços.
+  - `OnePieceMangaSpoilerHandler` lida com a lógica de resposta às requisições da Alexa.
 
--   `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.unit.test.ts`: Arquivo de teste unitário para `OpexService`.
--   `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.integration.test.ts`: Arquivo de teste de integração para `OpexModule`.
-
-**Violando o padrão:**
-
--   Nenhum exemplo de violação deste padrão de nomenclatura para arquivos de teste foi encontrado no código fornecido.
-
-## Convenção de Nomenclatura para Classes de Lógica/Interação
-
-### Descrição
-
-Classes que encapsulam lógica de negócio específica, interações com serviços externos (como HTTP ou crawling) ou orquestração de funcionalidades são nomeadas com o sufixo `Service` ou `Module`. Este padrão ajuda a categorizar a responsabilidade principal da classe.
-
-### Exemplos
-
-**Seguindo o padrão:**
-
--   `examples/alexa-skills/src/Services/HttpService.ts`: Classe para interações HTTP.
--   `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.ts`: Classe que orquestra a obtenção de informações do Opex.
-
-**Violando o padrão:**
-
--   Nenhum exemplo de violação deste padrão de nomenclatura para classes de lógica/interação foi encontrado no código fornecido.
-
-## Convenção de Nomenclatura para Classes de Utilidade
-
-### Descrição
-
-Classes que fornecem funções auxiliares genéricas, reutilizáveis em diferentes partes do código e que geralmente não contêm lógica de negócio complexa, são nomeadas com o sufixo `Util`. Este padrão distingue essas classes de serviços ou módulos mais focados.
-
-### Exemplos
-
-**Seguindo o padrão:**
-
--   `examples/alexa-skills/src/Utils/DateUtil.ts`: Classe com funções auxiliares para manipulação de datas.
--   `examples/alexa-skills/src/Utils/ServerlessUtil.ts`: Classe com funções auxiliares para configuração do Serverless.
-
-**Violando o padrão:**
-
--   Nenhum exemplo de violação deste padrão de nomenclatura para classes de utilidade foi encontrado no código fornecido.
+- **Viola:** Nenhuma violação explícita do padrão de separação de preocupações repetido foi encontrada no código fornecido.
