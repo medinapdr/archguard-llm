@@ -2,60 +2,68 @@
 
 ### Descrição
 
-No código fornecido, há uma convenção de nomenclatura consistente para funções de acesso a dados nos repositórios. As funções de recuperação de dados começam com "get" (por exemplo, `getAll`, `getById`), enquanto as funções de criação começam com "create" (por exemplo, `create`).
+No código fornecido, há uma convenção de nomenclatura clara para funções de acesso a dados. As funções de recuperação de dados seguem o padrão `getX` e as funções de criação seguem o padrão `createX`. Essa convenção ajuda a manter o código consistente e facilita a compreensão das operações realizadas por cada função.
 
 ### Exemplos
 
 - **Segue o padrão**: 
-  - `getAll` e `create` em `UserRepository`.
-  - `getAll` e `create` em `AccountRepository`.
+  - `UserRepository.getAll()`
+  - `UserRepository.create(user)`
+  - `AccountRepository.getAll()`
+  - `AccountRepository.create(account)`
 
 - **Viola o padrão**: 
-  - Se houvesse uma função de recuperação de dados nomeada como `fetchAll` ou `retrieveAll`, isso violaria a convenção observada.
+  - Se houvesse uma função nomeada como `fetchUsers()` ou `addUser()` em vez de `getAll()` ou `create()`, isso violaria a convenção observada.
 
 ## Organização de Arquivos/Módulos
 
 ### Descrição
 
-Os componentes do sistema estão organizados em diretórios específicos de acordo com seu tipo. Por exemplo, os controladores estão no diretório `/Controllers`, os serviços em `/Services`, os repositórios em `/Repositories`, e as validações em `/Validations`.
+Os componentes do sistema estão organizados em diretórios específicos de acordo com seu tipo, como `Controllers`, `Services`, `Repositories`, `Routes`, `Validations`, e `Utils`. Essa organização facilita a manutenção e a escalabilidade do sistema, permitindo que desenvolvedores encontrem rapidamente o que precisam.
 
 ### Exemplos
 
-- **Segue o padrão**: 
-  - `UserController.js` está em `/Controllers`.
-  - `UserService.js` está em `/Services`.
-  - `UserRepository.js` está em `/Repositories`.
-  - `UserValidation.js` está em `/Validations`.
+- **Segue o padrão**:
+  - `src/Controllers/UserController.js`
+  - `src/Services/UserService.js`
+  - `src/Repositories/UserRepository.js`
+  - `src/Routes/UserRoute.js`
+  - `src/Validations/UserValidation.js`
+  - `src/Utils/ValidatorUtil.js`
 
-- **Viola o padrão**: 
-  - Se `UserController.js` estivesse em `/Services` ou `UserRepository.js` estivesse em `/Controllers`, isso violaria a organização observada.
+- **Viola o padrão**:
+  - Se `UserController` estivesse dentro de `src/Services` ou `UserRepository` dentro de `src/Controllers`, isso violaria a organização observada.
 
 ## Arquitetura em Camadas
 
 ### Descrição
 
-O código segue uma arquitetura em camadas clara, onde há uma separação entre controladores, serviços, repositórios e validações. Cada camada tem uma responsabilidade específica e interage com as outras de maneira definida.
+O código segue uma arquitetura em camadas clara, com separação entre controladores, serviços, repositórios, e validações. Cada camada tem uma responsabilidade específica, o que promove a separação de preocupações e facilita a manutenção e evolução do sistema.
 
 ### Exemplos
 
-- **Segue o padrão**: 
-  - `UserController` chama métodos de `UserService`, que por sua vez interage com `UserRepository`.
-  - `UserValidation` é usado por `UserController` para validar dados antes de chamar `UserService`.
+- **Segue o padrão**:
+  - `UserController` lida com a lógica de requisição e resposta HTTP.
+  - `UserService` contém a lógica de negócios.
+  - `UserRepository` é responsável pelo acesso a dados.
+  - `UserValidation` realiza validações de dados.
 
-- **Viola o padrão**: 
-  - Se `UserController` acessasse diretamente `UserRepository` sem passar por `UserService`, isso violaria a separação de camadas.
+- **Viola o padrão**:
+  - Se `UserController` contivesse lógica de acesso a dados diretamente, ou se `UserRepository` realizasse validações, isso violaria a separação de camadas observada.
 
-## Separação de Responsabilidades (SoC)
+## Separação de Preocupações (SoC)
 
 ### Descrição
 
-O código demonstra uma separação clara de responsabilidades, onde cada classe ou módulo tem uma função específica. Por exemplo, a validação de dados é tratada por `UserValidation`, enquanto a lógica de negócios é gerida por `UserService`.
+O código demonstra uma separação clara de responsabilidades entre diferentes componentes. Cada componente tem uma única responsabilidade, como manipulação de requisições, lógica de negócios, acesso a dados, ou validação. Isso melhora a legibilidade e a manutenibilidade do código.
 
 ### Exemplos
 
-- **Segue o padrão**: 
-  - `UserValidation` apenas valida dados e não interage com a base de dados.
-  - `UserService` lida com a lógica de negócios e não se preocupa com a validação de dados.
+- **Segue o padrão**:
+  - `UserController` apenas manipula requisições e respostas.
+  - `UserService` apenas contém lógica de negócios.
+  - `UserRepository` apenas lida com dados.
+  - `UserValidation` apenas realiza validações.
 
-- **Viola o padrão**: 
-  - Se `UserService` incluísse lógica de validação de dados ou `UserValidation` tentasse acessar o repositório, isso violaria a separação de responsabilidades.
+- **Viola o padrão**:
+  - Se `UserService` também manipulasse requisições HTTP ou se `UserValidation` acessasse diretamente o banco de dados, isso violaria a separação de preocupações observada.
