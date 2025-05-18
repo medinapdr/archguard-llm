@@ -5,9 +5,9 @@ class AccountRepository {
 		return AccountRepository.#accounts
 	}
 
-	add (user) {
+	addOneAccount (account) {
 		AccountRepository.#accounts.push({
-			...user,
+			...account,
 			id: Date.now().toString()
 		})
 	}
