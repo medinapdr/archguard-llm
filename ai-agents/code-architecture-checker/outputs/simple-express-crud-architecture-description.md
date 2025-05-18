@@ -1,46 +1,43 @@
-```
-## Padrão de Estrutura em Camadas
+## Padrão de Arquitetura MVC (Model-View-Controller)
 
 ### Descrição
 
-O código segue um padrão de arquitetura em camadas, onde a responsabilidade é separada entre controladores, serviços, repositórios, validações e rotas. Este padrão é importante porque promove a separação de preocupações, facilitando a manutenção e a escalabilidade do sistema. Cada camada tem uma responsabilidade clara: os controladores lidam com a lógica de entrada e saída, os serviços contêm a lógica de negócios, os repositórios gerenciam o acesso a dados, as validações garantem a integridade dos dados de entrada, e as rotas definem os endpoints da API.
+O padrão MVC é claramente seguido na estrutura do código, onde há uma separação clara entre as responsabilidades de controle, serviço e repositório. O `UserController` lida com as requisições HTTP e interage com o `UserService`, que por sua vez, realiza operações de negócio e interage com o `UserRepository` para acessar os dados. Essa separação de responsabilidades facilita a manutenção e a escalabilidade do sistema.
 
 ### Exemplos
 
-- **Segue o padrão**: 
-  - `UserController.js` lida com as requisições HTTP e utiliza `UserService.js` para a lógica de negócios.
-  - `UserService.js` interage com `UserRepository.js` para operações de dados.
-  - `UserValidation.js` é usado para validar dados de entrada antes de serem processados.
+- **Segue o padrão:**
+  - `UserController` lida com a lógica de requisição e resposta HTTP.
+  - `UserService` contém a lógica de negócio.
+  - `UserRepository` gerencia o acesso aos dados.
 
-- **Viola o padrão**:
-  - Se `UserController.js` contivesse diretamente a lógica de acesso a dados, como manipulação direta do array de usuários, isso violaria a separação de responsabilidades esperada na arquitetura em camadas.
+- **Viola o padrão:**
+  - Se o `UserController` acessasse diretamente o `UserRepository` sem passar pelo `UserService`, isso violaria o padrão MVC, pois misturaria a lógica de controle com a lógica de acesso a dados.
 
-## Convenção de Nomenclatura de Métodos
+## Convenção de Nomenclatura para Métodos de Acesso a Dados
 
 ### Descrição
 
-Os métodos dentro das classes seguem uma convenção de nomenclatura que reflete suas ações, como `getAll`, `create`, `validateCreateUserParams`. Essa prática é importante porque melhora a legibilidade do código e facilita a compreensão das ações realizadas por cada método.
+Os métodos de acesso a dados no `UserRepository` seguem uma convenção de nomenclatura clara, onde métodos de recuperação de dados começam com `get` e métodos de criação começam com `create`. Essa consistência ajuda a entender rapidamente o propósito dos métodos e a manter a uniformidade no código.
 
 ### Exemplos
 
-- **Segue o padrão**:
-  - `UserService.js` possui métodos como `getAll` e `create`, que indicam claramente suas funções.
-  - `UserValidation.js` possui o método `validateCreateUserParams`, que descreve sua finalidade de validação.
+- **Segue o padrão:**
+  - `getAll()`, `getById(id)`, `create(user)` no `UserRepository`.
 
-- **Viola o padrão**:
-  - Se um método em `UserService.js` fosse nomeado de forma genérica ou não descritiva, como `doAction`, isso violaria a convenção de nomenclatura clara e descritiva.
+- **Viola o padrão:**
+  - Se houvesse um método chamado `fetchAllUsers()` ou `addUser()` no `UserRepository`, isso violaria a convenção de nomenclatura observada.
 
-## Uso de Instâncias Singleton
+## Estrutura de Diretórios por Responsabilidade
 
 ### Descrição
 
-O código utiliza o padrão Singleton para instanciar classes, garantindo que apenas uma única instância de cada classe seja criada e utilizada em todo o aplicativo. Isso é importante para manter o estado compartilhado e evitar a criação desnecessária de múltiplas instâncias que poderiam levar a inconsistências.
+A estrutura de diretórios do projeto é organizada por responsabilidade, com pastas separadas para `Controllers`, `Services`, `Repositories`, `Routes`, `Validations` e `Utils`. Essa organização facilita a navegação no projeto e a localização de arquivos relacionados a uma funcionalidade específica.
 
 ### Exemplos
 
-- **Segue o padrão**:
-  - `UserValidation.js`, `UserService.js`, `UserController.js`, `UserRepository.js`, e `ValidatorUtil.js` exportam uma única instância de suas respectivas classes.
+- **Segue o padrão:**
+  - `src/Controllers/UserController.js`, `src/Services/UserService.js`, `src/Repositories/UserRepository.js`.
 
-- **Viola o padrão**:
-  - Se `UserRepository.js` exportasse a classe diretamente em vez de uma instância, permitindo múltiplas instâncias, isso violaria o padrão Singleton.
-```
+- **Viola o padrão:**
+  - Se o `UserController` estivesse localizado diretamente em `src/` ao invés de `src/Controllers/`, isso violaria a estrutura de diretórios por responsabilidade.
