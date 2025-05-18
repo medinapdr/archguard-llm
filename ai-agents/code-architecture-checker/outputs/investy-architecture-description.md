@@ -1,75 +1,47 @@
-## Convenções de Nomenclatura
-### Descrição
-
-Classes e arquivos no lado do servidor seguem consistentemente um padrão de nomenclatura baseado em seu papel arquitetural principal. Isso geralmente se manifesta como `[Nome][Papel]` ou `[Papel][Nome]`, onde `[Papel]` indica a função (por exemplo, `Controller`, `Service`, `Repository`, `Lib`, `Util`, `Adapter`, `Config`, `Entity`, `Schema`, `Contract`/`Protocol`, `Middleware`, `Validation`, `Queue`).
-
-### Exemplos
-
-*   **Segue o padrão:**
-    *   `UserController` (em `server/controllers/UserController.ts`)
-    *   `AuthService` (em `server/services/AuthService.ts`)
-    *   `UserRepository` (em `server/repositories/UserRepository.ts`)
-    *   `NotionLib` (em `server/lib/NotionLib.ts`)
-    *   `ValidationUtil` (em `server/utils/ValidationUtil.ts`)
-    *   `NextHttpAdapter` (em `server/adapters/NextHttpAdapter.ts`)
-    *   `DatabaseConfig` (em `server/config/DatabaseConfig.ts`)
-    *   `UserEntity` (em `server/entities/UserEntity.ts`)
-    *   `UserSchema` (em `server/schemas/UserSchema.ts`)
-    *   `HttpContract` (em `server/contracts/HttpContract.ts`)
-    *   `AuthMiddleware` (em `server/middlewares/AuthMiddleware.ts`)
-    *   `UserValidation` (em `server/validations/UserValidation.ts`)
-    *   `SyncNotionAssetPriceQueue` (em `server/queues/SyncNotionAssetPriceQueue.ts`)
-
-*   **Viola o padrão:** Nenhuma violação clara e repetida deste padrão de nomenclatura baseada em papel foi encontrada nos trechos de código fornecidos para os componentes do lado do servidor.
-
 ## Organização de Arquivos/Módulos
+
 ### Descrição
 
-Os arquivos do lado do servidor são consistentemente organizados em diretórios que correspondem ao seu papel arquitetural. Isso cria uma estrutura de projeto clara onde módulos de um tipo específico (por exemplo, controladores, serviços, repositórios) são agrupados em seus respectivos diretórios.
+O código demonstra uma organização de arquivos e módulos consistente, especialmente no diretório `server/`, onde os arquivos são agrupados em subdiretórios com base em sua responsabilidade ou camada arquitetural. Essa estrutura inclui diretórios como `controllers/`, `services/`, `repositories/`, `utils/`, `libs/`, `infra/`, `validations/`, `schemas/`, `entities/`, `protocols/`, `contracts/`, `adapters/`, e `exceptions/`. Essa organização facilita a localização de código relacionado e reforça a separação de responsabilidades.
 
 ### Exemplos
 
-*   **Segue o padrão:**
-    *   O arquivo `server/controllers/UserController.ts` contém a classe `UserController`.
-    *   O arquivo `server/services/AuthService.ts` contém a classe `AuthService`.
-    *   O arquivo `server/repositories/UserRepository.ts` contém a classe `UserRepository`.
-    *   O arquivo `server/utils/StringUtil.ts` contém a classe `StringUtil`.
-    *   O arquivo `server/adapters/NextHttpAdapter.ts` contém a classe `NextHttpAdapter`.
-    *   O arquivo `server/config/DatabaseConfig.ts` contém o objeto `DatabaseConfig`.
-    *   O arquivo `server/entities/UserEntity.ts` contém a definição do tipo `UserEntity`.
-    *   O arquivo `server/schemas/UserSchema.ts` contém a definição do schema `UserSchema`.
-    *   O arquivo `server/contracts/HttpContract.ts` contém a interface `HttpContract`.
-    *   O arquivo `server/middlewares/AuthMiddleware.ts` contém a classe `AuthMiddleware`.
-    *   O arquivo `server/validations/UserValidation.ts` contém a classe `UserValidation`.
-    *   O arquivo `server/queues/SyncNotionAssetPriceQueue.ts` contém a classe `SyncNotionAssetPriceQueue`.
+Um exemplo que segue este padrão é o diretório `server/repositories/`, que contém exclusivamente arquivos relacionados à lógica de acesso a dados para diferentes entidades, como `AssetSyncRepository.ts`, `IntegrationRepository.ts`, e `UserRepository.ts`.
 
-*   **Viola o padrão:** Nenhuma violação clara e repetida deste padrão de organização de arquivos foi encontrada nos trechos de código fornecidos, onde um arquivo do lado do servidor é colocado em um diretório inconsistente com seu papel e nomenclatura.
+Um exemplo que viola este padrão, dentro do contexto da estrutura do `server/`, é o arquivo `pages/api/queues/SyncNotionAssetPrice.ts`. Embora esteja na localização padrão do Next.js para rotas de API (`pages/api/`), seu conteúdo principal é a adaptação de um `QueueHandler` usando um `Adapter`, o que poderia, em uma estrutura estritamente organizada por responsabilidade do servidor, estar mais próximo dos diretórios `server/queues` ou `server/adapters`, em vez de misturar a preocupação de "exposição via API" com a preocupação de "adaptação de handler de fila" neste arquivo de ponto de entrada.
+
+## Convenções de Nomenclatura
+
+### Descrição
+
+O código utiliza convenções de nomenclatura consistentes para arquivos e classes, baseadas em sua função ou responsabilidade. Classes e arquivos de repositório geralmente terminam com `Repository` (ex: `UserRepository`), serviços com `Service` (ex: `AuthService`), controladores com `Controller` (ex: `UserController`), utilitários com `Util` (ex: `StringUtil`), wrappers de bibliotecas externas com `Lib` (ex: `NotionLib`), adaptadores com `Adapter` (ex: `MongooseRepositoryAdapter`), validações com `Validation` (ex: `UserValidation`), entidades com `Entity` (ex: `UserEntity`), esquemas de banco de dados com `Schema` (ex: `UserSchema`), contratos/interfaces com `Contract` (ex: `RepositoryContract`), handlers de fila com `Queue` (ex: `SyncNotionAssetPriceQueue`), e hooks do lado do cliente com o prefixo `use` (ex: `useDidMount`).
+
+### Exemplos
+
+Um exemplo que segue este padrão é a classe `AuthService` definida no arquivo `server/services/AuthService.ts`, que encapsula a lógica relacionada à autenticação. Outro exemplo é a classe `UserRepository` em `server/repositories/UserRepository.ts`, dedicada às operações de persistência de dados do usuário.
+
+Um exemplo que viola este padrão é o nome do arquivo `pages/api/queues/SyncNotionAssetPrice.ts`. Enquanto outros arquivos na pasta `pages/api/` seguem uma convenção de nomenclatura baseada no recurso ou propósito da rota (ex: `users/login.ts`, `integrations/index.ts`, `asset-syncs/notion.ts`), este arquivo é nomeado diretamente após o handler de fila que ele expõe, quebrando a consistência de nomenclatura dentro do diretório `pages/api`.
 
 ## Arquitetura em Camadas
+
 ### Descrição
 
-O tratamento de requisições no lado do servidor segue uma estrutura em camadas. Os pontos de entrada da API (`pages/api/*`) delegam as requisições através de middlewares para os controladores. Os controladores orquestram a lógica chamando serviços, que por sua vez interagem com repositórios (para acesso a dados), bibliotecas (para interações externas) e módulos de infraestrutura. As dependências geralmente fluem de camadas de nível superior (controladores) para camadas de nível inferior (serviços, repositórios, libs, infra).
+O código no lado do servidor demonstra uma arquitetura em camadas, separando as responsabilidades em camadas distintas. Observa-se uma separação entre a camada de Apresentação/API (`pages/api/`), a camada de Aplicação/Controladores (`controllers/`), a camada de Domínio/Negócio (`services/`, `queues/`), a camada de Acesso a Dados (`repositories/`), e a camada de Infraestrutura (`libs/`, `infra/`, `adapters/`). As dependências geralmente fluem de camadas superiores para inferiores (ex: Controladores chamam Serviços, Serviços chamam Repositórios e Libs).
 
 ### Exemplos
 
-*   **Segue o padrão:**
-    *   O arquivo `pages/api/users/signup.ts` define um ponto de entrada da API que utiliza o `NextHttpAdapter` para rotear requisições POST. Ele chama `InfraMiddleware.setup` e `AuthMiddleware.requireAuth` (embora `AuthMiddleware` não seja estritamente necessário para signup/login, ele está presente em outros endpoints autenticados) antes de delegar para `UserController.signup`.
-    *   O método `UserController.signup` (em `server/controllers/UserController.ts`) não contém lógica de banco de dados ou hashing diretamente, mas chama `UserValidation.validateSignupData` (validação), `AuthService.makeHashedPassword` (serviço de hashing), `UserRepository.create` (repositório para persistência) e `AuthService.generateAuthToken` (serviço de autenticação). Isso demonstra a delegação para camadas inferiores.
+Um exemplo que segue este padrão é o `UserController` (`server/controllers/UserController.ts`), que lida com requisições de API para usuários. Ele delega a lógica de negócio para o `AuthService` (`server/services/AuthService.ts`) e as operações de persistência para o `UserRepository` (`server/repositories/UserRepository.ts`), sem interagir diretamente com esquemas de banco de dados ou lógica de hashing/criptografia de baixo nível.
 
-*   **Viola o padrão:** Nenhuma violação clara e repetida deste padrão de fluxo em camadas para o tratamento de requisições API foi encontrada nos trechos de código fornecidos, onde uma camada inferior chama repetidamente uma camada superior ou ignora o fluxo pretendido.
+Um exemplo que viola este padrão é o `NotionIntegrationController` (`server/controllers/NotionIntegrationController.ts`). Este controlador, que faz parte da camada de Aplicação/Controladores, importa e chama diretamente o `NotionLib` (`server/lib/NotionLib.ts`), que é um wrapper para uma API externa e pertence à camada de Infraestrutura/Libs. Uma arquitetura em camadas mais estrita exigiria que o controlador delegasse essa interação com a biblioteca externa a um serviço na camada de Domínio/Negócio.
 
-## Separação de Preocupações (SoC)
+## Separação de Responsabilidades
+
 ### Descrição
 
-A lógica é consistentemente separada em módulos distintos (classes/arquivos) com base em sua preocupação principal. Controladores lidam com o processamento de requisições HTTP e delegação, serviços contêm a lógica de negócio principal, repositórios abstraem a lógica de acesso a dados, bibliotecas encapsulam interações com APIs externas, validações lidam com a verificação de entrada, e utilitários fornecem funções auxiliares genéricas.
+O código exibe uma forte separação de responsabilidades, onde cada módulo, classe ou diretório é focado em uma única preocupação bem definida. Controladores lidam com a entrada/saída da API, Serviços contêm a lógica de negócio principal, Repositórios gerenciam a persistência de dados, Validações lidam com a verificação de dados de entrada, Utilitários fornecem funções auxiliares genéricas, Libs encapsulam interações com serviços externos, Infra lida com a configuração de recursos de infraestrutura, e Adapters fornecem implementações específicas de tecnologia para contratos.
 
 ### Exemplos
 
-*   **Segue o padrão:**
-    *   `UserController` (em `server/controllers/UserController.ts`) foca em receber requisições HTTP, chamar validação e delegar a lógica de negócio e persistência para serviços e repositórios.
-    *   `AuthService` (em `server/services/AuthService.ts`) foca na lógica de autenticação (hashing de senha, geração/decodificação de token), utilizando serviços mais específicos (`HashService`, `CryptService`).
-    *   `UserRepository` (em `server/repositories/UserRepository.ts`) foca exclusivamente na interação com o banco de dados para a entidade `User`, utilizando um adaptador (`MongooseRepositoryAdapter`).
-    *   `NotionLib` (em `server/lib/NotionLib.ts`) foca em interagir com a API externa do Notion.
-    *   `UserValidation` (em `server/validations/UserValidation.ts`) foca na validação dos dados de entrada do usuário.
+Um exemplo que segue este padrão é o `UserRepository` (`server/repositories/UserRepository.ts`), cuja única responsabilidade é realizar operações CRUD (Create, Retrieve, Update, Delete) na entidade `User` no banco de dados, sem incluir lógica de negócio, validação ou formatação de resposta de API.
 
-*   **Viola o padrão:** Nenhuma violação clara e repetida deste padrão de separação de preocupações em módulos distintos foi encontrada nos trechos de código fornecidos, onde um módulo mistura repetidamente preocupações que são claramente atribuídas a outros tipos de módulos.
+Um exemplo que viola este padrão é o `NotionIntegrationController` (`server/controllers/NotionIntegrationController.ts`). Embora sua responsabilidade principal seja lidar com requisições de API relacionadas à integração com o Notion, ele também assume a responsabilidade de interagir diretamente com a biblioteca externa do Notion (`NotionLib.searchDatabases`). Isso mistura a preocupação de manipulação da requisição API com a preocupação de interação com um serviço externo, que idealmente seria delegada a um serviço dedicado para manter a separação de responsabilidades.
