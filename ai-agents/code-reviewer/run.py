@@ -34,7 +34,8 @@ def review_diff_code_changes(diff_file_path: str) -> str:
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}
-        ]
+        ],
+        temperature=0.0
     )
 
     return response.choices[0].message.content
