@@ -6,7 +6,7 @@ from openai import OpenAI
 import google.generativeai as genai
 from google.generativeai import configure, GenerativeModel
 
-BATCH_CODE_FILE_ANALYSIS_SIZE = 100
+BATCH_CODE_FILE_ANALYSIS_SIZE = 1000
 
 def load_file_content(file_path: str) -> str:
     with open(file_path, "r", encoding="utf-8") as f:
