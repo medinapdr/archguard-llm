@@ -1,47 +1,48 @@
-## Padrão de Estrutura de Camadas
+## Padrão de Estrutura em Camadas
 
 ### Descrição
 
-O código segue um padrão de arquitetura em camadas, onde há uma clara separação entre as responsabilidades de controle, serviço, repositório e validação. Este padrão é importante porque promove a separação de preocupações, facilitando a manutenção e evolução do código. Cada camada tem uma responsabilidade específica: 
+O código segue um padrão de arquitetura em camadas, onde há uma separação clara entre as responsabilidades de controle, serviço, repositório e validação. Este padrão é importante porque promove a separação de preocupações, facilitando a manutenção e evolução do código. Cada camada tem uma responsabilidade específica: 
 
-- **Controllers**: Lidam com a lógica de entrada e saída HTTP.
-- **Services**: Contêm a lógica de negócios.
-- **Repositories**: Gerenciam o acesso aos dados.
-- **Validations**: Realizam validações de dados.
+- **Controllers**: Lidam com a lógica de entrada e saída, interagindo com as requisições HTTP.
+- **Services**: Contêm a lógica de negócios e interagem com os repositórios.
+- **Repositories**: Gerenciam o acesso aos dados, seja em memória ou em um banco de dados.
+- **Validations**: Realizam a validação dos dados de entrada.
 
 ### Exemplos
 
-- **Exemplo que segue o padrão**: 
-  - `UserController` utiliza `UserService` para lógica de negócios e `UserValidation` para validação de dados.
-  - `UserService` utiliza `UserRepository` para operações de dados.
+- **Segue o padrão**: 
+  - `UserController` interage com `UserService` para obter dados e processar requisições.
+  - `UserService` utiliza `UserRepository` para acessar dados de usuários.
+  - `UserValidation` é usado para validar dados de entrada antes de serem processados.
 
-- **Exemplo que viola o padrão**:
-  - Se `UserController` acessasse diretamente `UserRepository` para buscar dados, isso violaria a separação de camadas, pois a lógica de negócios estaria misturada com a lógica de controle.
+- **Viola o padrão**:
+  - Se `UserController` acessasse diretamente `UserRepository` para obter dados, sem passar por `UserService`, isso violaria a separação de camadas.
 
-## Convenção de Nomenclatura para Métodos de Repositório
+## Convenção de Nomenclatura para Repositórios
 
 ### Descrição
 
-Os métodos nos repositórios seguem uma convenção de nomenclatura que reflete a operação que realizam, como `getAll`, `getById` e `create`. Esta convenção é importante para a clareza e previsibilidade do código, facilitando a compreensão das operações realizadas por cada método.
+Todos os repositórios seguem uma convenção de nomenclatura que utiliza o sufixo "Repository". Isso ajuda a identificar rapidamente a responsabilidade de uma classe como sendo relacionada ao acesso a dados. Essa consistência é importante para a legibilidade e manutenção do código.
 
 ### Exemplos
 
-- **Exemplo que segue o padrão**:
-  - `UserRepository.getAll()`, `UserRepository.create(user)`, `UserRepository.getById(id)`
+- **Segue o padrão**:
+  - `UserRepository` e `AccountRepository` são nomeados com o sufixo "Repository", indicando claramente sua função.
 
-- **Exemplo que viola o padrão**:
-  - Se um método no repositório fosse nomeado de forma genérica ou não descritiva, como `doSomething()`, isso violaria a convenção de nomenclatura, tornando o código menos claro.
+- **Viola o padrão**:
+  - Se houvesse uma classe chamada `UserData` que funcionasse como um repositório, isso violaria a convenção de nomenclatura estabelecida.
 
 ## Uso Consistente de Instâncias Singleton
 
 ### Descrição
 
-O código utiliza instâncias singleton para classes de serviço, validação e utilitários, garantindo que apenas uma instância de cada classe seja criada e utilizada em toda a aplicação. Isso é importante para economizar recursos e manter o estado compartilhado quando necessário.
+O código utiliza instâncias singleton para classes que não precisam de múltiplas instâncias, como `UserValidation`, `UserService`, `UserController`, `ValidatorUtil`, `AccountRepository` e `UserRepository`. Isso é importante para garantir que o estado compartilhado seja gerenciado de forma consistente e para economizar recursos.
 
 ### Exemplos
 
-- **Exemplo que segue o padrão**:
-  - `module.exports = new UserService()`, `module.exports = new UserValidation()`, `module.exports = new ValidatorUtil()`
+- **Segue o padrão**:
+  - `module.exports = new UserService()` exporta uma única instância de `UserService`.
 
-- **Exemplo que viola o padrão**:
-  - Se `UserService` fosse exportado como `module.exports = UserService`, permitindo múltiplas instâncias, isso violaria o padrão singleton, potencialmente levando a inconsistências de estado.
+- **Viola o padrão**:
+  - Se `UserService` fosse exportado como `module.exports = UserService`, permitindo múltiplas instâncias, isso violaria o padrão singleton.
