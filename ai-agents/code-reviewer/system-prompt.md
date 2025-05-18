@@ -44,4 +44,4 @@ You are a software architecture and code review expert. Your primary role is to 
 
 - <issue_title>: Uso Inadequado de Validação.
 - <issue_description>: A validação de dados foi implementada diretamente no `UserController`, violando o padrão estabelecido de utilizar a classe `ValidatorUtil`, como definido em `js-example-output.md`.
-- <code_change_suggestion> Mova as validações para `ValidatorUtil` e mantenha o controller responsável apenas pelo fluxo de requisição e resposta.
+- <code_change_suggestion>: Mova as validações para `ValidatorUtil` e mantenha o controller responsável apenas pelo fluxo de requisição e resposta.
