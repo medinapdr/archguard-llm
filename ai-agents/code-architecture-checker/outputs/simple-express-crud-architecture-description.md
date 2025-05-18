@@ -1,50 +1,57 @@
-## Arquitetura em Camadas
-
-### Descrição
-
-A arquitetura em camadas é um padrão onde a aplicação é dividida em camadas distintas, cada uma com responsabilidades específicas. Neste código, podemos observar uma separação clara entre as camadas de controle, serviço, repositório, validação e rotas. Isso facilita a manutenção e a escalabilidade do sistema, pois cada camada pode ser desenvolvida e modificada independentemente.
-
-### Exemplos
-
-- **Exemplo que segue o padrão:**
-  - `UserController.js` atua como a camada de controle, lidando com as requisições HTTP e chamando os serviços apropriados.
-  - `UserService.js` serve como a camada de serviço, onde a lógica de negócios é implementada.
-  - `UserRepository.js` e `AccountRepository.js` são a camada de repositório, responsáveis pelo acesso aos dados.
-  - `UserValidation.js` é a camada de validação, garantindo que os dados de entrada estejam corretos.
-  - `UserRoute.js` define as rotas da aplicação, conectando URLs a métodos do controlador.
-
-- **Exemplo que viola o padrão:**
-  - Se `UserController.js` contivesse lógica de acesso a dados diretamente, sem passar por `UserService.js` ou `UserRepository.js`, isso violaria a separação de camadas.
-
 ## Convenções de Nomenclatura
 
 ### Descrição
 
-Convenções de nomenclatura são padrões consistentes usados para nomear arquivos, classes, métodos e variáveis. No código fornecido, há uma convenção clara para nomear classes e métodos, o que melhora a legibilidade e a previsibilidade do código.
+No código fornecido, há uma convenção de nomenclatura clara para funções de acesso a dados. As funções de recuperação de dados seguem o padrão `getX` e as funções de criação seguem o padrão `createX`. Essa convenção ajuda a manter o código consistente e facilita a compreensão das operações realizadas por cada função.
 
 ### Exemplos
 
-- **Exemplo que segue o padrão:**
-  - Classes como `UserController`, `UserService`, `UserRepository`, e `UserValidation` seguem uma convenção de nomenclatura PascalCase, que é comum para classes em JavaScript.
-  - Métodos como `getAll`, `create`, `getById` seguem uma convenção camelCase, que é comum para métodos e funções.
-
-- **Exemplo que viola o padrão:**
-  - Se houvesse um método nomeado como `GetAllUsers` ou `create_user`, isso violaria a convenção camelCase usada para métodos.
+- **Segue o padrão**: 
+  - `getAll` e `create` em `UserRepository` e `AccountRepository`.
+  
+- **Viola o padrão**: 
+  - Se houvesse uma função de recuperação de dados nomeada como `fetchAllUsers` ou `retrieveUsers` em vez de `getAll`, isso violaria a convenção observada.
 
 ## Organização de Arquivos/Módulos
 
 ### Descrição
 
-A organização de arquivos e módulos refere-se à forma como os arquivos de código são estruturados em diretórios. No código fornecido, há uma organização clara onde cada tipo de componente (controladores, serviços, repositórios, validações, utilitários) está em seu próprio diretório, o que facilita a navegação e a manutenção do código.
+Os componentes do sistema estão organizados em diretórios específicos de acordo com seu tipo, como `Controllers`, `Services`, `Repositories`, `Routes`, `Validations` e `Utils`. Essa organização facilita a navegação no projeto e a manutenção do código, pois cada tipo de componente tem um local designado.
 
 ### Exemplos
 
-- **Exemplo que segue o padrão:**
-  - `src/Controllers` contém controladores.
-  - `src/Services` contém serviços.
-  - `src/Repositories` contém repositórios.
-  - `src/Validations` contém validações.
-  - `src/Utils` contém utilitários.
+- **Segue o padrão**: 
+  - `UserController.js` está em `src/Controllers`.
+  - `UserService.js` está em `src/Services`.
+  - `UserRepository.js` está em `src/Repositories`.
 
-- **Exemplo que viola o padrão:**
-  - Se `UserController.js` estivesse dentro de `src/Services` ou `UserRepository.js` dentro de `src/Controllers`, isso violaria a organização de arquivos/módulos.
+- **Viola o padrão**: 
+  - Se `UserController.js` estivesse diretamente em `src/` em vez de `src/Controllers`, isso violaria a organização observada.
+
+## Arquitetura em Camadas
+
+### Descrição
+
+O código segue uma arquitetura em camadas clara, com separação entre controladores, serviços e repositórios. Os controladores lidam com as requisições HTTP, os serviços contêm a lógica de negócios e os repositórios gerenciam o acesso aos dados. Essa separação de responsabilidades melhora a modularidade e a testabilidade do sistema.
+
+### Exemplos
+
+- **Segue o padrão**: 
+  - `UserController` chama métodos de `UserService`, que por sua vez chama métodos de `UserRepository`.
+
+- **Viola o padrão**: 
+  - Se `UserController` acessasse diretamente `UserRepository` sem passar por `UserService`, isso violaria a separação em camadas.
+
+## Separação de Responsabilidades
+
+### Descrição
+
+O código demonstra uma separação clara de responsabilidades, onde cada componente ou camada tem uma função específica. Por exemplo, a validação de dados é tratada por `UserValidation`, enquanto a lógica de negócios é gerida por `UserService`. Essa separação evita a mistura de lógica não relacionada e facilita a manutenção.
+
+### Exemplos
+
+- **Segue o padrão**: 
+  - `UserValidation` é responsável apenas pela validação de dados e não contém lógica de negócios ou acesso a dados.
+
+- **Viola o padrão**: 
+  - Se `UserService` contivesse lógica de validação de dados além de sua lógica de negócios, isso violaria a separação de responsabilidades.
