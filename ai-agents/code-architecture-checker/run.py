@@ -31,7 +31,8 @@ def generate_llm_response(system_prompt: str, user_prompt: str, provider: str) -
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
-            ]
+            ],
+            temperature=0.0
         )
 
         return response.choices[0].message.content
@@ -40,10 +41,15 @@ def generate_llm_response(system_prompt: str, user_prompt: str, provider: str) -
         configure(api_key=os.getenv("GEMINI_API_KEY"))
         model = GenerativeModel("gemini-2.5-flash-preview-04-17")
 
-        response = model.generate_content([
-            {"role": "model", "parts": [system_prompt]},
-            {"role": "user", "parts": [user_prompt]},
-        ])
+        response = model.generate_content(
+            [
+                {"role": "model", "parts": [system_prompt]},
+                {"role": "user", "parts": [user_prompt]},
+            ],
+            generation_config={
+                "temperature": 0.0
+            }
+        )
 
         return response.text
 
