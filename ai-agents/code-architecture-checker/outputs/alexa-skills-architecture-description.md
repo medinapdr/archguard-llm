@@ -1,171 +1,102 @@
-```
-## Organização de Arquivos por Tipo e Feature
+## Organização de Arquivos por Tipo e Funcionalidade
 
 ### Descrição
 
-Os arquivos do código são organizados em diretórios que refletem seu tipo funcional (e.g., `Services`, `Utils`, `Protocols`) e, para lógica específica de uma feature ou skill, são agrupados adicionalmente sob um diretório dedicado à skill (`Skills/<SkillName>`). Isso cria uma estrutura hierárquica onde a lógica genérica reside em diretórios de tipo na raiz de `src`, enquanto a lógica específica de uma skill reside em diretórios de tipo dentro do diretório da skill.
+O código organiza os arquivos em diretórios baseados no tipo de funcionalidade que eles representam. Existem diretórios de nível superior como `Config`, `Services`, `Modules`, `Utils` e `Protocols`. Dentro do diretório `Skills`, há subdiretórios para cada skill específica (`OnePieceMangaSpoiler`), que por sua vez contêm subdiretórios para os tipos de arquivos relacionados a essa skill (`Constants`, `Modules`, `Services`, `Utils`, `Protocols`). Este padrão promove a separação de interesses e facilita a localização de arquivos por sua função e pela skill a que pertencem.
 
 ### Exemplos
 
-- Arquivos de serviço específicos de uma skill: `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`
-- Arquivos de utilitário específicos de uma skill: `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/DateUtil.ts`
-- Arquivos de protocolo específicos de uma skill: `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Protocols/OpexProtocol.ts`
-- Arquivos de serviço genéricos: `examples/alexa-skills/src/Services/HttpService.ts`
-- Arquivos de utilitário genéricos: `examples/alexa-skills/src/Utils/HandlerUtil.ts`
+**Seguindo o padrão:**
 
-```
-## Convenção de Nomenclatura de Testes
+-   `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`: Um serviço específico da skill `OnePieceMangaSpoiler` localizado no diretório `Services` dentro do diretório da skill.
+-   `examples/alexa-skills/src/Protocols/HandlerProtocol.ts`: Um arquivo de definição de tipos (protocolo) para handlers, localizado no diretório `Protocols` de nível superior.
+
+**Violando o padrão:**
+
+-   Nenhum exemplo de violação deste padrão foi encontrado no código fornecido. Todos os arquivos parecem seguir a estrutura de diretórios baseada em tipo e funcionalidade.
+
+## Exportação de Instância Única (Singleton Implícito)
 
 ### Descrição
 
-Arquivos de teste seguem uma convenção de nomenclatura específica: `<NomeDoArquivoOriginal>.<TipoDeTeste>.test.ts`. O `<TipoDeTeste>` indica o escopo ou a natureza do teste, como `unit` para testes unitários ou `integration` para testes de integração.
+Um padrão recorrente é a definição de uma classe e a exportação direta de uma nova instância dessa classe usando `export default new ClassName()`. Isso garante que, ao importar o módulo, o código receba sempre a mesma instância da classe, funcionando como um Singleton implícito para o ponto de importação.
 
 ### Exemplos
 
-- Teste unitário para um serviço: `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.unit.test.ts`
-- Teste de integração para um módulo: `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.integration.test.ts`
+**Seguindo o padrão:**
 
-```
-## Exportação de Instâncias Únicas
+-   `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`: Exporta `export default new OpexService()`.
+-   `examples/alexa-skills/src/Utils/DateUtil.ts`: Exporta `export default new DateUtil()`.
+
+**Violando o padrão:**
+
+-   `examples/alexa-skills/src/Services/HttpService.ts`: Exporta a classe em si (`export default HttpService`) em vez de uma instância.
+-   `examples/alexa-skills/src/Modules/HandlerModule.ts`: Exporta a classe abstrata em si (`export default HandlerModule`) em vez de uma instância.
+
+## Definição de Tipos em Arquivos Separados
 
 ### Descrição
 
-Classes que representam serviços, utilitários ou módulos são frequentemente instanciadas uma vez dentro de seu próprio arquivo e exportadas como o `default`. Isso sugere um padrão de uso como singletons implícitos, onde os consumidores importam diretamente a instância pronta para uso.
+As definições de tipos e interfaces (protocolos) são consistentemente agrupadas em arquivos separados, localizados dentro de diretórios nomeados `Protocols`. Este padrão mantém as definições de contrato de dados e comportamento separadas da lógica de implementação, melhorando a clareza e a manutenibilidade.
 
 ### Exemplos
 
-- Exportação de uma instância de serviço:
-```typescript
-class OpexService {
-	// ... methods
-}
+**Seguindo o padrão:**
 
-export default new OpexService()
-```
-- Exportação de uma instância de utilitário:
-```typescript
-class DateUtil {
-	// ... methods
-}
+-   `examples/alexa-skills/src/Protocols/HandlerProtocol.ts`: Define tipos relacionados a handlers.
+-   `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Protocols/OpexProtocol.ts`: Define tipos específicos para a funcionalidade Opex dentro da skill.
 
-export default new DateUtil()
-```
-- Exportação de uma instância de módulo:
-```typescript
-class OpexModule {
-	// ... methods
-}
+**Violando o padrão:**
 
-export default new OpexModule()
-```
+-   Nenhum exemplo de violação deste padrão foi encontrado no código fornecido. Todas as definições de tipo parecem estar localizadas em arquivos dentro de diretórios `Protocols`.
 
-### Exemplos que violam o padrão
-
-- Exportação da classe em vez de uma instância:
-```typescript
-class HttpService {
-	// ... methods
-}
-
-export default HttpService
-```
-
-```
-## Uso de Alias `@/` para Importações
+## Convenção de Nomenclatura para Arquivos de Teste
 
 ### Descrição
 
-O alias `@/` é consistentemente usado no início dos caminhos de importação para se referir ao diretório `src`. Isso permite o uso de importações absolutas a partir da raiz do código-fonte, tornando os caminhos de importação mais curtos e legíveis, especialmente em arquivos aninhados profundamente na estrutura de diretórios.
+Os arquivos de teste seguem uma convenção de nomenclatura específica, terminando com `.unit.test.ts` para testes unitários ou `.integration.test.ts` para testes de integração. Este padrão facilita a identificação rápida do propósito de um arquivo de teste e do tipo de teste que ele contém.
 
 ### Exemplos
 
-- Importação de um serviço usando `@/`:
-```typescript
-import OpexService from "@/Skills/OnePieceMangaSpoiler/Services/OpexService"
-```
-- Importação de um utilitário usando `@/`:
-```typescript
-import DateUtil from "@/Skills/OnePieceMangaSpoiler/Utils/DateUtil"
-```
-- Importação de um protocolo usando `@/`:
-```typescript
-import { SpoilerInfo } from "@/Skills/OnePieceMangaSpoiler/Protocols/OpexProtocol"
-```
+**Seguindo o padrão:**
 
-```
-## Estrutura de Handlers de Skill
+-   `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.unit.test.ts`: Arquivo de teste unitário para `OpexService`.
+-   `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.integration.test.ts`: Arquivo de teste de integração para `OpexModule`.
+
+**Violando o padrão:**
+
+-   Nenhum exemplo de violação deste padrão de nomenclatura para arquivos de teste foi encontrado no código fornecido.
+
+## Convenção de Nomenclatura para Classes de Lógica/Interação
 
 ### Descrição
 
-Classes que implementam a lógica principal para lidar com requisições de uma skill Alexa seguem uma estrutura específica. Elas estendem uma classe base (`HandlerModule`) que fornece implementações padrão para intents comuns e definem um array `customRequestHandlers` para mapear intents personalizadas para métodos assíncronos específicos dentro da classe.
+Classes que encapsulam lógica de negócio específica, interações com serviços externos (como HTTP ou crawling) ou orquestração de funcionalidades são nomeadas com o sufixo `Service` ou `Module`. Este padrão ajuda a categorizar a responsabilidade principal da classe.
 
 ### Exemplos
 
-- Definição de um handler de skill estendendo `HandlerModule` e definindo `customRequestHandlers`:
-```typescript
-class OnePieceMangaSpoilerHandler extends HandlerModule {
-	customRequestHandlers: HandlerModule["customRequestHandlers"] = [
-		{
-			canHandle: HandlerAdapterModule.canHandleCustomIntent("OnePieceMangaSpoilerIntent"),
-			handle: async (props) => await this.onOnePieceMangaSpoilerIntent(props)
-		}
-	]
+**Seguindo o padrão:**
 
-	async onLaunch ({ responseBuilder }: HandlerProps): Promise<HandlerResponse> {
-		// ... logic
-	}
+-   `examples/alexa-skills/src/Services/HttpService.ts`: Classe para interações HTTP.
+-   `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.ts`: Classe que orquestra a obtenção de informações do Opex.
 
-	async onOnePieceMangaSpoilerIntent ({ responseBuilder }: HandlerProps): Promise<HandlerResponse> {
-		// ... logic
-	}
-	// ... other on* methods
-}
-```
+**Violando o padrão:**
 
-```
-## Definição de Tipos em Arquivos `Protocol.ts`
+-   Nenhum exemplo de violação deste padrão de nomenclatura para classes de lógica/interação foi encontrado no código fornecido.
+
+## Convenção de Nomenclatura para Classes de Utilidade
 
 ### Descrição
 
-Interfaces e tipos TypeScript usados para definir contratos de dados ou estruturas são agrupados em arquivos dedicados com o sufixo `Protocol.ts`. Esses arquivos são organizados em um diretório `Protocols` na raiz do `src` para tipos genéricos ou dentro de diretórios de feature (`Skills/<SkillName>/Protocols`) para tipos específicos da feature.
+Classes que fornecem funções auxiliares genéricas, reutilizáveis em diferentes partes do código e que geralmente não contêm lógica de negócio complexa, são nomeadas com o sufixo `Util`. Este padrão distingue essas classes de serviços ou módulos mais focados.
 
 ### Exemplos
 
-- Definição de tipos genéricos em `Protocols`:
-```typescript
-// examples/alexa-skills/src/Protocols/HandlerProtocol.ts
-export type HandlerEvent = RequestEnvelope
-export type HandlerProps = HandlerInput
-// ... other types
-```
-- Definição de tipos específicos de skill em `Protocols`:
-```typescript
-// examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Protocols/OpexProtocol.ts
-export type SpoilerInfo = {
-	status: "available" | "manga-launched" | "not-found"
-	date?: Date
-	content?: string
-}
-```
+**Seguindo o padrão:**
 
-```
-## Convenção de Nomenclatura por Tipo
+-   `examples/alexa-skills/src/Utils/DateUtil.ts`: Classe com funções auxiliares para manipulação de datas.
+-   `examples/alexa-skills/src/Utils/ServerlessUtil.ts`: Classe com funções auxiliares para configuração do Serverless.
 
-### Descrição
+**Violando o padrão:**
 
-Nomes de classes e arquivos frequentemente terminam com uma palavra que indica seu tipo ou responsabilidade funcional dentro da arquitetura. Isso inclui sufixos como `Service`, `Util`, `Module`, `Constant`, `Protocol`, e `Handler`.
-
-### Exemplos
-
-- Arquivo/Classe de Serviço: `OpexService.ts`, `HttpService.ts`, `CrawlerService.ts`
-- Arquivo/Classe de Utilitário: `DateUtil.ts`, `SanitizationUtil.ts`, `HandlerUtil.ts`, `ServerlessUtil.ts`
-- Arquivo/Classe de Módulo: `OpexModule.ts`, `HandlerAdapterModule.ts`, `HandlerModule.ts`
-- Arquivo de Constantes: `SpoilerContentPhrasesConstant.ts`
-- Arquivo de Protocolos: `OpexProtocol.ts`, `HandlerProtocol.ts`, etc.
-- Arquivo/Classe de Handler: `OnePieceMangaSpoilerHandler` (classe), `HandlerModule` (classe base)
-
-### Exemplos que violam o padrão
-
-- Arquivo de configuração: `SkillConfig.ts` (termina com `Config`)
-- Arquivo de entrada principal da skill: `index.ts` (nome padrão, não segue o sufixo `Handler`)
-```
+-   Nenhum exemplo de violação deste padrão de nomenclatura para classes de utilidade foi encontrado no código fornecido.
