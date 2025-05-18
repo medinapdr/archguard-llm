@@ -15,6 +15,13 @@ class UserRepository {
 			id: Date.now().toString()
 		})
 	}
+
+	addMany (userList) {
+		UserRepository.#users.push(userList.map(user => ({
+			...user,
+			id: Date.now().toString()
+		})))
+	}
 }
 
 module.exports = new UserRepository()
