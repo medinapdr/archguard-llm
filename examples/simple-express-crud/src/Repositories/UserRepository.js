@@ -5,7 +5,7 @@ class UserRepository {
 		return UserRepository.#users
 	}
 
-	getOneById (id) {
+	findById (id) {
 		return UserRepository.#users[id]
 	}
 
