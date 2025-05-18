@@ -1,100 +1,81 @@
-## Convenção de Nomenclatura de Funções de Acesso a Dados
+```
+## Separação de Camadas: Controller, Service e Repository
 
 ### Descrição
 
-No código fornecido, as funções que realizam acesso a dados no repositório de usuários seguem uma convenção de nomenclatura que começa com os prefixos "get" e "create".
+O código segue um padrão de separação de responsabilidades em camadas distintas: Controller, Service e Repository. Cada uma dessas camadas tem uma responsabilidade específica:
+
+- **Controller**: responsável por lidar com as requisições HTTP, chamar o serviço apropriado e retornar a resposta HTTP.
+- **Service**: contém a lógica de negócios. Interage com o repository para manipular dados.
+- **Repository**: responsável pelo acesso e manipulação direta dos dados, neste caso, simulando operações em um banco de dados através de um array.
+
+A separação de camadas é importante para manter o código organizado, facilitar a manutenção e melhorar a testabilidade, permitindo a modificação de uma camada sem afetar diretamente as outras.
 
 ### Exemplos
 
-- Consistente com a convenção:
-  ```javascript
-  class UserRepository {
-    getAll() {
-      // lógica
-    }
-    
-    create(user) {
-      // lógica
-    }
-  }
-  ```
+- **Exemplo que segue o padrão:**
+  - `examples/simple-express-crud/src/Controllers/UserController.js` lida com as requisições e utiliza o `UserService` para realizar operações.
+  - `examples/simple-express-crud/src/Services/UserService.js` define a lógica de obter e criar usuários, interagindo com o `UserRepository`.
+  - `examples/simple-express-crud/src/Repositories/UserRepository.js` executa a manipulação de dados, simulando um banco de dados com um array.
 
-- Inconsistente com a convenção:
-  ```javascript
-  class UserRepository {
-    fetchUsers() { // "fetch" ao invés de "getAll"
-      // lógica
-    }
-    
-    addUser(user) { // "addUser" ao invés de "create"
-      // lógica
-    }
-  }
-  ```
-
-## Padrão MVC (Model-View-Controller)
-
-### Descrição
-
-A estrutura do código segue o padrão arquitetural MVC. Os componentes estão claramente separados em modelos como `UserRepository` (para acesso a dados), `UserService` (para lógica de negócio), `UserController` (para manipulação das requisições), e `UserRoute` (roteamento das requisições). Este padrão promove a separação de responsabilidades e uma melhor organização do código.
-
-### Exemplos
-
-- Consistente com o padrão:
-  - `UserRepository` cuida do acesso direto aos dados.
-  - `UserService` encapsula a lógica de negócios e manipula dados do repositório.
-  - `UserController` gerencia as requisições HTTP e respostas.
-  - `UserRoute` define os endpoints e vincula-os aos métodos do controlador.
-
-- Inconsistente com o padrão:
-  ```javascript
-  class UserService {
-    getAllUsers(req, res) { // Deveria estar em UserController
-      // lógica
-    }
-  }
-
-  // ou
-
-  class UserRepository {
-    createUser(user) { // já que mistura lógica de negócio e persistência
-      // lógica
-    }
-  }
-  ```
-
-## Camada de Validação
-
-### Descrição
-
-A validação dos dados dos usuários é realizada por uma classe separada `UserValidation`, que utiliza especificamente `ValidatorUtil` para validar parâmetros de entrada, mantendo o princípio de responsabilidade única (SoC - Separation of Concerns).
-
-### Exemplos
-
-- Consistente com a separação de preocupações:
-  ```javascript
-  class UserValidation {
-    validateCreateUserParams(user) {
-      return ValidatorUtil.validate(user, {
-        name: [
-          {
-            handler: (value) => Boolean(value),
-            errorMessage: "must_be_filled",
-          }
-        ],
-      });
-    }
-  }
-  ```
-
-- Inconsistente com a separação de preocupações:
-  ```javascript
-  class UserController {
-    createUser(req, res) {
-      if (!req.body.user.name) { // Validação diretamente no controlador
-        res.status(400).json({ error: "name must_be_filled" });
+- **Exemplo que viola o padrão:**
+  - Se a lógica de manipulação de dados estivesse diretamente no `UserController` em vez de ser delegada ao `UserService` e `UserRepository`, como:
+    ```javascript
+    class UserController {
+      getAllUsers (req, res) {
+        try {
+          const users = UserRepository.getAll() // Chamando diretamente o repository em vez de passar pelo service
+          return res.status(200).json({ users })
+        } catch (error) {
+          console.error(error)
+          return res.status(500).json({ error: "Server Error" })
+        }
       }
-      // lógica
     }
-  }
-  ```
+    ```
+
+## Convenção de Nomenclatura para Métodos
+
+### Descrição
+
+Os métodos no código seguem uma convenção de nomenclatura clara que reflete suas ações, utilizando prefixos como `get`, `create`, etc. Isso aumenta a legibilidade e a compreensão imediata das ações que cada método executa.
+
+### Exemplos
+
+- **Exemplo que segue o padrão:**
+  - `UserService.getAll()`: Usando `getAll` para indicar a obtenção de todos os recursos.
+  - `UserRepository.create(user)`: Usando `create` para indicar a criação de um recurso.
+
+- **Exemplo que viola o padrão:**
+  - Se um método de obtenção de todos os usuários fosse nomeado de forma inconsistente, como `UserService.retrieveUsers()`, em vez de `getAll()`, quebraria a consistência e a expectativa de nomenclatura.
+
+## Manipulação de Validação Centralizada
+
+### Descrição
+
+Toda a validação de entrada do usuário é feita através de uma classe de validação centralizada, `UserValidation`, que utiliza uma utilidade de validação (`ValidatorUtil`). Isso garante que todas as regras de validação sejam centralizadas e facilmente gerenciadas e expandidas.
+
+### Exemplos
+
+- **Exemplo que segue o padrão:**
+  - `UserValidation.validateCreateUserParams(user)`: Usa uma classe dedicada para validar parâmetros de criação de usuário.
+
+- **Exemplo que viola o padrão:**
+  - A validação dos parâmetros do usuário feita diretamente no controlador sem a utilização da classe de validação, como:
+    ```javascript
+    createUser (req, res) {
+      try {
+        const user = req.body.user
+        if (!user.name) { // Validação direta sem o uso do UserValidation
+          return res.status(400).json({ error: "name must be filled" })
+        }
+        UserService.create(user)
+        return res.status(201).json({})
+      } catch (error) {
+        console.error(error)
+        return res.status(500).json({ error: "Server Error" })
+      }
+    }
+    ```
+```
+
