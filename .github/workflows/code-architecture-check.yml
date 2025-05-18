@@ -13,6 +13,7 @@ jobs:
       contents: write
 
     strategy:
+      max-parallel: 1
       matrix:
         target:
           - project_name: "kindlefy"
