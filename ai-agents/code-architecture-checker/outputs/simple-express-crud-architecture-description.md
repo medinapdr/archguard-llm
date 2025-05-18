@@ -2,7 +2,7 @@
 
 ### Descrição
 
-No código fornecido, as funções que realizam acesso a dados no repositório de usuários seguem uma convenção de nomenclatura que começa com os prefixos "get" e "create". Essas funções estão localizadas dentro da classe `UserRepository` e são responsáveis por recuperar todos os usuários (`getAll`) e criar um novo usuário (`create`).
+No código fornecido, as funções que realizam acesso a dados no repositório de usuários seguem uma convenção de nomenclatura que começa com os prefixos "get" e "create".
 
 ### Exemplos
 
