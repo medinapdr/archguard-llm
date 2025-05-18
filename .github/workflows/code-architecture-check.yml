@@ -1,9 +1,7 @@
 name: Code Architecture Check
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   run_code_architecture_checker_ai_agent:
