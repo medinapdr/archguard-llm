@@ -1,81 +1,46 @@
 ```
-## Separação de Camadas: Controller, Service e Repository
+## Padrão de Estrutura em Camadas
 
 ### Descrição
 
-O código segue um padrão de separação de responsabilidades em camadas distintas: Controller, Service e Repository. Cada uma dessas camadas tem uma responsabilidade específica:
-
-- **Controller**: responsável por lidar com as requisições HTTP, chamar o serviço apropriado e retornar a resposta HTTP.
-- **Service**: contém a lógica de negócios. Interage com o repository para manipular dados.
-- **Repository**: responsável pelo acesso e manipulação direta dos dados, neste caso, simulando operações em um banco de dados através de um array.
-
-A separação de camadas é importante para manter o código organizado, facilitar a manutenção e melhorar a testabilidade, permitindo a modificação de uma camada sem afetar diretamente as outras.
+O código segue um padrão de arquitetura em camadas, onde a responsabilidade é separada entre controladores, serviços, repositórios, validações e rotas. Este padrão é importante porque promove a separação de preocupações, facilitando a manutenção e a escalabilidade do sistema. Cada camada tem uma responsabilidade clara: os controladores lidam com a lógica de entrada e saída, os serviços contêm a lógica de negócios, os repositórios gerenciam o acesso a dados, as validações garantem a integridade dos dados de entrada, e as rotas definem os endpoints da API.
 
 ### Exemplos
 
-- **Exemplo que segue o padrão:**
-  - `examples/simple-express-crud/src/Controllers/UserController.js` lida com as requisições e utiliza o `UserService` para realizar operações.
-  - `examples/simple-express-crud/src/Services/UserService.js` define a lógica de obter e criar usuários, interagindo com o `UserRepository`.
-  - `examples/simple-express-crud/src/Repositories/UserRepository.js` executa a manipulação de dados, simulando um banco de dados com um array.
+- **Segue o padrão**: 
+  - `UserController.js` lida com as requisições HTTP e utiliza `UserService.js` para a lógica de negócios.
+  - `UserService.js` interage com `UserRepository.js` para operações de dados.
+  - `UserValidation.js` é usado para validar dados de entrada antes de serem processados.
 
-- **Exemplo que viola o padrão:**
-  - Se a lógica de manipulação de dados estivesse diretamente no `UserController` em vez de ser delegada ao `UserService` e `UserRepository`, como:
-    ```javascript
-    class UserController {
-      getAllUsers (req, res) {
-        try {
-          const users = UserRepository.getAll() // Chamando diretamente o repository em vez de passar pelo service
-          return res.status(200).json({ users })
-        } catch (error) {
-          console.error(error)
-          return res.status(500).json({ error: "Server Error" })
-        }
-      }
-    }
-    ```
+- **Viola o padrão**:
+  - Se `UserController.js` contivesse diretamente a lógica de acesso a dados, como manipulação direta do array de usuários, isso violaria a separação de responsabilidades esperada na arquitetura em camadas.
 
-## Convenção de Nomenclatura para Métodos
+## Convenção de Nomenclatura de Métodos
 
 ### Descrição
 
-Os métodos no código seguem uma convenção de nomenclatura clara que reflete suas ações, utilizando prefixos como `get`, `create`, etc. Isso aumenta a legibilidade e a compreensão imediata das ações que cada método executa.
+Os métodos dentro das classes seguem uma convenção de nomenclatura que reflete suas ações, como `getAll`, `create`, `validateCreateUserParams`. Essa prática é importante porque melhora a legibilidade do código e facilita a compreensão das ações realizadas por cada método.
 
 ### Exemplos
 
-- **Exemplo que segue o padrão:**
-  - `UserService.getAll()`: Usando `getAll` para indicar a obtenção de todos os recursos.
-  - `UserRepository.create(user)`: Usando `create` para indicar a criação de um recurso.
+- **Segue o padrão**:
+  - `UserService.js` possui métodos como `getAll` e `create`, que indicam claramente suas funções.
+  - `UserValidation.js` possui o método `validateCreateUserParams`, que descreve sua finalidade de validação.
 
-- **Exemplo que viola o padrão:**
-  - Se um método de obtenção de todos os usuários fosse nomeado de forma inconsistente, como `UserService.retrieveUsers()`, em vez de `getAll()`, quebraria a consistência e a expectativa de nomenclatura.
+- **Viola o padrão**:
+  - Se um método em `UserService.js` fosse nomeado de forma genérica ou não descritiva, como `doAction`, isso violaria a convenção de nomenclatura clara e descritiva.
 
-## Manipulação de Validação Centralizada
+## Uso de Instâncias Singleton
 
 ### Descrição
 
-Toda a validação de entrada do usuário é feita através de uma classe de validação centralizada, `UserValidation`, que utiliza uma utilidade de validação (`ValidatorUtil`). Isso garante que todas as regras de validação sejam centralizadas e facilmente gerenciadas e expandidas.
+O código utiliza o padrão Singleton para instanciar classes, garantindo que apenas uma única instância de cada classe seja criada e utilizada em todo o aplicativo. Isso é importante para manter o estado compartilhado e evitar a criação desnecessária de múltiplas instâncias que poderiam levar a inconsistências.
 
 ### Exemplos
 
-- **Exemplo que segue o padrão:**
-  - `UserValidation.validateCreateUserParams(user)`: Usa uma classe dedicada para validar parâmetros de criação de usuário.
+- **Segue o padrão**:
+  - `UserValidation.js`, `UserService.js`, `UserController.js`, `UserRepository.js`, e `ValidatorUtil.js` exportam uma única instância de suas respectivas classes.
 
-- **Exemplo que viola o padrão:**
-  - A validação dos parâmetros do usuário feita diretamente no controlador sem a utilização da classe de validação, como:
-    ```javascript
-    createUser (req, res) {
-      try {
-        const user = req.body.user
-        if (!user.name) { // Validação direta sem o uso do UserValidation
-          return res.status(400).json({ error: "name must be filled" })
-        }
-        UserService.create(user)
-        return res.status(201).json({})
-      } catch (error) {
-        console.error(error)
-        return res.status(500).json({ error: "Server Error" })
-      }
-    }
-    ```
+- **Viola o padrão**:
+  - Se `UserRepository.js` exportasse a classe diretamente em vez de uma instância, permitindo múltiplas instâncias, isso violaria o padrão Singleton.
 ```
-
