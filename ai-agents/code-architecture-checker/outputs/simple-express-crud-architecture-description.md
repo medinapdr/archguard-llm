@@ -1,48 +1,61 @@
-## Padrão de Estrutura em Camadas
+## Convenções de Nomenclatura
 
 ### Descrição
 
-O código segue um padrão de arquitetura em camadas, onde há uma separação clara entre as responsabilidades de controle, serviço, repositório e validação. Este padrão é importante porque promove a separação de preocupações, facilitando a manutenção e evolução do código. Cada camada tem uma responsabilidade específica: 
-
-- **Controllers**: Lidam com a lógica de entrada e saída, interagindo com as requisições HTTP.
-- **Services**: Contêm a lógica de negócios e interagem com os repositórios.
-- **Repositories**: Gerenciam o acesso aos dados, seja em memória ou em um banco de dados.
-- **Validations**: Realizam a validação dos dados de entrada.
+No código fornecido, há uma convenção de nomenclatura consistente para funções de acesso a dados nos repositórios. As funções de recuperação de dados começam com "get" (por exemplo, `getAll`, `getById`), enquanto as funções de criação começam com "create" (por exemplo, `create`).
 
 ### Exemplos
 
 - **Segue o padrão**: 
-  - `UserController` interage com `UserService` para obter dados e processar requisições.
-  - `UserService` utiliza `UserRepository` para acessar dados de usuários.
-  - `UserValidation` é usado para validar dados de entrada antes de serem processados.
+  - `getAll` e `create` em `UserRepository`.
+  - `getAll` e `create` em `AccountRepository`.
 
-- **Viola o padrão**:
-  - Se `UserController` acessasse diretamente `UserRepository` para obter dados, sem passar por `UserService`, isso violaria a separação de camadas.
+- **Viola o padrão**: 
+  - Se houvesse uma função de recuperação de dados nomeada como `fetchAll` ou `retrieveAll`, isso violaria a convenção observada.
 
-## Convenção de Nomenclatura para Repositórios
-
-### Descrição
-
-Todos os repositórios seguem uma convenção de nomenclatura que utiliza o sufixo "Repository". Isso ajuda a identificar rapidamente a responsabilidade de uma classe como sendo relacionada ao acesso a dados. Essa consistência é importante para a legibilidade e manutenção do código.
-
-### Exemplos
-
-- **Segue o padrão**:
-  - `UserRepository` e `AccountRepository` são nomeados com o sufixo "Repository", indicando claramente sua função.
-
-- **Viola o padrão**:
-  - Se houvesse uma classe chamada `UserData` que funcionasse como um repositório, isso violaria a convenção de nomenclatura estabelecida.
-
-## Uso Consistente de Instâncias Singleton
+## Organização de Arquivos/Módulos
 
 ### Descrição
 
-O código utiliza instâncias singleton para classes que não precisam de múltiplas instâncias, como `UserValidation`, `UserService`, `UserController`, `ValidatorUtil`, `AccountRepository` e `UserRepository`. Isso é importante para garantir que o estado compartilhado seja gerenciado de forma consistente e para economizar recursos.
+Os componentes do sistema estão organizados em diretórios específicos de acordo com seu tipo. Por exemplo, os controladores estão no diretório `/Controllers`, os serviços em `/Services`, os repositórios em `/Repositories`, e as validações em `/Validations`.
 
 ### Exemplos
 
-- **Segue o padrão**:
-  - `module.exports = new UserService()` exporta uma única instância de `UserService`.
+- **Segue o padrão**: 
+  - `UserController.js` está em `/Controllers`.
+  - `UserService.js` está em `/Services`.
+  - `UserRepository.js` está em `/Repositories`.
+  - `UserValidation.js` está em `/Validations`.
 
-- **Viola o padrão**:
-  - Se `UserService` fosse exportado como `module.exports = UserService`, permitindo múltiplas instâncias, isso violaria o padrão singleton.
+- **Viola o padrão**: 
+  - Se `UserController.js` estivesse em `/Services` ou `UserRepository.js` estivesse em `/Controllers`, isso violaria a organização observada.
+
+## Arquitetura em Camadas
+
+### Descrição
+
+O código segue uma arquitetura em camadas clara, onde há uma separação entre controladores, serviços, repositórios e validações. Cada camada tem uma responsabilidade específica e interage com as outras de maneira definida.
+
+### Exemplos
+
+- **Segue o padrão**: 
+  - `UserController` chama métodos de `UserService`, que por sua vez interage com `UserRepository`.
+  - `UserValidation` é usado por `UserController` para validar dados antes de chamar `UserService`.
+
+- **Viola o padrão**: 
+  - Se `UserController` acessasse diretamente `UserRepository` sem passar por `UserService`, isso violaria a separação de camadas.
+
+## Separação de Responsabilidades (SoC)
+
+### Descrição
+
+O código demonstra uma separação clara de responsabilidades, onde cada classe ou módulo tem uma função específica. Por exemplo, a validação de dados é tratada por `UserValidation`, enquanto a lógica de negócios é gerida por `UserService`.
+
+### Exemplos
+
+- **Segue o padrão**: 
+  - `UserValidation` apenas valida dados e não interage com a base de dados.
+  - `UserService` lida com a lógica de negócios e não se preocupa com a validação de dados.
+
+- **Viola o padrão**: 
+  - Se `UserService` incluísse lógica de validação de dados ou `UserValidation` tentasse acessar o repositório, isso violaria a separação de responsabilidades.
