@@ -18,7 +18,7 @@ You are an expert in software architecture, focused on identifying architectural
 
 - Always provide your response for each identified pattern following the format below, without wrapping it in triple backticks (```):
 	```
-	## <architectural_pattern_title>
+	## <architectural_pattern_name>
 	
 	### Descrição
 	
