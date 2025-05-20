@@ -1,74 +1,68 @@
-## Convenção de Nomenclatura
+## Convenções de Nomenclatura
 
 ### Descrição
 
-Padrão consistente no uso de PascalCase para nomes de classes e arquivos (frequentemente com um sufixo indicando o tipo, como `Service` ou `Repository`), e camelCase para nomes de métodos e variáveis. Este padrão ajuda na legibilidade e na identificação rápida do propósito de um elemento.
+Este padrão descreve a aplicação consistente de regras para nomear classes, métodos, arquivos e variáveis em todo o código. A consistência na nomenclatura melhora a legibilidade e a manutenibilidade do código, tornando mais fácil para os desenvolvedores entenderem a finalidade de cada elemento. No código fornecido, observa-se o uso de PascalCase para nomes de classes e arquivos principais, camelCase para nomes de métodos e variáveis, e uma convenção baseada na ação para métodos de repositório (como `get` e `create`).
 
 ### Exemplos
 
 **Seguindo o padrão:**
 
--   `UserService` (nome da classe e do arquivo `UserService.js`)
--   `userRepository.create` (nome do método `create` na instância `userRepository`)
--   `validateCreateUserParams` (nome do método na classe `UserValidation`)
+-   O arquivo `src/Services/UserService.js` é nomeado em PascalCase (`UserService`) e contém a classe `UserService`, também em PascalCase.
+-   O método `getAll` na classe `UserService` é nomeado em camelCase.
+-   O método `create` na classe `UserRepository` segue a convenção de nomeação baseada na ação para operações de persistência.
 
 **Violando o padrão:**
 
--   Não foram encontrados exemplos que violem este padrão no código fornecido.
+-   Nenhuma violação explícita deste padrão foi encontrada nos trechos de código fornecidos.
 
-## Organização de Arquivos por Tipo
+## Organização de Arquivos/Módulos
 
 ### Descrição
 
-Padrão consistente de agrupar arquivos de tipos específicos (Controladores, Serviços, Repositórios, Validações, Utilitários, Rotas) em diretórios dedicados sob a pasta `src/`. Este padrão melhora a organização do projeto e a localizabilidade dos componentes.
+Este padrão refere-se à forma como os arquivos e módulos do projeto são estruturados em diretórios. Uma organização lógica e consistente baseada no papel ou tipo do componente ajuda a encontrar e gerenciar o código. No código fornecido, os arquivos são agrupados em diretórios como `Controllers`, `Services`, `Repositories`, `Routes`, `Validations` e `Utils`, refletindo suas responsabilidades arquiteturais.
 
 ### Exemplos
 
 **Seguindo o padrão:**
 
--   `src/Controllers/UserController.js` (Controlador na pasta `Controllers`)
--   `src/Repositories/UserRepository.js` (Repositório na pasta `Repositories`)
--   `src/Services/UserService.js` (Serviço na pasta `Services`)
--   `src/Validations/UserValidation.js` (Validação na pasta `Validations`)
--   `src/Utils/ValidatorUtil.js` (Utilitário na pasta `Utils`)
--   `src/Routes/UserRoute.js` (Rota na pasta `Routes`)
+-   O arquivo `UserController.js`, que contém a lógica para lidar com requisições HTTP relacionadas a usuários, está localizado no diretório `src/Controllers`.
+-   Os arquivos `UserRepository.js` e `AccountRepository.js`, que contêm a lógica de acesso a dados, estão localizados no diretório `src/Repositories`.
 
 **Violando o padrão:**
 
--   Não foram encontrados exemplos que violem este padrão no código fornecido.
+-   Nenhuma violação explícita deste padrão de organização foi encontrada nos trechos de código fornecidos.
 
 ## Arquitetura em Camadas
 
 ### Descrição
 
-Separação clara do código em camadas distintas (Rotas, Controladores, Serviços, Repositórios, Validações, Utilitários) com dependências fluindo predominantemente em uma direção descendente (e.g., Rota depende de Controlador, Controlador depende de Serviço e Validação, Serviço depende de Repositório). Este padrão promove a separação de responsabilidades e facilita a manutenção.
+Este padrão descreve a organização do código em camadas horizontais, onde cada camada tem uma responsabilidade específica e depende apenas das camadas abaixo dela. Isso promove a separação de preocupações e reduz o acoplamento. No código fornecido, observa-se uma estrutura onde as rotas dependem dos controladores, os controladores dependem dos serviços e validações, e os serviços dependem dos repositórios, indicando uma separação clara entre as camadas de apresentação/roteamento, aplicação/controle, lógica de negócio/serviço e acesso a dados.
 
 ### Exemplos
 
 **Seguindo o padrão:**
 
--   `UserRoute.js` importa e utiliza `UserController`.
--   `UserController.js` importa e utiliza `UserService` e `UserValidation`.
--   `UserService.js` importa e utiliza `UserRepository`.
+-   O `UserController` (camada de controle/aplicação) chama métodos do `UserService` (camada de lógica de negócio) para executar operações (`UserService.getAll()`, `UserService.create(user)`).
+-   O `UserService` (camada de lógica de negócio) chama métodos do `UserRepository` (camada de acesso a dados) para interagir com a fonte de dados (`UserRepository.getAll()`, `UserRepository.create(user)`).
 
 **Violando o padrão:**
 
--   Não foram encontrados exemplos que violem este padrão no código fornecido.
+-   Nenhuma violação explícita deste padrão de dependência entre camadas foi encontrada nos trechos de código fornecidos.
 
-## Separação de Responsabilidades
+## Separação de Preocupações
 
 ### Descrição
 
-Cada módulo ou arquivo tem uma responsabilidade primária e distinta, evitando a mistura de lógicas não relacionadas. Por exemplo, módulos de Repositório lidam exclusivamente com acesso a dados, enquanto Controladores lidam com o tratamento de requisições HTTP e orquestração entre outras camadas.
+Este padrão garante que cada módulo, componente ou camada do sistema seja responsável por uma única preocupação ou funcionalidade. Isso torna o código mais modular, compreensível e fácil de manter. No código fornecido, diferentes responsabilidades como roteamento, manipulação de requisições HTTP, lógica de negócio, validação de dados e acesso a dados são claramente separadas em módulos distintos (Rotas, Controladores, Serviços, Validações, Repositórios).
 
 ### Exemplos
 
 **Seguindo o padrão:**
 
--   `UserRepository.js` contém apenas a lógica para manipular o array `#users` (simulando acesso a dados).
--   `UserController.js` lida com os objetos `req` e `res`, chama métodos de `UserService` e `UserValidation`, e formata a resposta HTTP.
--   `ValidatorUtil.js` contém a lógica genérica para executar validações, independente das regras de validação específicas de uma entidade.
+-   O `UserController` foca em receber requisições, chamar a validação e o serviço apropriados, e enviar a resposta HTTP, sem conter lógica de negócio complexa ou acesso direto a dados.
+-   O `UserRepository` foca exclusivamente em operações de acesso a dados (neste caso, manipulação de um array em memória), sem incluir lógica de validação ou manipulação de requisições HTTP.
 
 **Violando o padrão:**
 
--   Não foram encontrados exemplos que violem este padrão no código fornecido.
+-   Nenhuma violação explícita deste padrão de separação de preocupações foi encontrada nos trechos de código fornecidos.
