@@ -17,9 +17,9 @@ def build_user_prompt(file_paths: List[str]) -> str:
 
     for path in file_paths:
         content = load_file_content(path)
-        parts.append(f"Arquivo: {path}\n{content}")
+        parts.append(f"File Path: {path}\n```\n{content}\n```")
 
-    return "\n\n".join(parts)
+    return "\n---\n".join(parts)
 
 def generate_llm_response(system_prompt: str, user_prompt: str, provider: str) -> str:
     if provider == "openai":
