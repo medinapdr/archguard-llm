@@ -1,71 +1,57 @@
-## Convenções de Nomenclatura de Arquivos por Tipo
+## Padrão: "Organização de Arquivos por Papel e Domínio"
 
 ### Descrição
 
-Este padrão define convenções de nomenclatura para arquivos com base no tipo de código que contêm. Arquivos que implementam um determinado tipo de funcionalidade ou contêm definições específicas seguem um sufixo consistente. Isso ajuda a identificar rapidamente o propósito de um arquivo e a manter a consistência em todo o projeto.
+O código organiza arquivos e módulos em diretórios distintos com base em seu papel arquitetural (como `Services`, `Utils`, `Protocols`, `Modules`, `Config`) e, dentro de domínios específicos (como `Skills/OnePieceMangaSpoiler`), subdivide ainda mais por papel. Essa estrutura facilita a localização de código relacionado e reforça a separação de responsabilidades. Arquivos de teste são colocados junto ao código que testam, seguindo convenções de nomenclatura específicas.
 
 ### Exemplos
 
-- **Segue o padrão:**
-  - `HttpService.ts`: Indica que o arquivo contém a implementação de um serviço HTTP.
-  - `DateUtil.ts`: Indica que o arquivo contém funções utilitárias relacionadas a datas.
-  - `OpexModule.ts`: Indica que o arquivo contém a implementação de um módulo específico.
-  - `SpoilerContentPhrasesConstant.ts`: Indica que o arquivo contém definições de constantes.
-  - `OpexProtocol.ts`: Indica que o arquivo contém definições de tipos ou interfaces (protocolos).
-  - `OpexService.unit.test.ts`: Indica que o arquivo contém testes unitários para o `OpexService`.
+- Arquivos de configuração são colocados no diretório `Config`: `examples/alexa-skills/src/Config/SkillConfig.ts`
+- Serviços genéricos são colocados no diretório `Services`: `examples/alexa-skills/src/Services/HttpService.ts`, `examples/alexa-skills/src/Services/CrawlerService.ts`
+- Utilitários genéricos são colocados no diretório `Utils`: `examples/alexa-skills/src/Utils/HandlerUtil.ts`, `examples/alexa-skills/src/Utils/ServerlessUtil.ts`
+- Definições de tipos/protocolos são colocadas no diretório `Protocols`: `examples/alexa-skills/src/Protocols/CrawlerProtocol.ts`, `examples/alexa-skills/src/Protocols/HandlerProtocol.ts`
+- Módulos de adaptação ou base são colocados no diretório `Modules`: `examples/alexa-skills/src/Modules/HandlerAdapterModule.ts`, `examples/alexa-skills/src/Modules/HandlerModule.ts`
+- Lógica específica de uma skill é agrupada em `Skills/<SkillName>` e subdividida por papel:
+    - Constantes: `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Constants/SpoilerContentPhrasesConstant.ts`
+    - Módulos: `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.ts`
+    - Protocolos: `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Protocols/OpexProtocol.ts`
+    - Serviços: `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`
+    - Utilitários: `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/DateUtil.ts`, `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/SanitizationUtil.ts`
+- Arquivos de teste são colocados nos mesmos diretórios que o código testado: `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.unit.test.ts`, `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.integration.test.ts`, `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/DateUtil.unit.test.ts`
 
-- **Viola o padrão:**
-  - `SkillConfig.ts`: Este arquivo contém dados de configuração, mas não segue um sufixo como `Config.ts` ou `Constant.ts` de forma consistente com outros tipos nomeados por sufixo. (Embora seja o único arquivo de configuração mostrado, ele não se alinha com a convenção de sufixo por tipo vista em outros lugares).
-
-## Organização de Arquivos e Módulos por Tipo e Domínio
+## Padrão: "Nomenclatura por Papel"
 
 ### Descrição
 
-Este padrão estabelece uma estrutura de diretórios consistente onde os arquivos são agrupados com base no seu tipo (Serviços, Utilitários, Módulos, Protocolos, Constantes) e/ou no domínio específico ao qual pertencem (por exemplo, uma skill Alexa específica). Isso promove a modularidade, facilita a navegação no código e reforça a separação de preocupações.
+Classes e arquivos são nomeados de forma consistente com base em seu papel ou responsabilidade. Isso inclui sufixos específicos para utilitários (`Util`), serviços (`Service`), módulos (`Module`), protocolos (`Protocol`) e constantes (`Constant`), além de convenções para arquivos de teste. Essa padronização torna o propósito de cada arquivo ou classe imediatamente claro.
 
 ### Exemplos
 
-- **Segue o padrão:**
-  - Arquivos de serviço gerais (`HttpService.ts`, `CrawlerService.ts`) são colocados no diretório `src/Services/`.
-  - Arquivos utilitários gerais (`HandlerUtil.ts`, `ServerlessUtil.ts`) são colocados no diretório `src/Utils/`.
-  - Arquivos de módulo gerais (`HandlerAdapterModule.ts`, `HandlerModule.ts`) são colocados no diretório `src/Modules/`.
-  - Arquivos de protocolo (`CrawlerProtocol.ts`, `HandlerProtocol.ts`) são colocados no diretório `src/Protocols/`.
-  - Arquivos específicos da skill `OnePieceMangaSpoiler` (`OpexService.ts`, `OpexModule.ts`, `DateUtil.ts`, `SanitizationUtil.ts`, `SpoilerContentPhrasesConstant.ts`, `OpexProtocol.ts`) são agrupados sob o diretório `src/Skills/OnePieceMangaSpoiler/`, com subdiretórios para seus tipos (`Services`, `Modules`, `Utils`, `Constants`, `Protocols`).
+- Classes utilitárias terminam com `Util`: `DateUtil`, `SanitizationUtil`, `HandlerUtil`, `ServerlessUtil`. Exemplo de arquivo: `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/DateUtil.ts`
+- Classes de serviço terminam com `Service`: `OpexService`, `HttpService`, `CrawlerService`. Exemplo de arquivo: `examples/alexa-skills/src/Services/HttpService.ts`
+- Classes de módulo terminam com `Module`: `OpexModule`, `HandlerAdapterModule`, `HandlerModule`. Exemplo de arquivo: `examples/alexa-skills/src/Modules/HandlerModule.ts`
+- Arquivos de definição de tipos/protocolos terminam com `Protocol`: `OpexProtocol`, `CrawlerProtocol`, `HandlerProtocol`, `ServerlessProtocol`, `HttpProtocol`, `SkillProtocol`. Exemplo de arquivo: `examples/alexa-skills/src/Protocols/HandlerProtocol.ts`
+- Arquivos de constantes terminam com `Constant`: `SpoilerContentPhrasesConstant`. Exemplo de arquivo: `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Constants/SpoilerContentPhrasesConstant.ts`
+- Arquivos de teste seguem o padrão `*.unit.test.ts` ou `*.integration.test.ts`: `OpexService.unit.test.ts`, `OpexModule.integration.test.ts`, `DateUtil.unit.test.ts`. Exemplo de arquivo: `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.unit.test.ts`
 
-- **Viola o padrão:**
-  - Não há exemplos claros de violação explícita deste padrão nos arquivos fornecidos, pois todos os arquivos mostrados parecem seguir a estrutura de diretórios baseada em tipo ou domínio da skill.
-
-## Arquitetura em Camadas
+## Padrão: "Separação de Responsabilidades por Camadas Lógicas"
 
 ### Descrição
 
-Este padrão organiza o código em camadas lógicas, onde cada camada tem responsabilidades específicas e depende apenas das camadas abaixo dela. A estrutura observada sugere camadas como Apresentação/Entrada (Handlers), Aplicação/Orquestração (Módulos), Lógica de Negócio/Domínio (Serviços específicos) e Infraestrutura/Técnica (Serviços gerais, Utilitários). As dependências fluem predominantemente de cima para baixo.
+O código demonstra uma separação clara de responsabilidades entre diferentes componentes e diretórios, que atuam como camadas lógicas. Há uma distinção entre:
+- Lógica de adaptação e manipulação de requisições externas (Handler/Adapter Modules).
+- Lógica de negócio específica de um domínio/skill (Skill Modules/Services).
+- Lógica de infraestrutura ou genérica (Services como HTTP, Crawler).
+- Funções auxiliares e utilitárias (Utils).
+- Definições de estrutura de dados e tipos (Protocols).
+- Configuração (Config).
+Essa separação garante que cada parte do código tenha um propósito bem definido e reduz o acoplamento.
 
 ### Exemplos
 
-- **Segue o padrão:**
-  - O `OnePieceMangaSpoilerHandler` (camada de Apresentação/Entrada) depende do `OpexModule` (camada de Aplicação/Orquestração) para obter as informações do spoiler.
-  - O `OpexModule` (camada de Aplicação/Orquestração) depende do `OpexService` (camada de Lógica de Negócio/Domínio) para processar o HTML e do `HttpService` (camada de Infraestrutura/Técnica) para buscar o HTML.
-  - O `OpexService` (camada de Lógica de Negócio/Domínio) depende do `CrawlerService` (camada de Infraestrutura/Técnica) para analisar o HTML e de `DateUtil` e `SanitizationUtil` (camada de Utilitários).
-
-- **Viola o padrão:**
-  - Não há exemplos claros de violação explícita deste padrão nos arquivos fornecidos, onde uma camada inferior dependa diretamente de uma camada superior.
-
-## Separação de Preocupações
-
-### Descrição
-
-Este padrão garante que cada componente (classe, módulo, utilitário) tenha uma única responsabilidade bem definida. A lógica relacionada a diferentes aspectos do sistema (como fazer requisições HTTP, analisar HTML, manipular datas, lidar com a interação da Alexa, extrair informações específicas de um site) é segregada em unidades distintas.
-
-### Exemplos
-
-- **Segue o padrão:**
-  - `HttpService` é responsável apenas por fazer requisições HTTP.
-  - `CrawlerService` é responsável apenas por analisar HTML.
-  - `DateUtil` é responsável apenas por manipulação de datas.
-  - `SanitizationUtil` é responsável apenas por sanitizar strings.
-  - `OpexService` é responsável pela lógica específica de extrair informações do HTML do site Opex, utilizando as ferramentas gerais fornecidas por `CrawlerService`, `DateUtil` e `SanitizationUtil`.
-  - `OnePieceMangaSpoilerHandler` é responsável por lidar com os eventos da Alexa e formatar a resposta falada, utilizando o `OpexModule` para obter os dados necessários.
-
-- **Viola o padrão:**
-  - Não há exemplos claros de violação explícita deste padrão nos arquivos fornecidos, onde um componente misture responsabilidades amplamente diferentes e não relacionadas ao seu propósito principal.
+- A lógica de adaptação da Alexa SDK é encapsulada em `HandlerAdapterModule`: `examples/alexa-skills/src/Modules/HandlerAdapterModule.ts`
+- A lógica de manipulação de requisições da skill é definida em `HandlerModule` e implementada em `OnePieceMangaSpoilerHandler`: `examples/alexa-skills/src/Modules/HandlerModule.ts`, `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/index.ts`
+- Serviços genéricos de infraestrutura como HTTP e Crawler são separados em `HttpService` e `CrawlerService`: `examples/alexa-skills/src/Services/HttpService.ts`, `examples/alexa-skills/src/Services/CrawlerService.ts`
+- A lógica de negócio específica para obter informações de spoiler é dividida entre `OpexModule` (orquestração) e `OpexService` (detalhes de parsing): `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.ts`, `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`
+- Funções auxiliares como manipulação de datas ou sanitização são isoladas em `Utils`: `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/DateUtil.ts`, `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/SanitizationUtil.ts`
+- As definições de tipos e interfaces são agrupadas em `Protocols`: `examples/alexa-skills/src/Protocols/HandlerProtocol.ts`, `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Protocols/OpexProtocol.ts`
