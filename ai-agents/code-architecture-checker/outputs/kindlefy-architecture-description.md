@@ -1,68 +1,65 @@
-## Convenção de Nomenclatura por Sufixo
+## Convenções de Nomenclatura
 
 ### Descrição
 
-Este padrão arquitetural é observado na utilização consistente de sufixos específicos para classes e arquivos, indicando seu papel ou tipo dentro da arquitetura. Arquivos localizados em diretórios específicos frequentemente terminam com um sufixo que reflete a natureza do código contido neles. Isso ajuda na organização e na rápida identificação da responsabilidade de um componente.
+O código segue consistentemente convenções de nomenclatura onde classes, tipos e interfaces frequentemente incluem um sufixo que indica seu papel ou a pasta onde estão localizados. Isso ajuda a identificar rapidamente a responsabilidade ou a natureza de um componente.
 
 ### Exemplos
 
--   **Segue o padrão**: Arquivos no diretório `src/Services` consistentemente terminam com `Service.ts` (ex: `HttpService.ts`, `TempFolderService.ts`, `BrowserService.ts`).
--   **Segue o padrão**: Arquivos no diretório `src/Utils` consistentemente terminam com `Util.ts` (ex: `FileUtil.ts`, `DateUtil.ts`, `SanitizationUtil.ts`).
--   **Segue o padrão**: Arquivos no diretório `src/Validations` consistentemente terminam com `Validation.ts` (ex: `EnvironmentValidation.ts`, `ConfigValidation.ts`, `SourceValidation.ts`).
--   **Segue o padrão**: Arquivos no diretório `src/Tools` consistentemente terminam com `Tool.ts` (ex: `RSSConverterTool.ts`, `MangaConverterTool.ts`, `GmailSenderTool.ts`).
--   **Segue o padrão**: Arquivos no diretório `src/Modules` consistentemente terminam com `Module.ts` (ex: `SyncModule.ts`, `StoreModule.ts`, `ImportationModule.ts`).
+*   **Segue o padrão:**
+    *   Classes em `/Services` terminam em `Service` (ex: `HttpService`, `QueueService`).
+    *   Classes em `/Utils` terminam em `Util` (ex: `FileUtil`, `DateUtil`).
+    *   Classes em `/Validations` terminam em `Validation` (ex: `ConfigValidation`, `SourceValidation`).
+    *   Classes em `/Tools` (e subpastas) terminam em `Tool` (ex: `RSSConverterTool`, `SMTPSenderTool`).
+    *   Classes em `/Modules` terminam em `Module` (ex: `SyncModule`, `ImportationModule`).
+    *   Classes em `/Models` terminam em `Model` (ex: `DocumentModel`).
+    *   Classes em `/Exceptions` terminam em `Exception` (ex: `ArrayParsingException`, `ProcessCommandException`).
+    *   Interfaces e tipos em `/Protocols` frequentemente terminam em `Protocol`, `Contract`, `Input`, `Options`, `Result` (ex: `StorageContract`, `QueueOptions`, `GenerateInput`).
 
--   **Viola o padrão**: O arquivo `src/App.ts` não segue a convenção de sufixo baseada em seu diretório (que seria a raiz `src`) ou em seu papel como orquestrador principal.
--   **Viola o padrão**: O arquivo `src/index.ts` não segue a convenção de sufixo.
+*   **Viola o padrão:**
+    *   Alguns tipos e interfaces em `/Protocols` não seguem a convenção de sufixo:
+        *   `Database` (em `JSONDatabaseProtocol.ts`)
+        *   `Element` (em `CrawlerProtocol.ts`)
+        *   `Ordering` (em `DataManipulationProtocol.ts`)
+        *   `Config` (em `SetupInputProtocol.ts`)
 
-## Organização de Arquivos por Tipo
+## Organização de Arquivos/Módulos
 
 ### Descrição
 
-Este padrão arquitetural envolve a organização do código-fonte em diretórios distintos, onde cada diretório agrupa arquivos ou módulos com responsabilidades ou tipos semelhantes. Isso cria uma estrutura de projeto clara e previsível, facilitando a localização de componentes específicos e a compreensão da finalidade de cada parte do sistema.
+Os arquivos são organizados em diretórios distintos com base em sua função principal ou tipo. Isso cria uma estrutura de projeto clara e previsível, facilitando a localização de componentes específicos.
 
 ### Exemplos
 
--   **Segue o padrão**: Todos os serviços de infraestrutura ou utilitários de baixo nível (como manipulação de HTTP, sistema de arquivos temporários, controle de navegador) são agrupados no diretório `src/Services`.
--   **Segue o padrão**: Todas as classes utilitárias de propósito geral (como manipulação de arquivos, datas, sanitização) são agrupadas no diretório `src/Utils`.
--   **Segue o padrão**: Todas as classes responsáveis por lógica de validação são agrupadas no diretório `src/Validations`.
--   **Segue o padrão**: Classes que implementam funcionalidades específicas como importação, conversão ou envio, muitas vezes agindo como adaptadores, são agrupadas no diretório `src/Tools`.
--   **Segue o padrão**: Classes que orquestram fluxos de trabalho de alto nível ou representam funcionalidades principais da aplicação são agrupadas no diretório `src/Modules`.
--   **Segue o padrão**: Definições de tipos e interfaces são agrupadas no diretório `src/Protocols`.
--   **Segue o padrão**: Classes de exceção personalizadas são agrupadas no diretório `src/Exceptions`.
--   **Segue o padrão**: Classes que representam modelos de dados são agrupadas no diretório `src/Models`.
+*   **Segue o padrão:**
+    *   Arquivos que fornecem funcionalidades de serviço genéricas ou de baixo nível estão em `/Services` (ex: `HttpService.ts`, `TempFolderService.ts`).
+    *   Arquivos que contêm funções utilitárias ou auxiliares estão em `/Utils` (ex: `FileUtil.ts`, `SanitizationUtil.ts`).
+    *   Arquivos que contêm lógica de validação estão em `/Validations` (ex: `EnvironmentValidation.ts`, `ConfigValidation.ts`).
+    *   Arquivos que implementam operações de domínio específicas (conversão, envio, importação, armazenamento) estão em subpastas dentro de `/Tools` (ex: `RSSConverterTool.ts` em `/Tools/Converters`, `SMTPSenderTool.ts` em `/Tools/Senders`).
+    *   Arquivos que orquestram fluxos de aplicação de alto nível estão em `/Modules` (ex: `ImportationModule.ts`, `StoreModule.ts`).
+    *   Arquivos que definem interfaces e tipos estão em `/Protocols` (ex: `StorageProtocol.ts`, `QueueProtocol.ts`).
+    *   Arquivos que definem classes de exceção estão em `/Exceptions` (ex: `SetupInputException.ts`, `ArrayParsingException.ts`).
+    *   Arquivos que definem modelos de dados estão em `/Models` (ex: `DocumentModel.ts`).
 
--   **Viola o padrão**: O arquivo `src/App.ts` reside na raiz do diretório `src`, em vez de ser agrupado com outros arquivos de orquestração ou inicialização, se existissem.
--   **Viola o padrão**: O arquivo `src/index.ts`, ponto de entrada da aplicação, reside na raiz do diretório `src`, em vez de ser agrupado em um diretório específico para inicialização ou configuração.
+*   **Viola o padrão:**
+    *   Não foram encontradas violações repetidas deste padrão nos arquivos fornecidos. Todos os arquivos funcionais parecem estar localizados consistentemente de acordo com sua função e convenção de nomenclatura.
 
-## Arquitetura em Camadas (Implícita)
+## Arquitetura em Camadas
 
 ### Descrição
 
-Este padrão arquitetural, embora não estritamente imposto em todas as interações, é observado na forma como os componentes de nível superior orquestram e dependem de componentes de nível inferior para realizar tarefas. Existe uma tendência clara de dependência unidirecional, onde módulos de aplicação dependem de ferramentas e serviços de infraestrutura, mas não o contrário.
+O código demonstra uma estrutura em camadas, onde componentes de alto nível dependem de componentes de nível inferior para realizar tarefas específicas. As camadas identificáveis incluem orquestração (`App`), lógica de aplicação (`Modules`), operações de domínio/infraestrutura (`Tools`/`Services`), e utilitários/validações (`Utils`/`Validations`). A regra geral é que as dependências fluem para baixo, de camadas superiores para inferiores.
 
 ### Exemplos
 
--   **Segue o padrão**: A classe `App` (camada de aplicação/orquestração) depende e chama métodos de classes no diretório `Modules` (`SetupInputModule`, `ImportationModule`, `ConversionModule`, `SyncModule`, `StoreModule`), que representam a lógica de negócio de alto nível.
--   **Segue o padrão**: Classes no diretório `Modules` (lógica de negócio) dependem e utilizam classes no diretório `Tools` (adaptadores/funcionalidades específicas) para realizar operações como importação, conversão ou envio (ex: `ImportationModule` usa `RSSImporterTool` ou `MangaImporterTool`).
--   **Segue o padrão**: Classes no diretório `Tools` (adaptadores/funcionalidades específicas) dependem e utilizam classes no diretório `Services` (infraestrutura/utilitários) para realizar operações de baixo nível (ex: `RSSConverterTool` usa `ParserService`, `EbookGeneratorService`, `EbookCoverService`, `RSSContentEnricherService`, `QueueService`).
+*   **Segue o padrão:**
+    *   `App.ts` (camada de orquestração) importa e utiliza classes de `/Modules` (ex: `ImportationModule`, `ConversionModule`) e `/Services` (ex: `NotificationService`, `TempFolderService`).
+    *   Classes em `/Modules` (camada de lógica de aplicação) importam e utilizam classes de `/Tools` (ex: `ImportationModule` importa `RSSImporterTool`), `/Services` (ex: `StoreModule` importa `LocalStorageTool` que por sua vez usa `JSONDatabaseService`), e `/Validations` (ex: `SetupInputModule` importa `ConfigValidation`).
+    *   Classes em `/Tools` (camada de operações de domínio) importam e utilizam classes de `/Services` (ex: `RSSConverterTool` importa `ParserService`, `EbookGeneratorService`) e `/Utils` (ex: `MangaConverterTool` importa `FileUtil`).
+    *   Classes em `/Services` (camada de infraestrutura/suporte) importam e utilizam outras classes de `/Services` (ex: `HttpService` importa `HttpProxyService`, `JSONDatabaseService` importa `QueueService`) e `/Utils` (ex: `EbookGeneratorService` importa `FileUtil`).
+    *   Classes em `/Validations` e `/Utils` (camadas de utilitários/validações) geralmente não importam classes de camadas superiores (`Modules`, `Tools`, `App`).
 
--   **Viola o padrão**: Não há violações claras e repetidas da direção das dependências (camadas inferiores chamando camadas superiores) observadas nos arquivos fornecidos. A estrutura parece manter a dependência fluindo de camadas mais altas para mais baixas.
-
-## Separação de Responsabilidades
-
-### Descrição
-
-Este padrão arquitetural é evidente na forma como as classes e módulos são projetados para ter uma responsabilidade principal bem definida. Cada componente tende a focar em uma única tarefa ou domínio específico, minimizando o acoplamento e facilitando a manutenção e o entendimento do código.
-
-### Exemplos
-
--   **Segue o padrão**: A classe `HttpService` é unicamente responsável por lidar com requisições HTTP.
--   **Segue o padrão**: A classe `TempFolderService` é unicamente responsável por gerenciar o diretório temporário (gerar, limpar, montar caminhos).
--   **Segue o padrão**: A classe `EbookGeneratorService` é responsável por gerar e converter arquivos de ebook usando ferramentas externas.
--   **Segue o padrão**: A classe `ParserService` é responsável por analisar (parsear) dados de feeds RSS.
--   **Segue o padrão**: A classe `SanitizationUtil` é responsável por sanitizar strings, especificamente nomes de arquivo.
--   **Segue o padrão**: As classes `RSSConverterTool` e `MangaConverterTool` são responsáveis por converter dados de seus respectivos tipos de fonte para o formato de documento final.
-
--   **Viola o padrão**: A classe `LocalStorageTool` (cuja responsabilidade principal é o armazenamento local) também inclui lógica para interagir com a API do Github Actions (`GithubActionsUtil.updateRepositoryFile`) para persistir o banco de dados em um ambiente específico. Isso mistura a responsabilidade de armazenamento com a responsabilidade de interação com uma plataforma de implantação.
--   **Viola o padrão**: A classe `RSSContentEnricherService` é responsável tanto por determinar qual tipo de conteúdo está sendo processado (`getContentTypeBySourceConfig`, `getEnricherByContentType`) quanto por implementar a lógica específica de enriquecimento para cada tipo (`enrichMediumContent`, `enrichDefaultContent`).
+*   **Viola o padrão:**
+    *   Classes na camada `/Utils` (utilitários) importam classes na camada `/Services` (serviços), o que viola a regra de dependência descendente:
+        *   `ParseUtil.ts` importa `ErrorHandlerService` (em `/Services`).
+        *   `GithubActionsUtil.ts` importa `ErrorHandlerService` (em `/Services`).
