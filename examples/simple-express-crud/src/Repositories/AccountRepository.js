@@ -5,6 +5,10 @@ class AccountRepository {
 		return AccountRepository.#accounts
 	}
 
+	retrieveOneById (id) {
+		return AccountRepository.#accounts[id]
+	}
+
 	create (account) {
 		AccountRepository.#accounts.push({
 			...account,

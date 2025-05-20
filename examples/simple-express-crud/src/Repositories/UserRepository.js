@@ -15,6 +15,13 @@ class UserRepository {
 			id: Date.now().toString()
 		})
 	}
+
+	updateById (id, data) {
+		return UserRepository.#users[id] = {
+			...UserRepository.#users[id],
+			...data
+		}
+	}
 }
 
 module.exports = new UserRepository()
