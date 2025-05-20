@@ -1,36 +1,71 @@
-## Organização de Arquivos e Módulos
+## Convenções de Nomenclatura de Arquivos por Tipo
 
 ### Descrição
 
-O código segue um padrão consistente de organização de arquivos e diretórios, separando o código por funcionalidade (Skills) e por tipo de componente (Services, Modules, Utils, Constants, Protocols). Componentes de uso geral são colocados em diretórios na raiz de `src/`, enquanto componentes específicos de uma Skill são aninhados em `src/Skills/<NomeDaSkill>/`.
+Este padrão define convenções de nomenclatura para arquivos com base no tipo de código que contêm. Arquivos que implementam um determinado tipo de funcionalidade ou contêm definições específicas seguem um sufixo consistente. Isso ajuda a identificar rapidamente o propósito de um arquivo e a manter a consistência em todo o projeto.
 
 ### Exemplos
 
-- O arquivo `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts` é um serviço específico da skill "OnePieceMangaSpoiler" e está localizado no diretório `Services` dentro do diretório da skill.
-- O arquivo `examples/alexa-skills/src/Services/HttpService.ts` é um serviço de uso geral (HTTP) e está localizado no diretório `Services` na raiz de `src/`.
+- **Segue o padrão:**
+  - `HttpService.ts`: Indica que o arquivo contém a implementação de um serviço HTTP.
+  - `DateUtil.ts`: Indica que o arquivo contém funções utilitárias relacionadas a datas.
+  - `OpexModule.ts`: Indica que o arquivo contém a implementação de um módulo específico.
+  - `SpoilerContentPhrasesConstant.ts`: Indica que o arquivo contém definições de constantes.
+  - `OpexProtocol.ts`: Indica que o arquivo contém definições de tipos ou interfaces (protocolos).
+  - `OpexService.unit.test.ts`: Indica que o arquivo contém testes unitários para o `OpexService`.
+
+- **Viola o padrão:**
+  - `SkillConfig.ts`: Este arquivo contém dados de configuração, mas não segue um sufixo como `Config.ts` ou `Constant.ts` de forma consistente com outros tipos nomeados por sufixo. (Embora seja o único arquivo de configuração mostrado, ele não se alinha com a convenção de sufixo por tipo vista em outros lugares).
+
+## Organização de Arquivos e Módulos por Tipo e Domínio
+
+### Descrição
+
+Este padrão estabelece uma estrutura de diretórios consistente onde os arquivos são agrupados com base no seu tipo (Serviços, Utilitários, Módulos, Protocolos, Constantes) e/ou no domínio específico ao qual pertencem (por exemplo, uma skill Alexa específica). Isso promove a modularidade, facilita a navegação no código e reforça a separação de preocupações.
+
+### Exemplos
+
+- **Segue o padrão:**
+  - Arquivos de serviço gerais (`HttpService.ts`, `CrawlerService.ts`) são colocados no diretório `src/Services/`.
+  - Arquivos utilitários gerais (`HandlerUtil.ts`, `ServerlessUtil.ts`) são colocados no diretório `src/Utils/`.
+  - Arquivos de módulo gerais (`HandlerAdapterModule.ts`, `HandlerModule.ts`) são colocados no diretório `src/Modules/`.
+  - Arquivos de protocolo (`CrawlerProtocol.ts`, `HandlerProtocol.ts`) são colocados no diretório `src/Protocols/`.
+  - Arquivos específicos da skill `OnePieceMangaSpoiler` (`OpexService.ts`, `OpexModule.ts`, `DateUtil.ts`, `SanitizationUtil.ts`, `SpoilerContentPhrasesConstant.ts`, `OpexProtocol.ts`) são agrupados sob o diretório `src/Skills/OnePieceMangaSpoiler/`, com subdiretórios para seus tipos (`Services`, `Modules`, `Utils`, `Constants`, `Protocols`).
+
+- **Viola o padrão:**
+  - Não há exemplos claros de violação explícita deste padrão nos arquivos fornecidos, pois todos os arquivos mostrados parecem seguir a estrutura de diretórios baseada em tipo ou domínio da skill.
 
 ## Arquitetura em Camadas
 
 ### Descrição
 
-A codebase demonstra uma arquitetura em camadas, onde as responsabilidades são divididas entre diferentes tipos de componentes com dependências direcionais. Observa-se uma estrutura onde Handlers dependem de Modules, Modules dependem de Services, e Services dependem de Utilities ou outros Services de infraestrutura.
+Este padrão organiza o código em camadas lógicas, onde cada camada tem responsabilidades específicas e depende apenas das camadas abaixo dela. A estrutura observada sugere camadas como Apresentação/Entrada (Handlers), Aplicação/Orquestração (Módulos), Lógica de Negócio/Domínio (Serviços específicos) e Infraestrutura/Técnica (Serviços gerais, Utilitários). As dependências fluem predominantemente de cima para baixo.
 
 ### Exemplos
 
-- O `OnePieceMangaSpoilerHandler` (camada de Handler) depende e chama métodos do `OpexModule` (camada de Module) para obter informações (`await OpexModule.getSpoilerInfo()`).
-- O `OpexModule` (camada de Module) depende e chama métodos do `OpexService` e `HttpService` (camada de Service/Infraestrutura) para realizar suas tarefas (`OpexService.getSpoilerPageUrlByLandingPageHTML(landingPageHTML)`, `await httpService.toString("")`).
+- **Segue o padrão:**
+  - O `OnePieceMangaSpoilerHandler` (camada de Apresentação/Entrada) depende do `OpexModule` (camada de Aplicação/Orquestração) para obter as informações do spoiler.
+  - O `OpexModule` (camada de Aplicação/Orquestração) depende do `OpexService` (camada de Lógica de Negócio/Domínio) para processar o HTML e do `HttpService` (camada de Infraestrutura/Técnica) para buscar o HTML.
+  - O `OpexService` (camada de Lógica de Negócio/Domínio) depende do `CrawlerService` (camada de Infraestrutura/Técnica) para analisar o HTML e de `DateUtil` e `SanitizationUtil` (camada de Utilitários).
 
-## Convenções de Nomenclatura
+- **Viola o padrão:**
+  - Não há exemplos claros de violação explícita deste padrão nos arquivos fornecidos, onde uma camada inferior dependa diretamente de uma camada superior.
+
+## Separação de Preocupações
 
 ### Descrição
 
-Existe um padrão para nomear arquivos e classes com base em seu propósito. Arquivos de teste incluem `.unit.test` ou `.integration.test` no nome. Classes que representam serviços terminam com `Service`, módulos terminam com `Module`, utilitários terminam com `Util`, e handlers terminam com `Handler` ou `AdapterModule`. Constantes são frequentemente nomeadas usando PascalCase ou SCREAMING_SNAKE_CASE.
+Este padrão garante que cada componente (classe, módulo, utilitário) tenha uma única responsabilidade bem definida. A lógica relacionada a diferentes aspectos do sistema (como fazer requisições HTTP, analisar HTML, manipular datas, lidar com a interação da Alexa, extrair informações específicas de um site) é segregada em unidades distintas.
 
 ### Exemplos
 
-- O arquivo `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts` nomeia a classe `OpexService`, seguindo a convenção para serviços.
-- O arquivo `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Constants/SpoilerContentPhrasesConstant.ts` nomeia a constante `SpoilerContentPhrasesConstant` usando PascalCase.
+- **Segue o padrão:**
+  - `HttpService` é responsável apenas por fazer requisições HTTP.
+  - `CrawlerService` é responsável apenas por analisar HTML.
+  - `DateUtil` é responsável apenas por manipulação de datas.
+  - `SanitizationUtil` é responsável apenas por sanitizar strings.
+  - `OpexService` é responsável pela lógica específica de extrair informações do HTML do site Opex, utilizando as ferramentas gerais fornecidas por `CrawlerService`, `DateUtil` e `SanitizationUtil`.
+  - `OnePieceMangaSpoilerHandler` é responsável por lidar com os eventos da Alexa e formatar a resposta falada, utilizando o `OpexModule` para obter os dados necessários.
 
-### Violações
-
-- A constante `skillConfig` no arquivo `examples/alexa-skills/src/Config/SkillConfig.ts` é nomeada usando camelCase, o que viola a convenção observada para outras constantes como `SpoilerContentPhrasesConstant` e `OPEX_WEBSITE_BASE_URL`.
+- **Viola o padrão:**
+  - Não há exemplos claros de violação explícita deste padrão nos arquivos fornecidos, onde um componente misture responsabilidades amplamente diferentes e não relacionadas ao seu propósito principal.
