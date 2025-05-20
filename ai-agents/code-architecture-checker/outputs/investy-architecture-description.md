@@ -1,75 +1,87 @@
-## Organização de Arquivos por Papel
+## Padrão: "Naming Conventions"
 
 ### Descrição
 
-O código organiza consistentemente arquivos em diretórios baseados em seu papel ou responsabilidade dentro da arquitetura. Por exemplo, lógica de negócio reside em `/services`, acesso a dados em `/repositories`, manipulação de requisições em `/controllers`, utilitários em `/utils`, adaptações para frameworks externos em `/adapters`, definições de contratos em `/contracts`, definições de protocolos em `/protocols`, esquemas de banco de dados em `/schemas`, definições de entidades em `/entities`, configurações em `/config`, middlewares em `/middlewares`, lógica de validação em `/validations`, wrappers para bibliotecas externas em `/lib`, componentes de UI em `/components` e hooks React em `/hooks`.
+O código demonstra um uso consistente de convenções de nomenclatura para arquivos, classes e variáveis, indicando o propósito ou a camada do componente. Essa padronização facilita a identificação rápida da função de um arquivo ou módulo dentro da arquitetura do projeto.
 
 ### Exemplos
 
-**Seguindo o padrão:**
+- Arquivos e classes de repositório seguem o padrão `[Nome da Entidade]Repository`:
+    - `examples/investy/server/repositories/UserRepository.ts` define a classe `UserRepository`.
+    - `examples/investy/server/repositories/IntegrationRepository.ts` define a classe `IntegrationRepository`.
+    - `examples/investy/server/repositories/AssetSyncRepository.ts` define a classe `AssetSyncRepository`.
+- Arquivos e classes de serviço seguem o padrão `[Propósito]Service`:
+    - `examples/investy/server/services/AuthService.ts` define a classe `AuthService`.
+    - `examples/investy/server/services/IntegrationService.ts` define a classe `IntegrationService`.
+    - `examples/investy/server/services/AssetSyncSchedulerService.ts` define a classe `AssetSyncSchedulerService`.
+- Arquivos e classes de controlador seguem o padrão `[Recurso]Controller`:
+    - `examples/investy/server/controllers/UserController.ts` define a classe `UserController`.
+    - `examples/investy/server/controllers/NotionAssetSyncController.ts` define a classe `NotionAssetSyncController`.
+- Arquivos e classes utilitárias seguem o padrão `[Propósito]Util`:
+    - `examples/investy/server/utils/StringUtil.ts` define a classe `StringUtil`.
+    - `examples/investy/server/utils/ValidationUtil.ts` define a classe `ValidationUtil`.
+- Arquivos e classes de validação seguem o padrão `[Recurso]Validation`:
+    - `examples/investy/server/validations/UserValidation.ts` define a classe `UserValidation`.
+    - `examples/investy/server/validations/IntegrationValidation.ts` define a classe `IntegrationValidation`.
 
-*   O arquivo `examples/investy/server/services/LogService.ts` reside no diretório `/server/services`, indicando que ele fornece funcionalidades de serviço (neste caso, logging).
-*   O arquivo `examples/investy/server/repositories/UserRepository.ts` reside no diretório `/server/repositories`, indicando que ele lida com operações de acesso a dados para a entidade `User`.
-*   O arquivo `examples/investy/client/components/Button/index.tsx` reside no diretório `/client/components`, indicando que é um componente de interface do usuário.
-
-**Violando o padrão:**
-
-*   Não foram encontradas violações explícitas deste padrão na estrutura de diretórios fornecida. Todos os arquivos parecem estar localizados nos diretórios correspondentes ao seu papel.
-
-## Convenção de Nomenclatura por Papel
+## Padrão: "File/Module Organization"
 
 ### Descrição
 
-O código utiliza uma convenção de nomenclatura consistente onde o nome de um arquivo ou classe frequentemente termina com um sufixo que indica seu papel arquitetural. Exemplos incluem `Service`, `Repository`, `Controller`, `Util`, `Adapter`, `Contract`, `Protocol`, `Schema`, `Entity`, `Config`, `Middleware`, `Validation`, `Lib`. Hooks React no lado do cliente consistentemente começam com o prefixo `use`.
+O código organiza arquivos e módulos em diretórios específicos com base em suas responsabilidades e tipos. Essa estrutura de diretórios consistente ajuda a manter a base de código organizada e previsível, facilitando a localização de componentes específicos.
 
 ### Exemplos
 
-**Seguindo o padrão:**
+- Módulos de infraestrutura (como banco de dados e fila) são agrupados em `/infra`:
+    - `examples/investy/server/infra/database/index.ts`
+    - `examples/investy/server/infra/queue/index.ts`
+- Lógica de acesso a dados é centralizada em `/repositories`:
+    - `examples/investy/server/repositories/UserRepository.ts`
+    - `examples/investy/server/repositories/IntegrationRepository.ts`
+- Lógica de negócio e serviços de aplicação são agrupados em `/services`:
+    - `examples/investy/server/services/AuthService.ts`
+    - `examples/investy/server/services/IntegrationService.ts`
+- Controladores que lidam com requisições HTTP são agrupados em `/controllers`:
+    - `examples/investy/server/controllers/UserController.ts`
+    - `examples/investy/server/controllers/NotionAssetSyncController.ts`
+- Componentes de UI reutilizáveis no lado do cliente são agrupados em `/client/components`:
+    - `examples/investy/client/components/Button/index.tsx`
+    - `examples/investy/client/components/Modal/index.tsx`
+    - `examples/investy/client/components/Table/index.tsx`
 
-*   A classe `LogService` em `examples/investy/server/services/LogService.ts` termina com `Service`.
-*   A classe `UserRepository` em `examples/investy/server/repositories/UserRepository.ts` termina com `Repository`.
-*   A classe `NotionIntegrationController` em `examples/investy/server/controllers/NotionIntegrationController.ts` termina com `Controller`.
-*   A classe `MongooseRepositoryAdapter` em `examples/investy/server/adapters/MongooseRepositoryAdapter.ts` termina com `Adapter`.
-*   O hook `useDidMount` em `examples/investy/client/hooks/useDidMount.ts` começa com `use`.
-
-**Violando o padrão:**
-
-*   Não foram encontradas violações explícitas desta convenção de nomenclatura nos arquivos fornecidos. Todos os nomes de arquivos e classes parecem seguir o padrão estabelecido para seus respectivos diretórios.
-
-## Arquitetura em Camadas
+## Padrão: "Layered Architecture"
 
 ### Descrição
 
-O código segue um padrão geral de arquitetura em camadas, onde as responsabilidades são divididas em camadas distintas, como apresentação (API routes/Controllers), lógica de negócio (Services), acesso a dados (Repositories) e integração com sistemas externos (Libs). As dependências geralmente fluem de camadas superiores para inferiores (por exemplo, Controllers dependem de Services, Services dependem de Repositories e Libs). Middlewares lidam com preocupações transversais antes que a requisição chegue ao Controller.
+A base de código, particularmente no lado do servidor, demonstra uma estrutura em camadas onde diferentes responsabilidades são atribuídas a grupos distintos de módulos. As dependências geralmente fluem de camadas superiores para inferiores, promovendo a separação de preocupações e a manutenibilidade.
 
 ### Exemplos
 
-**Seguindo o padrão:**
+- As rotas da API Next.js (`pages/api/...`) atuam como a camada de entrada, utilizando adaptadores (`NextHttpAdapter`) para rotear requisições para os controladores.
+    - `examples/investy/pages/api/users/login.ts`
+    - `examples/investy/pages/api/asset-syncs/notion.ts`
+- Controladores (`server/controllers`) lidam com a lógica de requisição/resposta e delegam a lógica de negócio para os serviços.
+    - `examples/investy/server/controllers/UserController.ts` utiliza `AuthService` e `UserRepository`.
+    - `examples/investy/server/controllers/NotionAssetSyncController.ts` utiliza `IntegrationService`, `AssetSyncSchedulerService`, `AssetSyncRepository`, `NotionLib`, etc.
+- Serviços (`server/services`) contêm a lógica de negócio principal e orquestram operações, utilizando repositórios e bibliotecas.
+    - `examples/investy/server/services/AuthService.ts` utiliza `HashService` e `CryptService`.
+    - `examples/investy/server/services/IntegrationService.ts` utiliza `IntegrationRepository`.
+- Repositórios (`server/repositories`) encapsulam a lógica de acesso a dados, interagindo com o banco de dados (através de adaptadores e schemas).
+    - `examples/investy/server/repositories/UserRepository.ts` utiliza `MongooseRepositoryAdapter` e `UserSchema`.
+    - `examples/investy/server/repositories/AssetSyncRepository.ts` utiliza `MongooseRepositoryAdapter` e `AssetSyncSchema`.
 
-*   Em `examples/investy/pages/api/users/login.ts`, a rota API utiliza `NextHttpAdapter` para adaptar a requisição e delega para `InfraMiddleware.setup` e `UserController.login`, mostrando a camada de entrada delegando para middlewares e controllers.
-*   Em `examples/investy/server/controllers/UserController.ts`, o método `login` chama `UserValidation.validateLoginData` (validação), `UserRepository.retrieveOne` (acesso a dados) e `AuthService.generateAuthToken` (lógica de negócio/serviço), mostrando um controller orquestrando validação, acesso a dados e serviços.
-*   Em `examples/investy/server/services/AuthService.ts`, a classe utiliza `HashService` e `CryptService`, mostrando um serviço utilizando outros serviços para compor sua lógica.
-
-**Violando o padrão:**
-
-*   Em `examples/investy/server/controllers/NotionAssetSyncController.ts`, o método `retrieveAll` chama `AssetSyncRepository.retrieveAll` e `NotionLib.getDatabase` diretamente, contornando a camada de Service que normalmente orquestraria essas interações.
-*   Em `examples/investy/server/validations/UserValidation.ts`, o método `isUserEmailAvailable` chama `UserRepository.retrieveOne` diretamente. A lógica de validação idealmente não deveria interagir diretamente com a camada de acesso a dados.
-
-## Separação de Responsabilidades
+## Padrão: "Separation of Concerns"
 
 ### Descrição
 
-O código demonstra uma forte separação de responsabilidades, onde módulos e classes são projetados para ter um único foco principal. Repositórios lidam exclusivamente com persistência de dados, Serviços contêm lógica de negócio e orquestração, Controllers lidam com a interface de requisição/resposta, Utilitários fornecem funções auxiliares genéricas, Validações lidam com a validação de entrada, Adaptadores encapsulam detalhes de frameworks/bibliotecas externas e Libs encapsulam interações com APIs externas específicas.
+Diferentes tipos de lógica e responsabilidades são claramente separados em módulos distintos. Isso garante que cada módulo tenha um único propósito bem definido, o que melhora a modularidade, a testabilidade e a manutenibilidade do código.
 
 ### Exemplos
 
-**Seguindo o padrão:**
-
-*   A classe `MongooseRepositoryAdapter` em `examples/investy/server/adapters/MongooseRepositoryAdapter.ts` foca exclusivamente em adaptar operações CRUD genéricas para o Mongoose.
-*   A classe `AuthService` em `examples/investy/server/services/AuthService.ts` foca em lógica relacionada à autenticação (hashing de senha, geração/decodificação de token).
-*   A classe `ValidationUtil` em `examples/investy/server/utils/ValidationUtil.ts` fornece funções utilitárias genéricas para validação, sem lógica de negócio específica.
-
-**Violando o padrão:**
-
-*   Em `examples/investy/server/controllers/NotionAssetSyncController.ts`, o método `retrieveAll` inclui lógica para formatar os dados retornados do repositório e da lib (`formattedAssetSyncs` mapping), o que poderia ser considerado lógica de apresentação ou de negócio que idealmente residiria em um Service ou em um serializador dedicado, não no Controller.
-*   Em `examples/investy/server/validations/UserValidation.ts`, o método `isUserEmailAvailable` realiza uma consulta ao banco de dados através do `UserRepository`. Isso mistura a responsabilidade de validação com a responsabilidade de acesso a dados.
+- A lógica de manipulação de requisições HTTP (parsing, formatação de resposta) está nos controladores (`server/controllers`) e adaptadores HTTP (`server/adapters/NextHttpAdapter.ts`).
+- A lógica de negócio principal (como autenticação, sincronização de ativos) está nos serviços (`server/services`).
+- A lógica de persistência de dados (interação com o banco de dados) está nos repositórios (`server/repositories`) e schemas (`server/schemas`).
+- A lógica de interação com serviços externos (Notion, StatusInvest) está encapsulada em bibliotecas (`server/lib`).
+- A lógica de validação de entrada está separada em módulos de validação (`server/validations`).
+- A lógica de inicialização de infraestrutura (banco de dados, fila) está em módulos dedicados em `/infra`.
+- A lógica de UI e apresentação está nos componentes React (`client/components`) e páginas (`client/pages`).
