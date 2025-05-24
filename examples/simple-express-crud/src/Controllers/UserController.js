@@ -31,6 +31,26 @@ class UserController {
 			return res.status(500).json({ error: "Server Error" })
 		}
 	}
+
+	updateUser (req, res) {
+		try {
+			const userId = req.params.userId
+			const updatedUserData = req.body
+
+			const userExists = UserService.getById(userId)
+
+			if (!userExists) {
+				return res.status(404, { error: "Not Found" })
+			}
+
+			UserService.updateById(userId, updatedUserData)
+
+			return res.status(201).json({})
+		} catch (error) {
+			console.error(error)
+			return res.status(500).json({ error: "Server Error" })
+		}
+	}
 }
 
 module.exports = new UserController()
