@@ -2,82 +2,60 @@
 
 ### Descrição
 
-O código segue convenções de nomenclatura consistentes para arquivos, classes e métodos, indicando claramente o propósito e a responsabilidade de cada componente. Arquivos e classes frequentemente terminam com sufixos que denotam seu papel arquitetural (por exemplo, `Service`, `Util`, `Tool`, `Module`, `Validation`, `Protocol`, `Exception`, `Model`). Métodos geralmente usam verbos de ação que descrevem a operação que realizam (por exemplo, `get`, `set`, `handle`, `import`, `convert`, `send`, `run`, `fetch`, `generate`, `clean`, `start`, `close`).
+O código utiliza convenções de nomenclatura consistentes para arquivos e variáveis booleanas. Arquivos são nomeados com sufixos que indicam seu propósito ou tipo, e variáveis booleanas frequentemente usam prefixos como "is", "has" ou "can". Essa consistência melhora a legibilidade e a previsibilidade da base de código.
 
 ### Exemplos
 
-- **Sufixos de Arquivo/Classe:**
-    - `src/Services/HttpService.ts`
-    - `src/Utils/FileUtil.ts`
-    - `src/Tools/Converters/RSSConverterTool.ts`
-    - `src/Modules/SyncModule.ts`
-    - `src/Validations/EnvironmentValidation.ts`
-    - `src/Protocols/HttpProtocol.ts`
-    - `src/Exceptions/ArrayParsingException.ts`
-    - `src/Models/DocumentModel.ts`
-- **Nomenclatura de Métodos:**
-    - `HttpService.toBuffer()` (usa "to" para conversão de formato)
-    - `TempFolderService.generate()` (usa "generate" para criação)
-    - `TempFolderService.clean()` (usa "clean" para limpeza)
-    - `BrowserService.start()` / `BrowserService.close()` (usam "start" e "close" para ciclo de vida)
-    - `QueueService.enqueue()` (usa "enqueue" para adicionar à fila)
-    - `CompressionService.addFile()` (usa "add" para adicionar)
-    - `ProcessCommandService.run()` (usa "run" para execução)
-    - `MediumImporterService.getPostHTML()` (usa "get" para recuperação)
-    - `JSONDatabaseService.set()` (usa "set" para definir valor)
-    - `ErrorHandlerService.handle()` (usa "handle" para tratamento)
-    - `ImportationModule.import()` (usa "import" para importação)
-    - `ConversionModule.convert()` (usa "convert" para conversão)
-    - `SyncModule.sync()` (usa "sync" para sincronização)
-    - `StoreModule.markDocumentSync()` (usa "mark" para marcar estado)
-    - `SetupInputModule.fetch()` (usa "fetch" para buscar)
-    - `FileUtil.parseFilePath()` (usa "parse" para análise)
-    - `SanitizationUtil.sanitizeFilename()` (usa "sanitize" para sanitização)
+- Sufixos de arquivo:
+    - Arquivos em `src/Services/` terminam com `Service.ts` (ex: `HttpService.ts`, `NotificationService.ts`).
+    - Arquivos em `src/Utils/` terminam com `Util.ts` (ex: `FileUtil.ts`, `DateUtil.ts`).
+    - Arquivos em `src/Validations/` terminam com `Validation.ts` (ex: `EnvironmentValidation.ts`, `ConfigValidation.ts`).
+    - Arquivos em `src/Modules/` terminam com `Module.ts` (ex: `SyncModule.ts`, `StoreModule.ts`).
+    - Arquivos em `src/Tools/` (e seus subdiretórios) terminam com `Tool.ts` (ex: `RSSConverterTool.ts`, `SMTPSenderTool.ts`).
+- Prefixos de variáveis booleanas:
+    - `isGithubActionEnvironment` (em `examples/kindlefy/src/Validations/EnvironmentValidation.ts`)
+    - `isDevEnvironment` (em `examples/kindlefy/src/Validations/EnvironmentValidation.ts`)
+    - `isDocumentAlreadySync` (em `examples/kindlefy/src/Modules/StoreModule.ts`)
+    - `isAbleToUseStorage` (em `examples/kindlefy/src/Modules/StoreModule.ts`)
 
 ## Padrão: "File/Module Organization"
 
 ### Descrição
 
-O código organiza arquivos e módulos em diretórios distintos com base em sua responsabilidade ou tipo. Essa organização cria uma estrutura de projeto clara e previsível, onde componentes com propósitos semelhantes são agrupados.
+Os arquivos e módulos são organizados em diretórios com base em sua responsabilidade ou tipo funcional. Essa estrutura de diretórios clara ajuda a localizar componentes e entender a finalidade de diferentes partes da base de código.
 
 ### Exemplos
 
-- `src/Modules/`: Contém a lógica de orquestração de alto nível (`SyncModule`, `StoreModule`, `ImportationModule`, `SetupInputModule`, `ConversionModule`).
-- `src/Services/`: Contém funcionalidades reutilizáveis e preocupações de infraestrutura (`HttpService`, `TempFolderService`, `BrowserService`, `NotificationService`, etc.).
-- `src/Tools/`: Contém implementações específicas para tarefas como conversão, importação, envio e armazenamento, subdivididas por tipo (`Converters`, `Importers`, `Senders`, `Storages`).
-- `src/Validations/`: Contém lógica de validação (`EnvironmentValidation`, `ConfigValidation`, `SourceValidation`).
-- `src/Utils/`: Contém funções utilitárias genéricas (`FileUtil`, `DateUtil`, `ParseUtil`, etc.).
-- `src/Protocols/`: Contém definições de tipos e interfaces.
-- `src/Exceptions/`: Contém classes de exceção personalizadas.
-- `src/Models/`: Contém modelos de dados (`DocumentModel`).
+- `src/Services/`: Contém classes que fornecem funcionalidades de baixo nível ou infraestrutura (ex: `HttpService.ts`, `TempFolderService.ts`, `BrowserService.ts`).
+- `src/Utils/`: Contém funções utilitárias genéricas usadas em toda a aplicação (ex: `FileUtil.ts`, `DateUtil.ts`, `SanitizationUtil.ts`).
+- `src/Validations/`: Contém classes responsáveis por lógica de validação específica (ex: `EnvironmentValidation.ts`, `ConfigValidation.ts`).
+- `src/Tools/`: Agrupa componentes que realizam tarefas específicas do domínio, subdivididos por função (ex: `Importers/`, `Converters/`, `Senders/`, `Storages/`).
+- `src/Modules/`: Contém classes que orquestram fluxos de trabalho de alto nível, utilizando os componentes de `Tools` e `Services` (ex: `ImportationModule.ts`, `ConversionModule.ts`, `SyncModule.ts`).
+- `src/Protocols/`: Contém definições de tipos e interfaces usadas em toda a base de código.
 
 ## Padrão: "Layered Architecture"
 
 ### Descrição
 
-O código demonstra uma arquitetura em camadas, onde as responsabilidades são divididas em níveis distintos com dependências direcionais. A camada de aplicação (`App`) orquestra o fluxo principal, dependendo dos `Modules`. Os `Modules` contêm a lógica de negócio principal e dependem de `Tools` e `Services` para realizar tarefas específicas e acessar funcionalidades de infraestrutura. `Tools` e `Services` dependem de `Utils` para operações genéricas. Essa estrutura garante que as preocupações de baixo nível não dependam da lógica de alto nível.
+A base de código demonstra uma separação de responsabilidades em camadas lógicas. A camada de entrada/orquestração (`App`) delega tarefas a módulos de alto nível (`Modules`), que por sua vez utilizam componentes mais específicos (`Tools`) e funcionalidades de infraestrutura/utilitários (`Services`, `Utils`, `Validations`). Essa estrutura em camadas ajuda a gerenciar a complexidade e promove a separação de preocupações.
 
 ### Exemplos
 
-- `App.ts` depende de classes em `src/Modules/`.
-- Classes em `src/Modules/` (como `ImportationModule`, `ConversionModule`, `SyncModule`, `StoreModule`) dependem de classes em `src/Tools/` e `src/Services/`.
-- Classes em `src/Tools/` (como `RSSConverterTool`, `MangaConverterTool`, `SMTPSenderTool`, `LocalStorageTool`) dependem de classes em `src/Services/` e `src/Utils/`.
-- Classes em `src/Services/` (como `HttpService`, `QueueService`, `JSONDatabaseService`) dependem de classes em `src/Utils/` ou outros `Services`.
-- Classes em `src/Validations/` são usadas por `Modules` e `Services`.
-- Classes em `src/Utils/` são usadas por `Services` e `Tools`.
+- O arquivo `examples/kindlefy/src/App.ts` atua como orquestrador principal, chamando métodos em instâncias de `Modules` (`SetupInputModule`, `ImportationModule`, `ConversionModule`, `SyncModule`, `StoreModule`).
+- Os arquivos em `src/Modules/` (ex: `ImportationModule.ts`, `ConversionModule.ts`) coordenam fluxos de trabalho, delegando a execução de tarefas específicas a classes em `src/Tools/`.
+- Os arquivos em `src/Tools/` (ex: `RSSConverterTool.ts`, `SMTPSenderTool.ts`) implementam a lógica para tarefas específicas do domínio (conversão, envio, etc.) e utilizam classes em `src/Services/` (ex: `EbookGeneratorService`, `HttpService`) e `src/Utils/` (ex: `FileUtil`, `SanitizationUtil`) para funcionalidades de baixo nível.
+- Os arquivos em `src/Services/` (ex: `HttpService.ts`, `BrowserService.ts`) fornecem funcionalidades reutilizáveis que são consumidas pelas camadas superiores.
 
 ## Padrão: "Separation of Concerns"
 
 ### Descrição
 
-As responsabilidades são consistentemente separadas em componentes distintos, com cada classe ou módulo focando em uma única preocupação principal. Isso é evidente na forma como as tarefas são divididas entre `Modules` (orquestração do fluxo), `Tools` (implementações específicas de importação/conversão/envio/armazenamento), `Services` (funcionalidades reutilizáveis de infraestrutura/domínio) e `Utils` (funções auxiliares genéricas).
+Cada classe ou módulo na base de código tende a ter uma única responsabilidade bem definida. A lógica relacionada a diferentes preocupações (como requisições HTTP, manipulação de arquivos temporários, validação de configuração, importação de dados, conversão de formatos, envio de documentos) é encapsulada em unidades separadas. Isso torna o código mais modular, compreensível e fácil de manter.
 
 ### Exemplos
 
-- `HttpService` lida exclusivamente com requisições HTTP.
-- `CrawlerService` foca na análise e extração de dados de HTML.
-- `EbookGeneratorService` encapsula a lógica para gerar e converter ebooks usando ferramentas externas.
-- `JSONDatabaseService` gerencia a persistência de dados em um arquivo JSON.
-- `Validations` classes (como `ConfigValidation`) contêm apenas a lógica para validar estruturas de configuração.
-- `ImportationModule` é responsável por selecionar o `ImporterContract` apropriado e executar a importação, mas a lógica de importação específica (como buscar RSS ou dados de Manga) está em classes `ImporterTool` separadas.
-- `SyncModule` é responsável por selecionar o `SenderContract` apropriado e executar o envio, mas a lógica de envio específica (SMTP, Gmail, Outlook) está em classes `SenderTool` separadas.
+- `examples/kindlefy/src/Services/HttpService.ts` é responsável apenas por fazer requisições HTTP.
+- `examples/kindlefy/src/Services/TempFolderService.ts` é responsável apenas por gerenciar o diretório temporário.
+- `examples/kindlefy/src/Validations/ConfigValidation.ts` é responsável apenas por validar a configuração de entrada.
+- `examples/kindlefy/src/Modules/ImportationModule.ts` é responsável apenas por orquestrar o processo de importação, delegando a importadores específicos.
+- `examples/kindlefy/src/Tools/Converters/RSSConverterTool.ts` é responsável apenas por converter conteúdo RSS em documentos.
