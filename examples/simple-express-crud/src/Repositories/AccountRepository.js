@@ -5,7 +5,7 @@ class AccountRepository {
 		return AccountRepository.#accounts
 	}
 
-	getById (id) {
+	retrieveOneById (id) {
 		return AccountRepository.#accounts[id]
 	}
 
