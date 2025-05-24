@@ -21,7 +21,7 @@ def review_diff_code_changes(diff_file_path: str) -> str:
     diff_file_content = load_file_content(diff_file_path)
 
     project_name = extract_diff_project_name(diff_file_content)
-    user_prompt = diff_file_content
+    user_prompt = f"File Path: {diff_file_path}\n\nCode Changes (diff):\n{diff_file_content}"
     system_prompt = load_file_content("ai-agents/code-reviewer/system-prompt.md")
 
     architecture_description = load_file_content(f"ai-agents/code-architecture-checker/outputs/{project_name}-architecture-description.md")
