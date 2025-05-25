@@ -43,10 +43,7 @@ def generate_llm_response(system_prompt: str, user_prompt: str, provider: str) -
 
         response = client.models.generate_content(
             model="gemini-2.5-flash-preview-05-20",
-            contents=[
-                {"role": "model", "parts": [system_prompt]},
-                {"role": "user", "parts": [user_prompt]},
-            ],
+            contents=[system_prompt, user_prompt],
             config=types.GenerateContentConfig(
                 temperature=0.0,
                 thinking_config=types.ThinkingConfig(thinking_budget=1024)
