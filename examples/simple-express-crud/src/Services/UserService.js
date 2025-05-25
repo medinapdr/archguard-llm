@@ -5,8 +5,16 @@ class UserService {
 		return UserRepository.getAll()
 	}
 
+	getById (id) {
+		return UserRepository.getById(id)
+	}
+
 	create (user) {
 		return UserRepository.create(user)
+	}
+
+	updateById (id, data) {
+		return UserRepository.updateById(id, data)
 	}
 }
 
