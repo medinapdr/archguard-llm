@@ -1,55 +1,92 @@
-## Padrão: "Naming Conventions"
+## Naming Conventions
 
-Este padrão arquitetural é observado na forma consistente como os elementos de código são nomeados em todo o projeto. Classes e variáveis seguem formatos previsíveis que indicam sua função ou tipo.
+Este padrão arquitetural é observado na aplicação de convenções de nomenclatura consistentes em diferentes tipos de arquivos e classes, o que facilita a identificação da responsabilidade e do propósito de cada componente.
 
-Exemplos explícitos no código incluem:
+- **Classes de Serviço**: Todas as classes localizadas no diretório `src/Services/` seguem a convenção de nomeação com o sufixo `Service`.
+  - Exemplos: `NotificationService`, `TempFolderService`, `BrowserService`, `HttpService`, `QueueService`, `RSSContentEnricherService`, `ErrorHandlerService`, `EbookGeneratorService`, `JSONDatabaseService`, `ParserService`, `MeusMangasImporterService`, `EbookCoverService`, `CompressionService`, `CrawlerService`, `ProcessCommandService`, `MediumImporterService`.
 
--   Classes que fornecem funcionalidades de serviço ou utilidade geral são consistentemente nomeadas com o sufixo `Service`. Exemplos: `HttpService`, `QueueService`, `ErrorHandlerService`, `TempFolderService`, `BrowserService`, `CompressionService`, `CrawlerService`, `ProcessCommandService`, `JSONDatabaseService`, `RSSContentEnricherService`, `MediumImporterService`, `NotificationService`.
--   Classes que fornecem funcionalidades utilitárias gerais são consistentemente nomeadas com o sufixo `Util`. Exemplos: `MapUtil`, `FileUtil`, `GithubActionsUtil`, `ParseUtil`, `AppUtil`, `TimeUtil`, `DateUtil`, `SanitizationUtil`, `ArrayUtil`, `DataManipulationUtil`.
--   Classes que encapsulam lógica de validação são consistentemente nomeadas com o sufixo `Validation`. Exemplos: `EnvironmentValidation`, `ConfigValidation`, `SourceValidation`.
--   Classes que representam unidades funcionais específicas dentro do diretório `Tools` são consistentemente nomeadas com o sufixo `Tool`. Exemplos: `RSSConverterTool`, `MangaConverterTool`, `SMTPSenderTool`, `GmailSenderTool`, `OutlookSenderTool`, `LocalStorageTool`, `RSSImporterTool`, `MangaImporterTool`.
--   Classes que representam módulos funcionais distintos são consistentemente nomeadas com o sufixo `Module`. Exemplos: `SyncModule`, `StoreModule`, `ConversionModule`, `SetupInputModule`, `ImportationModule`.
--   Classes que representam modelos de dados são consistentemente nomeadas com o sufixo `Model`. Exemplo: `DocumentModel`.
--   Classes que representam exceções personalizadas são consistentemente nomeadas com o sufixo `Exception`. Exemplos: `ProcessCommandException`, `ArrayParsingException`, `NoValidSetupInputFoundException`, `EnabledNoDuplicatedSyncWithoutStorageConfigException`.
--   Variáveis booleanas são frequentemente prefixadas com `is` ou `has`. Exemplos: `isGithubActionEnvironment` (em `EnvironmentValidation.ts`), `isDevEnvironment` (em `EnvironmentValidation.ts`), `isMediumRSSSource` (em `SourceValidation.ts`), `isDocumentAlreadySync` (em `StoreModule.ts`), `isAbleToUseStorage` (em `StoreModule.ts`).
+- **Classes de Validação**: As classes no diretório `src/Validations/` são nomeadas com o sufixo `Validation`.
+  - Exemplos: `EnvironmentValidation`, `ConfigValidation`, `SourceValidation`.
 
-## Padrão: "File/Module Organization"
+- **Classes de Módulo**: As classes no diretório `src/Modules/` são nomeadas com o sufixo `Module`.
+  - Exemplos: `SyncModule`, `StoreModule`, `ImportationModule`, `SetupInputModule`, `ConversionModule`.
 
-Este padrão arquitetural é demonstrado pela estrutura de diretórios consistente usada para organizar os arquivos do projeto com base em suas responsabilidades ou tipos.
+- **Classes de Ferramenta (Tools)**: As classes no diretório `src/Tools/` são nomeadas com o sufixo `Tool`.
+  - Exemplos: `RSSConverterTool`, `MangaConverterTool`, `GmailSenderTool`, `OutlookSenderTool`, `SMTPSenderTool`, `MangaImporterTool`, `RSSImporterTool`, `LocalStorageTool`.
 
-Exemplos explícitos no código incluem:
+- **Classes de Utilitário (Utils)**: As classes no diretório `src/Utils/` são nomeadas com o sufixo `Util`.
+  - Exemplos: `TimeUtil`, `FileUtil`, `DateUtil`, `DataManipulationUtil`, `SanitizationUtil`, `AppUtil`, `ArrayUtil`, `GithubActionsUtil`, `ParseUtil`, `MapUtil`.
 
--   Arquivos contendo classes de serviço ou utilidades funcionais são agrupados no diretório `src/Services/`. Exemplos: `HttpService.ts`, `QueueService.ts`, `ErrorHandlerService.ts`, `TempFolderService.ts`, `BrowserService.ts`, `CompressionService.ts`, `CrawlerService.ts`, `ProcessCommandService.ts`, `JSONDatabaseService.ts`, `RSSContentEnricherService.ts`, `MediumImporterService.ts`, `NotificationService.ts`, `HttpProxyService.ts`.
--   Arquivos contendo classes utilitárias gerais são agrupados no diretório `src/Utils/`. Exemplos: `MapUtil.ts`, `FileUtil.ts`, `GithubActionsUtil.ts`, `ParseUtil.ts`, `AppUtil.ts`, `TimeUtil.ts`, `DateUtil.ts`, `SanitizationUtil.ts`, `ArrayUtil.ts`, `DataManipulationUtil.ts`.
--   Arquivos contendo classes de validação são agrupados no diretório `src/Validations/`. Exemplos: `EnvironmentValidation.ts`, `ConfigValidation.ts`, `SourceValidation.ts`.
--   Arquivos contendo classes que representam unidades funcionais específicas (ferramentas) são agrupados no diretório `src/Tools/`, com subdiretórios adicionais para categorização (e.g., `Converters`, `Senders`, `Importers`, `Storages`). Exemplos: `src/Tools/Converters/RSSConverterTool.ts`, `src/Tools/Senders/SMTPSenderTool.ts`, `src/Tools/Importers/RSSImporterTool.ts`, `src/Tools/Storages/LocalStorageTool.ts`.
--   Arquivos contendo classes que representam módulos funcionais distintos são agrupados no diretório `src/Modules/`. Exemplos: `SyncModule.ts`, `StoreModule.ts`, `ConversionModule.ts`, `SetupInputModule.ts`, `ImportationModule.ts`.
--   Arquivos contendo classes que representam modelos de dados são agrupados no diretório `src/Models/`. Exemplo: `DocumentModel.ts`.
--   Arquivos contendo interfaces e tipos são agrupados no diretório `src/Protocols/`. Exemplos: `MeusMangasProtocol.ts`, `QueueProtocol.ts`, `StorageProtocol.ts`, `SyncProtocol.ts`, `JSONDatabaseProtocol.ts`, `EbookGeneratorProtocol.ts`, `CompressionProtocol.ts`, `CrawlerProtocol.ts`, `NotificationProtocol.ts`, `DataManipulationProtocol.ts`, `RSSContentEnricherProtocol.ts`, `MapProtocol.ts`, `AppProtocol.ts`, `SMTPSenderProtocol.ts`, `GithubActionsProtocol.ts`, `EbookCoverProtocol.ts`, `FileProtocol.ts`, `MangaImporterProtocol.ts`, `SenderProtocol.ts`, `SetupInputProtocol.ts`, `DocumentProtocol.ts`, `ImporterProtocol.ts`, `MediumExporterProtocol.ts`, `ParserProtocol.ts`, `ConverterProtocol.ts`, `HttpProtocol.ts`.
--   Arquivos contendo classes de exceção personalizadas são agrupados no diretório `src/Exceptions/`. Exemplos: `SetupInputException.ts`, `EnabledNoDuplicatedSyncWithoutStorageConfigException.ts`, `ArrayParsingException.ts`, `ProcessCommandException.ts`.
+- **Variáveis e Métodos Booleanos**: Variáveis e métodos que retornam um valor booleano são consistentemente prefixados com `is` ou `no` (para negação).
+  - Exemplos: `isGithubActionEnvironment` (EnvironmentValidation.ts), `isDevEnvironment` (EnvironmentValidation.ts), `noValidSetupInputFound` (ConfigValidation.ts), `isNoDuplicatedSyncEnabledWithoutStorageConfig` (ConfigValidation.ts), `isMediumRSSSource` (SourceValidation.ts), `isSpecificRSSSource` (SourceValidation.ts), `exists` (HttpService.ts), `isDocumentAlreadySync` (StoreModule.ts), `isAbleToUseStorage` (StoreModule.ts), `isSinglePostPerDocumentConfig` (RSSConverterTool.ts).
 
-## Padrão: "Layered Architecture"
+- **Métodos de Recuperação (Getters)**: Métodos responsáveis por recuperar dados ou valores são consistentemente prefixados com `get`.
+  - Exemplos: `getManga` (MeusMangasImporterService.ts), `getPostHTML` (MediumImporterService.ts), `getPostUrlFromSeeMoreContent` (MediumImporterService.ts), `getMimetypeByFileName` (FileUtil.ts), `get appName` (AppUtil.ts), `get appVersion` (AppUtil.ts), `get packageJSON` (AppUtil.ts), `get path` (TempFolderService.ts), `get isGithubActionEnvironment` (EnvironmentValidation.ts), `get isDevEnvironment` (EnvironmentValidation.ts), `get isAbleToUseStorage` (StoreModule.ts), `get storage` (StoreModule.ts), `get sender` (SyncModule.ts), `getConverterBySourceConfig` (ConversionModule.ts), `getImporterBySourceConfig` (ImportationModule.ts), `get todayFormattedDate` (DateUtil.ts), `getPage` (BrowserService.ts), `getRawChaptersByMangaPath` (MeusMangasImporterService.ts), `getRawChapterPictures` (MeusMangasImporterService.ts), `getElementByClassName` (CrawlerService.ts), `getTagByParagraphType` (MediumImporterService.ts), `get databaseFullPath` (LocalStorageTool.ts).
 
-Este padrão arquitetural é observado na organização do código em camadas lógicas, onde cada camada tem responsabilidades específicas e interage principalmente com as camadas adjacentes.
+## File/Module Organization
 
-Exemplos explícitos no código incluem:
+Este padrão arquitetural é evidente na forma como os arquivos e módulos são estruturados e agrupados em diretórios lógicos, refletindo suas responsabilidades e facilitando a navegação e manutenção do código.
 
--   A classe `App` (em `src/App.ts`) atua como uma camada de aplicação ou orquestração de alto nível. Ela coordena o fluxo principal da aplicação, chamando métodos de diferentes `Modules` (`SetupInputModule`, `ImportationModule`, `ConversionModule`, `StoreModule`, `SyncModule`) e `Services` (`NotificationService`, `TempFolderService`, `BrowserService`). Ela não contém lógica de negócio detalhada, importação, conversão ou envio, delegando essas tarefas para as camadas inferiores.
--   As classes no diretório `src/Modules/` (`SetupInputModule`, `ImportationModule`, `ConversionModule`, `StoreModule`, `SyncModule`) representam uma camada de lógica de negócio ou fluxo de trabalho. Cada módulo encapsula uma parte específica do processo (configuração, importação, conversão, armazenamento, sincronização) e coordena o uso de componentes de camadas inferiores (`Tools` e `Services`). Por exemplo, `ImportationModule` delega a importação real para classes `ImporterTool` (em `src/Tools/Importers/`), e `ConversionModule` delega a conversão para classes `ConverterTool` (em `src/Tools/Converters/`).
--   As classes nos diretórios `src/Tools/` (e seus subdiretórios como `Converters`, `Senders`, `Importers`, `Storages`) e `src/Services/` atuam como camadas de funcionalidade específica ou acesso a recursos externos. Elas contêm a lógica detalhada para tarefas como fazer requisições HTTP (`HttpService`), gerar ebooks (`EbookGeneratorService`), interagir com o sistema de arquivos (`TempFolderService`, `JSONDatabaseService`), enviar emails (`SMTPSenderTool`), etc. Essas classes são utilizadas pelos `Modules` e, em alguns casos, por outras classes de `Service` ou `Tool`.
--   As classes nos diretórios `src/Utils/` e `src/Validations/` fornecem funcionalidades de suporte e validação que podem ser utilizadas por várias camadas, mas não representam o fluxo principal da aplicação.
+- **Agrupamento por Tipo de Componente**: O projeto organiza seus arquivos em diretórios dedicados a tipos específicos de componentes.
+  - `src/Modules/`: Contém módulos de alto nível que orquestram operações complexas (e.g., `SyncModule`, `StoreModule`, `ImportationModule`, `SetupInputModule`, `ConversionModule`).
+  - `src/Services/`: Contém classes que encapsulam lógica de negócio ou interações com serviços externos (e.g., `NotificationService`, `TempFolderService`, `BrowserService`, `HttpService`, `QueueService`, `RSSContentEnricherService`, `ErrorHandlerService`, `EbookGeneratorService`, `JSONDatabaseService`, `ParserService`, `MeusMangasImporterService`, `EbookCoverService`, `CompressionService`, `CrawlerService`, `ProcessCommandService`, `MediumImporterService`).
+  - `src/Tools/`: Contém ferramentas específicas que implementam funcionalidades de conversão, importação, envio ou armazenamento (e.g., `RSSConverterTool`, `MangaConverterTool`, `GmailSenderTool`, `OutlookSenderTool`, `SMTPSenderTool`, `MangaImporterTool`, `RSSImporterTool`, `LocalStorageTool`).
+  - `src/Validations/`: Contém classes dedicadas à lógica de validação (e.g., `EnvironmentValidation`, `ConfigValidation`, `SourceValidation`).
+  - `src/Utils/`: Contém funções utilitárias e helpers de uso geral (e.g., `TimeUtil`, `FileUtil`, `DateUtil`, `DataManipulationUtil`, `SanitizationUtil`, `AppUtil`, `ArrayUtil`, `GithubActionsUtil`, `ParseUtil`, `MapUtil`).
+  - `src/Protocols/`: Contém definições de tipos e interfaces (e.g., `MeusMangasProtocol.ts`, `QueueProtocol.ts`, `StorageProtocol.ts`, `SyncProtocol.ts`, `JSONDatabaseProtocol.ts`, `EbookGeneratorProtocol.ts`, `CompressionProtocol.ts`, `CrawlerProtocol.ts`, `NotificationProtocol.ts`, `DataManipulationProtocol.ts`, `RSSContentEnricherProtocol.ts`, `MapProtocol.ts`, `AppProtocol.ts`, `SMTPSenderProtocol.ts`, `GithubActionsProtocol.ts`, `EbookCoverProtocol.ts`, `FileProtocol.ts`, `MangaImporterProtocol.ts`, `SenderProtocol.ts`, `SetupInputProtocol.ts`, `DocumentProtocol.ts`, `ImporterProtocol.ts`, `MediumExporterProtocol.ts`, `ParserProtocol.ts`, `ConverterProtocol.ts`, `HttpProtocol.ts`).
+  - `src/Exceptions/`: Contém classes de exceção personalizadas (e.g., `SetupInputException.ts`, `EnabledNoDuplicatedSyncWithoutStorageConfigException.ts`, `ArrayParsingException.ts`, `ProcessCommandException.ts`).
+  - `src/Models/`: Contém modelos de dados (e.g., `DocumentModel.ts`).
 
-A dependência flui predominantemente de camadas superiores para inferiores (e.g., `App` -> `Modules` -> `Tools`/`Services` -> `Utils`/`Validations`), demonstrando uma estrutura em camadas.
+## Layered Architecture
 
-## Padrão: "Separation of Concerns"
+Este padrão arquitetural é observado na clara separação de responsabilidades entre as camadas lógicas da aplicação, onde cada camada tem um papel bem definido e interage com as camadas adjacentes de forma controlada.
 
-Este padrão arquitetural é evidente na forma como o código é dividido em unidades (classes, módulos) onde cada unidade tem uma responsabilidade única e bem definida.
+- **Camada de Orquestração (Modules)**: Os arquivos em `src/Modules/` atuam como uma camada de orquestração de alto nível. Eles coordenam o fluxo de trabalho principal da aplicação, delegando tarefas a serviços e ferramentas mais específicos.
+  - Exemplo: `App.ts` utiliza `SetupInputModule`, `ImportationModule`, `ConversionModule`, `SyncModule` e `StoreModule` para gerenciar o ciclo de vida da aplicação.
+  - Exemplo: `SyncModule.ts` é responsável por orquestrar o envio de documentos, delegando a tarefa a uma instância de `SenderContract` (e.g., `SMTPSenderTool`, `GmailSenderTool`, `OutlookSenderTool`).
+  - Exemplo: `StoreModule.ts` gerencia o armazenamento de documentos, utilizando uma instância de `StorageContract` (e.g., `LocalStorageTool`).
+  - Exemplo: `ConversionModule.ts` delega a conversão de conteúdo a uma instância de `ConverterContract` (e.g., `RSSConverterTool`, `MangaConverterTool`).
+  - Exemplo: `ImportationModule.ts` delega a importação de conteúdo a uma instância de `ImporterContract` (e.g., `RSSImporterTool`, `MangaImporterTool`).
+  - Exemplo: `SetupInputModule.ts` é responsável por buscar e validar as configurações de entrada, utilizando `EnvironmentValidation` e `ConfigValidation`.
 
-Exemplos explícitos no código incluem:
+- **Camada de Serviço (Services)**: Os arquivos em `src/Services/` contêm a lógica de negócio e as interações com recursos externos ou funcionalidades específicas. Eles são chamados pelos módulos e, por sua vez, podem utilizar utilitários ou outros serviços.
+  - Exemplo: `HttpService.ts` lida exclusivamente com requisições HTTP.
+  - Exemplo: `EbookGeneratorService.ts` é responsável pela geração e conversão de ebooks.
+  - Exemplo: `JSONDatabaseService.ts` gerencia a persistência de dados em arquivos JSON.
+  - Exemplo: `RSSContentEnricherService.ts` enriquece o conteúdo RSS, utilizando `SourceValidation` e `MediumImporterService`.
 
--   As classes no diretório `src/Validations/` (e.g., `EnvironmentValidation`, `ConfigValidation`, `SourceValidation`) são responsáveis exclusivamente por validar dados ou o ambiente, sem misturar essa lógica com processamento de dados ou interação externa.
--   As classes no diretório `src/Services/` (e.g., `HttpService`, `TempFolderService`, `CrawlerService`, `ProcessCommandService`) focam em uma única preocupação, como fazer requisições HTTP, gerenciar arquivos temporários, rastrear HTML ou executar comandos de processo, respectivamente. Elas não contêm lógica de negócio complexa ou orquestração de fluxo.
--   As classes no diretório `src/Tools/` (e seus subdiretórios) também demonstram separação de preocupações. Por exemplo, `RSSImporterTool` (em `src/Tools/Importers/`) é responsável apenas por importar conteúdo RSS, enquanto `RSSConverterTool` (em `src/Tools/Converters/`) é responsável apenas por converter conteúdo RSS importado em documentos. `SMTPSenderTool` (em `src/Tools/Senders/`) é responsável apenas por enviar documentos via SMTP, e `LocalStorageTool` (em `src/Tools/Storages/`) é responsável apenas por armazenar documentos localmente.
--   As classes no diretório `src/Modules/` (e.g., `ImportationModule`, `ConversionModule`, `SyncModule`, `StoreModule`) encapsulam uma preocupação de fluxo de trabalho específica (importação, conversão, sincronização, armazenamento), mas delegam a execução das tarefas detalhadas para as classes `Tool` e `Service` apropriadas. Por exemplo, `ImportationModule` não sabe como importar RSS ou Manga; ele apenas seleciona o `ImporterTool` correto e chama seu método `import`.
--   A classe `App` (em `src/App.ts`) tem a preocupação única de orquestrar o fluxo geral da aplicação, chamando os módulos e serviços necessários na sequência correta. Ela não implementa a lógica interna de nenhum módulo ou serviço.
--   As classes no diretório `src/Utils/` (e.g., `FileUtil`, `DateUtil`, `SanitizationUtil`) fornecem funcionalidades genéricas e reutilizáveis que não estão ligadas a uma preocupação de negócio específica, como manipulação de arquivos, datas ou strings.
+- **Camada de Ferramentas (Tools)**: Os arquivos em `src/Tools/` representam implementações concretas de funcionalidades específicas (conversores, importadores, remetentes, armazenamentos) que são utilizadas pelos módulos.
+  - Exemplo: `RSSConverterTool.ts` e `MangaConverterTool.ts` implementam a lógica de conversão para diferentes tipos de conteúdo.
+  - Exemplo: `SMTPSenderTool.ts`, `GmailSenderTool.ts` e `OutlookSenderTool.ts` implementam a lógica de envio de documentos.
+  - Exemplo: `RSSImporterTool.ts` e `MangaImporterTool.ts` implementam a lógica de importação de conteúdo.
+  - Exemplo: `LocalStorageTool.ts` implementa a lógica de armazenamento local.
+
+- **Camada de Utilitários (Utils)**: Os arquivos em `src/Utils/` fornecem funções auxiliares e genéricas que podem ser usadas por qualquer camada, sem conter lógica de negócio específica.
+  - Exemplo: `FileUtil.ts` para manipulação de caminhos de arquivo, `DateUtil.ts` para formatação de datas, `SanitizationUtil.ts` para sanitização de strings.
+
+## Separation of Concerns
+
+Este padrão arquitetural é demonstrado pela atribuição de responsabilidades únicas e bem definidas a cada módulo, serviço ou utilitário, evitando que um componente acumule múltiplas responsabilidades não relacionadas.
+
+- **Controladores (Módulos de Orquestração) focam na coordenação**: Os módulos em `src/Modules/` são responsáveis por orquestrar o fluxo de trabalho, mas delegam a lógica de negócio e operações específicas a serviços e ferramentas.
+  - Exemplo: Em `App.ts`, o método `run` coordena as chamadas para `setupInputModule.fetch()`, `TempFolderService.generate()`, `BrowserService.start()`, `importationModule.import()`, `conversionModule.convert()`, `syncModule.sync()`, `storeModule.markDocumentSync()`, `storeModule.commitDocumentSyncChanges()`, `TempFolderService.clean()` e `BrowserService.close()`. Ele não contém a lógica interna de como cada uma dessas operações é realizada.
+
+- **Serviços encapsulam lógica de negócio específica**: Cada serviço em `src/Services/` tem uma responsabilidade clara e única.
+  - Exemplo: `HttpService.ts` é exclusivamente responsável por fazer requisições HTTP e formatar as respostas (`toBuffer`, `toString`, `toJSON`, `toReadStream`, `exists`, `makeRawRequest`). Ele não lida com a lógica de negócio de como esses dados são usados ou transformados.
+  - Exemplo: `EbookGeneratorService.ts` foca apenas na geração e conversão de ebooks.
+  - Exemplo: `JSONDatabaseService.ts` gerencia apenas a leitura e escrita de dados em um arquivo JSON, incluindo controle de concorrência para o arquivo.
+  - Exemplo: `ErrorHandlerService.ts` tem a única responsabilidade de lidar com erros, registrando-os no console.
+  - Exemplo: `BrowserService.ts` gerencia a inicialização e o fechamento de uma instância do navegador Puppeteer e a obtenção de novas páginas.
+
+- **Ferramentas implementam funcionalidades específicas**: As classes em `src/Tools/` são especializadas em uma única funcionalidade (conversão, importação, envio, armazenamento).
+  - Exemplo: `RSSConverterTool.ts` e `MangaConverterTool.ts` são responsáveis apenas pela conversão de um tipo específico de conteúdo para o formato de documento.
+  - Exemplo: `SMTPSenderTool.ts` é responsável apenas pelo envio de documentos via SMTP.
+  - Exemplo: `LocalStorageTool.ts` é responsável apenas por salvar e recuperar documentos de um armazenamento local (arquivo JSON).
+
+- **Utilitários fornecem funções genéricas e sem estado**: As classes em `src/Utils/` contêm funções auxiliares que não possuem estado ou lógica de negócio complexa, sendo reutilizáveis em diferentes contextos.
+  - Exemplo: `FileUtil.ts` lida com operações de caminho de arquivo e mimetype.
+  - Exemplo: `SanitizationUtil.ts` foca apenas na sanitização de nomes de arquivo.
+  - Exemplo: `DataManipulationUtil.ts` fornece métodos para manipulação genérica de arrays (ordenação, limite).
+
+- **Validações são separadas da lógica principal**: As classes em `src/Validations/` contêm apenas a lógica para validar dados ou o ambiente, sem executar ações ou lógica de negócio.
+  - Exemplo: `ConfigValidation.ts` contém métodos como `noValidSetupInputFound` e `isNoDuplicatedSyncEnabledWithoutStorageConfig` que apenas verificam condições na configuração.
