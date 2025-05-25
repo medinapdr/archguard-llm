@@ -47,10 +47,7 @@ def generate_llm_response(system_prompt: str, user_prompt: str, provider: str) -
                 {"role": "user", "parts": [user_prompt]},
             ],
             generation_config={
-                "temperature": 0.0,
-                "thinking_config": {
-                    "thinking_budget": 10000
-                }
+                "temperature": 0.0
             }
         )
 
