@@ -1,42 +1,70 @@
-## Padrão: "Naming Conventions"
+## Naming Conventions
 
-Padrões onde nomes seguem consistentemente formatos previsíveis e significativos.
+Este padrão arquitetural é observado na aplicação de formatos de nomes consistentes e previsíveis para diferentes tipos de entidades no código.
 
--   **Sufixo "Service"**: Classes responsáveis por lógica de negócio específica ou interação com recursos externos são nomeadas com o sufixo `Service`. Exemplos: `OpexService` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`), `HttpService` (`examples/alexa-skills/src/Services/HttpService.ts`), `CrawlerService` (`examples/alexa-skills/src/Services/CrawlerService.ts`).
--   **Sufixo "Util"**: Classes que contêm funções utilitárias genéricas ou específicas de domínio são nomeadas com o sufixo `Util`. Exemplos: `DateUtil` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/DateUtil.ts`), `SanitizationUtil` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/SanitizationUtil.ts`), `HandlerUtil` (`examples/alexa-skills/src/Utils/HandlerUtil.ts`), `ServerlessUtil` (`examples/alexa-skills/src/Utils/ServerlessUtil.ts`).
--   **Sufixo "Module"**: Classes que orquestram a lógica de negócio ou adaptam interfaces são nomeadas com o sufixo `Module`. Exemplos: `HandlerAdapterModule` (`examples/alexa-skills/src/Modules/HandlerAdapterModule.ts`), `HandlerModule` (`examples/alexa-skills/src/Modules/HandlerModule.ts`), `OpexModule` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.ts`).
--   **Sufixo "Protocol"**: Arquivos que definem tipos e interfaces são nomeados com o sufixo `Protocol`. Exemplos: `SkillProtocol.ts` (`examples/alexa-skills/src/Protocols/SkillProtocol.ts`), `OpexProtocol.ts` (`examples/alexa-skills/src/Protocols/OpexProtocol.ts`), `CrawlerProtocol.ts` (`examples/alexa-skills/src/Protocols/CrawlerProtocol.ts`), `HandlerProtocol.ts` (`examples/alexa-skills/src/Protocols/HandlerProtocol.ts`), `ServerlessProtocol.ts` (`examples/alexa-skills/src/Protocols/ServerlessProtocol.ts`), `HttpProtocol.ts` (`examples/alexa-skills/src/Protocols/HttpProtocol.ts`).
--   **Prefixo "on"**: Métodos em classes Handler que respondem a eventos específicos (como intents da Alexa) são nomeados com o prefixo `on`. Exemplos: `onLaunch`, `onOnePieceMangaSpoilerIntent`, `onNo`, `onHelp`, `onCancelAndStop`, `onFallback`, `onSessionEnded`, `onIntentReflector`, `onError` em `HandlerModule` (`examples/alexa-skills/src/Modules/HandlerModule.ts`) e `OnePieceMangaSpoilerHandler` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/index.ts`).
--   **Prefixo "get"**: Métodos que recuperam ou calculam um valor são nomeados com o prefixo `get`. Exemplos: `getSpoilerPageUrlByLandingPageHTML`, `getSpoilerInfoBySpoilerPageHTML` em `OpexService` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`), `getSpoilerInfo` em `OpexModule` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.ts`), `getDateWeekDay`, `getTodayDate` em `DateUtil` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/DateUtil.ts`).
--   **Prefixo "is"**: Métodos que retornam um valor booleano indicando uma condição são nomeados com o prefixo `is`. Exemplos: `isSameWeek` em `DateUtil` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/DateUtil.ts`), `isSpoilerTitle`, `isMangaTitle`, `isThereAnyContent` em `OpexService` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`).
--   **Prefixo "can"**: Métodos que retornam um valor booleano indicando a capacidade de realizar uma ação são nomeados com o prefixo `can`. Exemplos: `canHandle` em `HandlerAdapterModule` (`examples/alexa-skills/src/Modules/HandlerAdapterModule.ts`) e `HandlerModule` (`examples/alexa-skills/src/Modules/HandlerModule.ts`), `canProcessSpoilerContent` em `OpexService` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`).
--   **Prefixo "adapt"**: Métodos que realizam a adaptação entre diferentes interfaces ou estruturas são nomeados com o prefixo `adapt`. Exemplos: `adapt`, `adaptRequestHandlers`, `adaptErrorHandlers` em `HandlerAdapterModule` (`examples/alexa-skills/src/Modules/HandlerAdapterModule.ts`).
--   **Prefixo "find"**: Métodos que buscam ou localizam elementos são nomeados com o prefixo `find`. Exemplos: `findChildElement`, `findElements` em `CrawlerService` (`examples/alexa-skills/src/Services/CrawlerService.ts`).
--   **Prefixo "turn"**: Métodos que transformam dados de um formato para outro são nomeados com o prefixo `turn`. Exemplos: `turnBRHumanDateIntoDate` em `DateUtil` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/DateUtil.ts`).
+-   **Classes de Serviço**: Classes que encapsulam lógica de negócios ou coordenação de operações são consistentemente nomeadas com o sufixo `Service`.
+    -   Exemplos: `OpexService` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`), `HttpService` (em `examples/alexa-skills/src/Services/HttpService.ts`), `CrawlerService` (em `examples/alexa-skills/src/Services/CrawlerService.ts`).
+-   **Classes de Utilitários**: Classes que fornecem funções auxiliares ou de conveniência são consistentemente nomeadas com o sufixo `Util`.
+    -   Exemplos: `DateUtil` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/DateUtil.ts`), `SanitizationUtil` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/SanitizationUtil.ts`), `HandlerUtil` (em `examples/alexa-skills/src/Utils/HandlerUtil.ts`), `ServerlessUtil` (em `examples/alexa-skills/src/Utils/ServerlessUtil.ts`).
+-   **Classes de Módulos**: Classes que orquestram operações de alto nível ou adaptam interfaces são consistentemente nomeadas com o sufixo `Module`.
+    -   Exemplos: `HandlerAdapterModule` (em `examples/alexa-skills/src/Modules/HandlerAdapterModule.ts`), `HandlerModule` (em `examples/alexa-skills/src/Modules/HandlerModule.ts`), `OpexModule` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.ts`).
+-   **Constantes**: Arquivos ou objetos que contêm valores constantes são nomeados com o sufixo `Constant`.
+    -   Exemplo: `SpoilerContentPhrasesConstant` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Constants/SpoilerContentPhrasesConstant.ts`).
+-   **Arquivos de Teste**: Arquivos de teste de unidade são nomeados com o sufixo `.unit.test.ts`, e arquivos de teste de integração com `.integration.test.ts`.
+    -   Exemplos: `OpexService.unit.test.ts` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.unit.test.ts`), `OpexModule.integration.test.ts` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.integration.test.ts`), `DateUtil.unit.test.ts` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/DateUtil.unit.test.ts`).
 
-## Padrão: "File/Module Organization"
+## File/Module Organization
 
-Consistência estrutural na forma como arquivos e módulos são agrupados e localizados no diretório do projeto.
+Este padrão arquitetural é evidenciado pela consistência estrutural na forma como os arquivos e módulos são agrupados e posicionados dentro do diretório do projeto, seguindo uma organização por tipo de responsabilidade ou funcionalidade.
 
--   **Agrupamento por Tipo Compartilhado**: Arquivos que definem tipos/interfaces compartilhados são agrupados no diretório `/Protocols` (`examples/alexa-skills/src/Protocols/`). Serviços compartilhados são agrupados no diretório `/Services` (`examples/alexa-skills/src/Services/`). Módulos compartilhados são agrupados no diretório `/Modules` (`examples/alexa-skills/src/Modules/`). Utilitários compartilhados são agrupados no diretório `/Utils` (`examples/alexa-skills/src/Utils/`).
--   **Agrupamento por Funcionalidade (Skill)**: O código relacionado a uma skill específica da Alexa é agrupado em um diretório sob `/Skills/` com o nome da skill (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/`).
--   **Estrutura Interna Consistente por Skill**: Dentro do diretório de cada skill (`/Skills/<SkillName>/`), há uma estrutura interna consistente com subdiretórios para diferentes tipos de arquivos, como `/Constants`, `/Modules`, `/Protocols`, `/Services`, e `/Utils`. Exemplos: `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Constants/`, `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/`, `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Protocols/`, `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/`, `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/`.
+-   **Agrupamento por Tipo**:
+    -   Arquivos de configuração são armazenados em `/Config`. Exemplo: `SkillConfig.ts` (em `examples/alexa-skills/src/Config/SkillConfig.ts`).
+    -   Serviços são agrupados em diretórios `/Services`. Exemplo: `HttpService.ts` (em `examples/alexa-skills/src/Services/HttpService.ts`), `CrawlerService.ts` (em `examples/alexa-skills/src/Services/CrawlerService.ts`).
+    -   Módulos de alto nível ou adaptadores são agrupados em `/Modules`. Exemplo: `HandlerAdapterModule.ts` (em `examples/alexa-skills/src/Modules/HandlerAdapterModule.ts`), `HandlerModule.ts` (em `examples/alexa-skills/src/Modules/HandlerModule.ts`).
+    -   Utilitários compartilhados são colocados em um diretório `/Utils` comum. Exemplo: `HandlerUtil.ts` (em `examples/alexa-skills/src/Utils/HandlerUtil.ts`), `ServerlessUtil.ts` (em `examples/alexa-skills/src/Utils/ServerlessUtil.ts`).
+    -   Definições de tipos e interfaces são centralizadas em `/Protocols`. Exemplo: `CrawlerProtocol.ts` (em `examples/alexa-skills/src/Protocols/CrawlerProtocol.ts`), `HandlerProtocol.ts` (em `examples/alexa-skills/src/Protocols/HandlerProtocol.ts`).
+-   **Agrupamento por Funcionalidade (dentro de `Skills`)**: Dentro do diretório `src/Skills`, cada funcionalidade (skill) tem seu próprio diretório, e dentro dele, os arquivos são novamente organizados por tipo.
+    -   A skill `OnePieceMangaSpoiler` tem seu próprio diretório `src/Skills/OnePieceMangaSpoiler`.
+    -   Dentro de `src/Skills/OnePieceMangaSpoiler`, há subpastas para:
+        -   `Constants`: Para constantes específicas da skill. Exemplo: `SpoilerContentPhrasesConstant.ts` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Constants/SpoilerContentPhrasesConstant.ts`).
+        -   `Modules`: Para módulos específicos da skill. Exemplo: `OpexModule.ts` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.ts`).
+        -   `Protocols`: Para definições de tipos e interfaces específicas da skill. Exemplo: `OpexProtocol.ts` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Protocols/OpexProtocol.ts`).
+        -   `Services`: Para serviços específicos da skill. Exemplo: `OpexService.ts` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`).
+        -   `Utils`: Para utilitários específicos da skill. Exemplo: `DateUtil.ts` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/DateUtil.ts`), `SanitizationUtil.ts` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/SanitizationUtil.ts`).
 
-## Padrão: "Layered Architecture"
+## Layered Architecture
 
-Clara separação de responsabilidades entre camadas lógicas.
+Este padrão arquitetural é observado na clara separação de responsabilidades entre camadas lógicas, onde cada camada tem um papel distinto e se comunica com as camadas adjacentes de forma controlada.
 
--   **Camada de Apresentação/Aplicação (Handlers)**: Classes como `OnePieceMangaSpoilerHandler` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/index.ts`) lidam com a interação direta com a plataforma externa (Alexa), processando requisições de entrada e formatando respostas de saída. Elas delegam a lógica de negócio e acesso a dados para camadas inferiores, como `OpexModule` e `DateUtil`.
--   **Camada de Lógica de Negócio/Aplicação (Modules, Skill-specific Services)**: Classes como `OpexModule` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.ts`) e `OpexService` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`) contêm a lógica específica para obter e processar informações sobre spoilers. `OpexModule` orquestra o fluxo de obtenção de dados, enquanto `OpexService` contém a lógica de parsing e extração. Elas dependem de serviços de infraestrutura como `HttpService` e `CrawlerService`.
--   **Camada de Infraestrutura/Acesso a Dados (Shared Services)**: Classes como `HttpService` (`examples/alexa-skills/src/Services/HttpService.ts`) e `CrawlerService` (`examples/alexa-skills/src/Services/CrawlerService.ts`) encapsulam a lógica de interação com recursos externos (HTTP requests, parsing de HTML). Elas são utilizadas pelas camadas superiores (como `OpexModule` e `OpexService`) mas não contêm lógica de negócio específica.
--   **Camada de Utilitários**: Classes como `DateUtil` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/DateUtil.ts`) e `SanitizationUtil` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/SanitizationUtil.ts`) fornecem funções auxiliares que podem ser usadas por várias camadas, sem conter lógica de negócio principal ou interação com recursos externos.
+-   **Camada de Apresentação/Interface (Handlers)**: Os arquivos `index.ts` dentro de cada skill (como `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/index.ts`) atuam como a camada de apresentação. Eles são responsáveis por:
+    -   Receber requisições da plataforma Alexa (via `HandlerAdapterModule`).
+    -   Delegar a lógica de negócios para módulos e serviços.
+    -   Formatar as respostas a serem enviadas de volta para o usuário.
+    -   Exemplo: Em `OnePieceMangaSpoilerHandler`, os métodos `onLaunch`, `onOnePieceMangaSpoilerIntent`, `onNo`, etc., chamam `OpexModule.getSpoilerInfo()` para obter dados e então usam `responseBuilder.speak()` para construir a resposta de voz. Eles não contêm a lógica de como os spoilers são obtidos ou processados.
 
-## Padrão: "Separation of Concerns"
+-   **Camada de Lógica de Negócios (Modules)**: Os módulos (como `OpexModule` em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.ts`) contêm a lógica de negócios principal e orquestram as operações entre diferentes serviços. Eles são responsáveis por:
+    -   Coordenar chamadas a serviços de nível inferior (como `HttpService` e `OpexService`).
+    -   Aplicar regras de negócio para determinar o status ou conteúdo a ser retornado.
+    -   Exemplo: `OpexModule.getSpoilerInfo()` coordena a obtenção do HTML via `HttpService`, a extração da URL da página de spoiler via `OpexService.getSpoilerPageUrlByLandingPageHTML`, e a extração das informações do spoiler via `OpexService.getSpoilerInfoBySpoilerPageHTML`.
 
-Cada módulo ou componente possui uma única responsabilidade bem definida.
+-   **Camada de Serviços/Acesso a Dados (Services)**: Os serviços (como `OpexService` em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`, `HttpService` em `examples/alexa-skills/src/Services/HttpService.ts`, e `CrawlerService` em `examples/alexa-skills/src/Services/CrawlerService.ts`) são responsáveis por operações específicas e de baixo nível, como acesso a dados externos ou manipulação de dados brutos.
+    -   `HttpService`: Responsável exclusivamente por fazer requisições HTTP e retornar os dados em diferentes formatos (string, buffer, JSON, stream). Não contém lógica de negócios sobre o que fazer com os dados.
+    -   `CrawlerService`: Responsável por manipular HTML, encontrar elementos e extrair informações. Não sabe o que essas informações significam em termos de negócio.
+    -   `OpexService`: Responsável por extrair informações específicas de páginas HTML relacionadas a spoilers, como URLs, datas e conteúdo, utilizando o `CrawlerService`. Ele não faz as requisições HTTP diretamente, delegando essa responsabilidade ao `HttpService` (via `OpexModule`).
 
--   **Serviços de Infraestrutura**: `HttpService` (`examples/alexa-skills/src/Services/HttpService.ts`) é responsável apenas por realizar requisições HTTP. `CrawlerService` (`examples/alexa-skills/src/Services/CrawlerService.ts`) é responsável apenas por parsing de HTML.
--   **Utilitários**: `DateUtil` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/DateUtil.ts`) lida apenas com manipulação de datas. `SanitizationUtil` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/SanitizationUtil.ts`) lida apenas com sanitização de strings.
--   **Serviços de Domínio**: `OpexService` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`) é responsável por extrair informações específicas de spoiler de uma página HTML, utilizando o `CrawlerService` para a tarefa de parsing, mas não realizando a requisição HTTP ou a lógica de resposta da Alexa.
--   **Módulos de Orquestração**: `OpexModule` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Modules/OpexModule.ts`) orquestra o processo de obtenção de informações de spoiler, coordenando chamadas para `HttpService` e `OpexService`, mas não contendo a lógica de parsing ou a lógica de resposta da Alexa.
--   **Handlers**: `OnePieceMangaSpoilerHandler` (`examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/index.ts`) é responsável por lidar com os eventos da Alexa, chamar a lógica de negócio necessária (`OpexModule`, `DateUtil`) e formatar a resposta para a Alexa, sem conter a lógica de acesso a dados ou parsing.
+## Separation of Concerns
+
+Este padrão arquitetural é observado na forma como cada módulo ou componente possui uma única e bem definida responsabilidade, evitando a mistura de lógicas distintas.
+
+-   **Lógica de Requisição/Resposta vs. Lógica de Negócios**:
+    -   Os `HandlerModule`s (como `OnePieceMangaSpoilerHandler` em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/index.ts`) são responsáveis por lidar com os tipos de requisição da Alexa (`LaunchRequest`, `IntentRequest`, etc.) e formatar as respostas. Eles delegam a lógica de negócios complexa para os `Module`s.
+    -   Exemplo: `onLaunch` em `OnePieceMangaSpoilerHandler` chama `OpexModule.getSpoilerInfo()` para obter os dados do spoiler e, com base no status retornado, constrói a frase de resposta. A lógica de como `getSpoilerInfo` funciona (fazer requisições HTTP, parsear HTML) está completamente separada em `OpexModule` e `OpexService`.
+
+-   **Acesso a Dados/Crawling vs. Lógica de Negócios Específica**:
+    -   `HttpService` (em `examples/alexa-skills/src/Services/HttpService.ts`) é responsável apenas por operações HTTP genéricas (GET, HEAD, etc.) e diferentes tipos de retorno (buffer, string, JSON, stream). Ele não tem conhecimento do domínio de "spoilers de One Piece" ou de como parsear HTML.
+    -   `CrawlerService` (em `examples/alexa-skills/src/Services/CrawlerService.ts`) é responsável por operações de parsing de HTML genéricas (encontrar elementos, encontrar filhos). Ele não sabe o que é um "spoiler" ou "mangá".
+    -   `OpexService` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Services/OpexService.ts`) é responsável por extrair informações *específicas* de spoilers de One Piece de HTML, utilizando as capacidades genéricas de `CrawlerService`. Ele não faz as requisições HTTP, delegando isso ao `HttpService` (via `OpexModule`).
+
+-   **Utilitários Genéricos vs. Lógica de Domínio**:
+    -   `DateUtil` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/DateUtil.ts`) e `SanitizationUtil` (em `examples/alexa-skills/src/Skills/OnePieceMangaSpoiler/Utils/SanitizationUtil.ts`) contêm funções utilitárias que podem ser aplicadas a diferentes contextos, como manipulação de datas ou sanitização de strings. Eles não contêm lógica de negócios sobre spoilers ou a interação com a Alexa.
+    -   Exemplo: `OpexService` utiliza `SanitizationUtil.sanitizeSpoilerContent` para limpar o texto do spoiler, mas a lógica de *como* sanitizar está encapsulada em `SanitizationUtil`, e a lógica de *quando* sanitizar e *o que* sanitizar está em `OpexService`.
