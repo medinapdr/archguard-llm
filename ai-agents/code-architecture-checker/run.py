@@ -3,7 +3,6 @@ import sys
 import argparse
 from typing import List
 from openai import OpenAI
-from google.generativeai import configure, GenerativeModel
 from google import genai
 from google.genai import types
 
