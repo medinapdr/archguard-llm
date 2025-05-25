@@ -45,7 +45,6 @@ jobs:
       - name: Install LLM Agent Dependencies
         run: |
           pip install openai
-          pip install google-generativeai
           pip install google-genai
 
       - name: Generate Architecture Description with LLM
