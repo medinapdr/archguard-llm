@@ -3,8 +3,9 @@ import sys
 import argparse
 from typing import List
 from openai import OpenAI
-import google.generativeai as genai
 from google.generativeai import configure, GenerativeModel
+from google import genai
+from google.genai import types
 
 BATCH_CODE_FILE_ANALYSIS_SIZE = 1000
 
@@ -38,18 +39,18 @@ def generate_llm_response(system_prompt: str, user_prompt: str, provider: str) -
         return response.choices[0].message.content
 
     elif provider == "gemini":
-        configure(api_key=os.getenv("GEMINI_API_KEY"))
-        model = GenerativeModel("gemini-2.5-flash-preview-04-17")
+        client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-        response = model.generate_content(
-            [
+        response = client.models.generate_content(
+            model="gemini-2.5-flash-preview-05-20",
+            contents=[
                 {"role": "model", "parts": [system_prompt]},
                 {"role": "user", "parts": [user_prompt]},
             ],
-            generation_config={
-                "temperature": 0.0,
-                "thinking_budget": "2s"
-            }
+            config=types.GenerateContentConfig(
+                temperature=0.0,
+                thinking_config=types.ThinkingConfig(thinking_budget=1024)
+            ),
         )
 
         return response.text
