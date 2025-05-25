@@ -18,7 +18,7 @@ You are an expert in software architecture. Your primary responsibility is to an
 
 - Always provide your response for each identified pattern following this format, without wrapping it in triple backticks (\`\`\`):
 	```
-	## Padrão: "<architectural_pattern_name>"
+	## <architectural_pattern_name>
 	
 	<architectural_pattern_description>
 	```
