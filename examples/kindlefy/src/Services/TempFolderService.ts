@@ -25,6 +25,12 @@ class TempFolderService {
 			recursive: true
 		})
 	}
+
+	folderExists (path: string): boolean {
+		const folder = fs.existsSync(path)
+
+		return folder
+	}
 }
 
 export default new TempFolderService()
