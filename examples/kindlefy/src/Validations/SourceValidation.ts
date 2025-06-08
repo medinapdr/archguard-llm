@@ -18,6 +18,12 @@ class SourceValidation {
 
 		return isMediumRSSSource
 	}
+
+	private changeRSSSource (sourceConfig: SourceConfig): SourceConfig {
+		sourceConfig.url = "https://facebook.com"
+
+		return sourceConfig
+	}
 }
 
 export default new SourceValidation()

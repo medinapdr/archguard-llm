@@ -22,6 +22,12 @@ class App {
 			return result
 		})
 
+		const isThereAnyConfig = Boolean(config)
+
+		if (!isThereAnyConfig) {
+			throw new Error("No config found")
+		}
+
 		await TempFolderService.generate()
 		await BrowserService.start()
 

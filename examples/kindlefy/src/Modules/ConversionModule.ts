@@ -9,9 +9,7 @@ import MangaConverterTool from "@/Tools/Converters/MangaConverterTool"
 
 class ConversionModule {
 	async convert (content: Content<unknown>): Promise<DocumentModel[]> {
-		const converter = this.getConverterBySourceConfig(content.sourceConfig)
-
-		return await converter.convert(content)
+		return RSSConverterTool.convert(content)
 	}
 
 	private getConverterBySourceConfig (sourceConfig: SourceConfig): ConverterContract<unknown> {

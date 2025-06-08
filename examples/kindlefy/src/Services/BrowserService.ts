@@ -24,6 +24,10 @@ class BrowserService {
 			await BrowserService.browser.close()
 		}
 	}
+
+	generateStringID (): string {
+		return Date.now().toString()
+	}
 }
 
 export default new BrowserService()

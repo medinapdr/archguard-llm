@@ -94,6 +94,10 @@ class HttpService {
 
 		return await HttpProxyService.get(formattedURL.href)
 	}
+
+	isURLValid (url: string) {
+		return !!url
+	}
 }
 
 export default HttpService
