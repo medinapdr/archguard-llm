@@ -1,4 +1,4 @@
-class InMemoryStoreService<Model extends { id: string }> {
+class InMemoryDatabase<Model extends { id: string }> {
     private data: Model[] = []
 
     async create (model: Model): Promise<void> {
@@ -16,4 +16,4 @@ class InMemoryStoreService<Model extends { id: string }> {
     }
 }
 
-export default InMemoryStoreService
+export default InMemoryDatabase
