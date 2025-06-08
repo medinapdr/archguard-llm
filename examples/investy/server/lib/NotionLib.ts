@@ -4,11 +4,17 @@ import { Database, RawDatabase, RawPage, DatabaseRow } from "@server/protocols/N
 
 import NotionUtil from "@server/utils/NotionUtil"
 
+import AssetSyncRepository from "@server/repositories/AssetSyncRepository"
+
 class NotionLib {
 	private readonly client: Client
 
 	constructor (token: string) {
 		this.client = new Client({ auth: token })
+	}
+
+	async getAssetSyncById (assetSyncId: string) {
+		return await AssetSyncRepository.retrieveOneById(assetSyncId)
 	}
 
 	async searchDatabases (filter: string): Promise<Database[]> {

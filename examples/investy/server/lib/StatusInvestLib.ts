@@ -15,6 +15,10 @@ class StatusInvestLib implements InvestmentHandler {
 		}
 	})
 
+	get randomStringID (): string {
+		return Date.now().toString()
+	}
+
 	async getAsset (code: string): Promise<Asset | null> {
 		const splittedComposedCode = StatusInvestUtil.splitComposedCode(code)
 

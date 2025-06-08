@@ -4,6 +4,8 @@ import NotionLib from "@server/lib/NotionLib"
 
 import IntegrationService from "@server/services/IntegrationService"
 
+import UserRepository from "@server/repositories/UserRepository"
+
 type SearchDatabaseQuery = {
 	name: string
 }
@@ -26,6 +28,8 @@ class NotionIntegrationController {
 		}
 
 		const databases = await notion.searchDatabases(name)
+
+		await UserRepository.update(userId, { active: true })
 
 		return response.ok(databases)
 	}

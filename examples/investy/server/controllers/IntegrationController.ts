@@ -16,6 +16,10 @@ class IntegrationController {
 
 		const { type, token } = validation.data
 
+		if (!["notion"].includes(type)) {
+			return response.badRequest(validation.fieldErrors)
+		}
+
 		const integration = await IntegrationRepository.create({
 			token,
 			type,
